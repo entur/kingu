@@ -1,0 +1,167 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
+package org.entur.kingu.model;
+
+import org.hibernate.annotations.CacheConcurrencyStrategy;
+
+import javax.persistence.AttributeOverride;
+import javax.persistence.AttributeOverrides;
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.ElementCollection;
+import javax.persistence.Embedded;
+import javax.persistence.FetchType;
+import javax.persistence.MappedSuperclass;
+import javax.persistence.OneToMany;
+import javax.persistence.OneToOne;
+import javax.persistence.Transient;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+@MappedSuperclass
+public abstract class Site_VersionStructure
+        extends org.entur.kingu.model.SiteElement {
+
+    @OneToMany(cascade = CascadeType.ALL)
+    @Transient
+    private final List<Level> levels = new ArrayList<>();
+
+    @org.hibernate.annotations.Cache(usage = CacheConcurrencyStrategy.READ_WRITE)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.DETACH)
+    protected TopographicPlace topographicPlace;
+
+    @Transient
+    protected SiteTypeEnumeration siteType;
+
+    @Transient
+    protected Boolean atCentre;
+
+    @Transient
+    protected LocaleStructure locale;
+
+    @Transient
+    protected org.entur.kingu.model.OrganisationRefStructure organisationRef;
+
+    @AttributeOverrides({
+            @AttributeOverride(name = "ref", column = @Column(name = "parent_site_ref")),
+            @AttributeOverride(name = "version", column = @Column(name = "parent_site_ref_version"))
+    })
+    @Embedded
+    protected org.entur.kingu.model.SiteRefStructure parentSiteRef;
+
+    @ElementCollection(targetClass = org.entur.kingu.model.SiteRefStructure.class, fetch = FetchType.LAZY)
+    protected Set<org.entur.kingu.model.SiteRefStructure> adjacentSites = new HashSet<>();
+
+    @Transient
+    protected SiteEntrances_RelStructure entrances;
+
+    @OneToOne(cascade = CascadeType.ALL)
+    protected PlaceEquipment placeEquipments;
+
+    @OneToMany(cascade = CascadeType.ALL)
+    private List<org.entur.kingu.model.EquipmentPlace> equipmentPlaces;
+
+    public Site_VersionStructure(org.entur.kingu.model.EmbeddableMultilingualString name) {
+        super(name);
+    }
+
+    public Site_VersionStructure() {
+    }
+
+    public TopographicPlace getTopographicPlace() {
+        return topographicPlace;
+    }
+
+    public void setTopographicPlace(TopographicPlace topographicPlace) {
+        this.topographicPlace = topographicPlace;
+    }
+
+    public SiteTypeEnumeration getSiteType() {
+        return siteType;
+    }
+
+    public void setSiteType(SiteTypeEnumeration value) {
+        this.siteType = value;
+    }
+
+    public Boolean isAtCentre() {
+        return atCentre;
+    }
+
+    public void setAtCentre(Boolean value) {
+        this.atCentre = value;
+    }
+
+    public LocaleStructure getLocale() {
+        return locale;
+    }
+
+    public void setLocale(LocaleStructure value) {
+        this.locale = value;
+    }
+
+    public org.entur.kingu.model.OrganisationRefStructure getOrganisationRef() {
+        return organisationRef;
+    }
+
+    public void setOrganisationRef(org.entur.kingu.model.OrganisationRefStructure organisationRef) {
+        this.organisationRef = organisationRef;
+    }
+
+
+    public org.entur.kingu.model.SiteRefStructure getParentSiteRef() {
+        return parentSiteRef;
+    }
+
+    public void setParentSiteRef(org.entur.kingu.model.SiteRefStructure value) {
+        this.parentSiteRef = value;
+    }
+
+    public Set<org.entur.kingu.model.SiteRefStructure> getAdjacentSites() {
+        return adjacentSites;
+    }
+
+    public SiteEntrances_RelStructure getEntrances() {
+        return entrances;
+    }
+
+    public void setEntrances(SiteEntrances_RelStructure value) {
+        this.entrances = value;
+    }
+
+
+    public PlaceEquipment getPlaceEquipments() {
+        return placeEquipments;
+    }
+
+    public void setPlaceEquipments(PlaceEquipment value) {
+        this.placeEquipments = value;
+    }
+
+    public List<Level> getLevels() {
+        return levels;
+    }
+
+    public List<org.entur.kingu.model.EquipmentPlace> getEquipmentPlaces() {
+        return equipmentPlaces;
+    }
+
+    public void setEquipmentPlaces(List<org.entur.kingu.model.EquipmentPlace> equipmentPlaces) {
+        this.equipmentPlaces = equipmentPlaces;
+    }
+}

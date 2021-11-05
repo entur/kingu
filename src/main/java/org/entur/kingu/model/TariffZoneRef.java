@@ -1,0 +1,46 @@
+/*
+ * Licensed under the EUPL, Version 1.2 or – as soon they will be approved by
+ * the European Commission - subsequent versions of the EUPL (the "Licence");
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at:
+ *
+ *   https://joinup.ec.europa.eu/software/page/eupl
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the Licence is distributed on an "AS IS" basis,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the Licence for the specific language governing permissions and
+ * limitations under the Licence.
+ */
+
+package org.entur.kingu.model;
+
+import javax.persistence.Embeddable;
+
+@Embeddable
+public class TariffZoneRef extends org.entur.kingu.model.ZoneRefStructure {
+
+
+    public TariffZoneRef() {
+    }
+
+    public TariffZoneRef(org.entur.kingu.model.TariffZone tariffZone) {
+        this.setRef(tariffZone.getNetexId());
+        this.setVersion(String.valueOf(tariffZone.getVersion()));
+    }
+
+
+    public TariffZoneRef(org.entur.kingu.model.FareZone fareZone) {
+        this.setRef(fareZone.getNetexId());
+        this.setVersion(String.valueOf(fareZone.getVersion()));
+    }
+
+    public TariffZoneRef(String netexId) {
+        this.setRef(netexId);
+    }
+
+    public TariffZoneRef(String netexid, String version) {
+        this.setRef(netexid);
+        this.setVersion(version);
+    }
+}

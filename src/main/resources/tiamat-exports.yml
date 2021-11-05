@@ -1,0 +1,18 @@
+tiamat:
+    export-jobs:
+      -
+          name: Full
+          versionValidity: ALL
+          topographicPlaceExportMode: ALL
+          tariffZoneExportMode: ALL
+          fareZoneExportMode: ALL
+          groupOfStopPlacesExportMode: ALL
+          groupOfTariffZonesExportMode: ALL
+          serviceFrameExportMode: ALL
+      -
+          name: Current
+          versionValidity: CURRENT
+          serviceFrameExportMode: RELEVANT
+      -
+          name: Oslo_Viken
+          countyReferences: KVE:TopographicPlace:03,KVE:TopographicPlace:30
