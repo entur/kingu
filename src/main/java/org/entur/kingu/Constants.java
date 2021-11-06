@@ -6,6 +6,7 @@ public class Constants {
     public static final String CAMEL_ALL_HEADERS = "camel_all_headers";
     public static final String CAMEL_ALL_HTTP_HEADERS = "camel_all_http_headers";
     public static final String TASK_TYPE = "taskType";
+    public static final String EXPORT_LOCATION="exportLocation";
 
     private Constants(){}
 }

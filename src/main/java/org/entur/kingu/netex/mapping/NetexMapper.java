@@ -108,7 +108,6 @@ public class NetexMapper {
                 .fieldBToA("topographicPlace", "topographicPlaceRef")
                 .fieldAToB("topographicPlaceRef.ref", "topographicPlace.netexId")
                 .fieldAToB("topographicPlaceRef.version", "topographicPlace.version")
-                // TODO: Excluding some fields while waiting for NRP-1354
                 .exclude("localServices")
                 .exclude("postalAddress")
                 .exclude("roadAddress")
@@ -223,8 +222,7 @@ public class NetexMapper {
     }
 
     public SiteFrame mapToNetexModel(org.entur.kingu.model.SiteFrame tiamatSiteFrame) {
-        SiteFrame siteFrame = facade.map(tiamatSiteFrame, SiteFrame.class);
-        return siteFrame;
+        return facade.map(tiamatSiteFrame, SiteFrame.class);
     }
 
     public ServiceFrame mapToNetexModel(org.entur.kingu.model.ServiceFrame tiamatServiceFrame) {

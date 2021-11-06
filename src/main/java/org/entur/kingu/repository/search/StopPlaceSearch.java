@@ -21,8 +21,6 @@ import org.entur.kingu.config.VersionValidity;
 import org.entur.kingu.exporter.params.SearchObject;
 import org.entur.kingu.model.StopTypeEnumeration;
 
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.util.List;
@@ -132,10 +130,6 @@ public class StopPlaceSearch implements SearchObject {
         return submode;
     }
 
-    public Pageable getPageable() {
-        return PageRequest.of(page, size);
-    }
-
     public List<String> getNetexIdList() {
         return netexIdList;
     }
@@ -179,6 +173,10 @@ public class StopPlaceSearch implements SearchObject {
 
     public VersionValidity getVersionValidity() {
         return versionValidity;
+    }
+
+    public void setVersionValidity(VersionValidity versionValidity) {
+        this.versionValidity = versionValidity;
     }
 
     public List<String> getTags() {

@@ -13,7 +13,6 @@ import java.util.List;
 public class ExportParams implements Serializable {
 
     private String name;
-    private VersionValidity versionValidity = VersionValidity.CURRENT;
     private ExportMode tariffZoneExportMode = ExportMode.RELEVANT;
     private ExportMode fareZoneExportMode = ExportMode.RELEVANT;
     private ExportMode groupOfStopPlacesExportMode = ExportMode.RELEVANT;
@@ -30,7 +29,6 @@ public class ExportParams implements Serializable {
     }
 
     public ExportParams(String name,
-                        VersionValidity versionValidity,
                         ExportMode tariffZoneExportMode,
                         ExportMode fareZoneExportMode,
                         ExportMode groupOfStopPlacesExportMode,
@@ -42,7 +40,6 @@ public class ExportParams implements Serializable {
                         List<String> countryReferences,
                         StopPlaceSearch stopPlaceSearch) {
         this.name = name;
-        this.versionValidity = versionValidity;
         this.tariffZoneExportMode = tariffZoneExportMode;
         this.fareZoneExportMode = fareZoneExportMode;
         this.groupOfStopPlacesExportMode = groupOfStopPlacesExportMode;
@@ -61,14 +58,6 @@ public class ExportParams implements Serializable {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public VersionValidity getVersionValidity() {
-        return versionValidity;
-    }
-
-    public void setVersionValidity(VersionValidity versionValidity) {
-        this.versionValidity = versionValidity;
     }
 
     public ExportMode getTariffZoneExportMode() {

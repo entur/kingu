@@ -19,12 +19,12 @@ public class NetexExportRoute extends BaseRouteBuilder {
         from("direct:tiamatExport")
                 .log(LoggingLevel.INFO,"Start tiamat export: ${body}")
                 .bean(ExportJobWork.class,"startExport")
-                .to("activemq:TiamatExportQueue")
                 .routeId("tiamat-export");
 
 
         from("activemq:TiamatExportQueue?selector=taskType='PROCESSED'")
                 .log(LoggingLevel.INFO, "Done processing Tiamat exports: ${body}")
+                .log(LoggingLevel.INFO,"Export location is $simple{in.header.exportLocation}")
                 .routeId("from-tiamat-export-queue-processed");
     }
 }

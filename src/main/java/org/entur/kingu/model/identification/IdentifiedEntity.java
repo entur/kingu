@@ -16,15 +16,12 @@
 package org.entur.kingu.model.identification;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.entur.kingu.repository.listener.IdentifiedEntityListener;
 
-import javax.persistence.EntityListeners;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-@EntityListeners(IdentifiedEntityListener.class)
 public abstract class IdentifiedEntity {
 
     @Id

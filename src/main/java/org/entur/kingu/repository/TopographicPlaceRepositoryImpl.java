@@ -18,11 +18,11 @@ package org.entur.kingu.repository;
 
 import com.google.common.base.Strings;
 import org.apache.commons.lang3.NotImplementedException;
+import org.entur.kingu.repository.search.TopographicPlaceSearch;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
-import org.entur.kingu.exporter.params.TopographicPlaceSearch;
 import org.entur.kingu.model.TopographicPlace;
 import org.entur.kingu.model.TopographicPlaceTypeEnumeration;
 import org.entur.kingu.repository.iterator.ScrollableResultIterator;

@@ -13,11 +13,22 @@
  * limitations under the Licence.
  */
 
-package org.entur.kingu.repository;
+package org.entur.kingu.config;
 
-import org.entur.kingu.model.TariffZone;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.PrecisionModel;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-public interface TariffZoneRepository extends EntityInVersionRepository<TariffZone>, TariffZoneRepositoryCustom {
+@Configuration
+public class GeometryFactoryConfig {
 
+    private static final int SRID = 4326;
+
+    @Bean
+    public GeometryFactory geometryFactory() {
+
+        return new GeometryFactory(new PrecisionModel(), SRID);
+
+    }
 }
-

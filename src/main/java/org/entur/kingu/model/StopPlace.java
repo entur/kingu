@@ -89,10 +89,10 @@ public class StopPlace
     protected SitePathLinks_RelStructure pathLinks;
     @OneToOne(fetch = FetchType.LAZY)
     @Transient
-    protected org.entur.kingu.model.PathJunctions_RelStructure pathJunctions;
+    protected PathJunctions_RelStructure pathJunctions;
     @OneToOne(fetch = FetchType.LAZY)
     @Transient
-    protected org.entur.kingu.model.NavigationPaths_RelStructure navigationPaths;
+    protected NavigationPaths_RelStructure navigationPaths;
     private boolean parentStopPlace;
     @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<Quay> quays = new HashSet<>();

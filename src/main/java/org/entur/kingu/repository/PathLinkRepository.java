@@ -15,9 +15,9 @@
 
 package org.entur.kingu.repository;
 
-import org.entur.kingu.model.TariffZone;
+import org.entur.kingu.model.PathLink;
 
-public interface TariffZoneRepository extends EntityInVersionRepository<TariffZone>, TariffZoneRepositoryCustom {
+
+public interface PathLinkRepository extends PathLinkRepositoryCustom, EntityInVersionRepository<PathLink> {
 
 }
-

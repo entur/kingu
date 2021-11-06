@@ -46,7 +46,7 @@ public class SiteRefsRelStructureConverter extends BidirectionalConverter<Set<Si
             SiteRefs_RelStructure siteRefs_relStructure = new SiteRefs_RelStructure();
 
             siteRefStructures.stream()
-                    .peek(siteref -> System.out.println(siteref))
+                    .peek(siteref -> logger.info(siteref.toString()))
                     .map(siteRef -> mapperFacade.map(siteRef, org.rutebanken.netex.model.SiteRefStructure.class))
                     .map(netexSiteRef -> netexObjectFactory.createSiteRef(netexSiteRef))
                     .forEach(jaxbElement -> siteRefs_relStructure.getSiteRef().add(jaxbElement));

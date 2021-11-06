@@ -195,4 +195,8 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
         return sql;
     }
 
+    @Override
+    public String findFirstByKeyValues(String key, Set<String> originalIds) {
+        return null;
+    }
 }

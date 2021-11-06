@@ -18,6 +18,9 @@
 		<orika-core.version>1.5.4</orika-core.version>
 		<jts-core.version>1.16.0</jts-core.version>
 		<geotools.version>20.1</geotools.version>
+		<hibernate.version>5.4.32.Final</hibernate.version>
+		<hibernate-spatial.version>5.4.32.Final</hibernate-spatial.version>
+		<hikariCP.version>5.0.0</hikariCP.version>
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -112,6 +115,23 @@
 			<groupId>org.geotools</groupId>
 			<artifactId>gt-geojson</artifactId>
 			<version>${geotools.version}</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.hibernate</groupId>
+			<artifactId>hibernate-spatial</artifactId>
+			<version>${hibernate-spatial.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>com.vividsolutions</groupId>
+					<artifactId>jts-core</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>com.zaxxer</groupId>
+			<artifactId>HikariCP</artifactId>
+			<version>${hikariCP.version}</version>
 		</dependency>
 	</dependencies>
 

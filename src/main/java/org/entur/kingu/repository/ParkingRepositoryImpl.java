@@ -16,17 +16,13 @@
 package org.entur.kingu.repository;
 
 import org.apache.commons.lang3.StringUtils;
-
 import org.entur.kingu.model.Parking;
-import org.entur.kingu.model.ParkingTypeEnumeration;
 import org.entur.kingu.repository.iterator.ScrollableResultIterator;
-
+import org.entur.kingu.repository.search.SearchHelper;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
-
-import org.locationtech.jts.geom.GeometryFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
@@ -38,7 +34,6 @@ import javax.persistence.Query;
 import javax.persistence.TypedQuery;
 import javax.transaction.Transactional;
 import java.math.BigInteger;
-
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -58,7 +53,7 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
     private EntityManager entityManager;
 
     @Autowired
-    private GeometryFactory geometryFactory;
+    private SearchHelper searchHelper;
 
 
     /**

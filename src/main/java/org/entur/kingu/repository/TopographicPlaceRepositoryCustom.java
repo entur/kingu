@@ -15,9 +15,9 @@
 
 package org.entur.kingu.repository;
 
-import org.entur.kingu.exporter.params.TopographicPlaceSearch;
 import org.entur.kingu.model.TopographicPlace;
 import org.entur.kingu.model.TopographicPlaceTypeEnumeration;
+import org.entur.kingu.repository.search.TopographicPlaceSearch;
 
 import java.util.Iterator;
 import java.util.List;

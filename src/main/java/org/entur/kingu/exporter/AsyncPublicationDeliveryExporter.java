@@ -16,6 +16,7 @@
 package org.entur.kingu.exporter;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
+import org.apache.camel.CamelContext;
 import org.entur.kingu.config.ExportParams;
 import org.entur.kingu.exporter.async.ExportJobWorker;
 import org.entur.kingu.model.job.ExportJob;
@@ -61,15 +62,18 @@ public class AsyncPublicationDeliveryExporter {
 
     private final String localExportPath;
 
+    private final CamelContext camelContext;
+
 
     @Autowired
     public AsyncPublicationDeliveryExporter(@Qualifier("asyncStreamingPublicationDelivery") StreamingPublicationDelivery streamingPublicationDelivery,
                                             NetexXmlReferenceValidator netexXmlReferenceValidator, ExportTimeZone exportTimeZone,
-                                            @Value("${async.export.path:/deployments/data/}") String localExportPath) {
+                                            @Value("${async.export.path:/deployments/data/}") String localExportPath, CamelContext camelContext) {
         this.streamingPublicationDelivery = streamingPublicationDelivery;
         this.netexXmlReferenceValidator = netexXmlReferenceValidator;
         this.exportTimeZone = exportTimeZone;
         this.localExportPath = localExportPath;
+        this.camelContext = camelContext;
 
 
         File exportFolder = new File(localExportPath);
@@ -102,7 +106,7 @@ public class AsyncPublicationDeliveryExporter {
         String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getStarted());
         exportJob.setFileName(fileNameWithoutExtention + ".zip");
 
-        ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, netexXmlReferenceValidator);
+        ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, netexXmlReferenceValidator,camelContext);
         exportService.submit(exportJobWorker);
         logger.info("Returning started export job {}", exportJob);
         setJobUrl(exportJob);

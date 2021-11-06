@@ -15,9 +15,21 @@
 
 package org.entur.kingu.repository;
 
-import org.entur.kingu.model.TariffZone;
+import org.entur.kingu.model.PathLink;
 
-public interface TariffZoneRepository extends EntityInVersionRepository<TariffZone>, TariffZoneRepositoryCustom {
+import java.util.List;
+import java.util.Set;
 
+public interface PathLinkRepositoryCustom {
+
+    Long findByKeyValue(String key, Set<String> values);
+
+    /**
+     * Find pathlinks that have pathlink end referencing to quays of stop place
+     * @param netexStopPlaceId
+     * @return list of path links referencing to quays, which belong to stop place.
+     */
+    List<String> findByStopPlaceNetexId(String netexStopPlaceId);
+
+    List<PathLink> findByStopPlaceIds(Set<Long> stopPlaceIds);
 }
-

@@ -15,8 +15,8 @@
 
 package org.entur.kingu.repository;
 
+import org.entur.kingu.repository.search.TopographicPlaceSearch;
 import org.locationtech.jts.geom.Point;
-import org.entur.kingu.exporter.params.TopographicPlaceSearch;
 import org.entur.kingu.model.IanaCountryTldEnumeration;
 import org.entur.kingu.model.TopographicPlace;
 import org.entur.kingu.model.TopographicPlaceTypeEnumeration;

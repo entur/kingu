@@ -15,7 +15,6 @@
 
 package org.entur.kingu.exporter.async;
 
-import org.entur.kingu.exporter.eviction.EntitiesEvictor;
 import org.entur.kingu.model.EntityStructure;
 import org.entur.kingu.netex.mapping.NetexMapper;
 import org.slf4j.Logger;
@@ -33,30 +32,15 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
     private final Class<N> netexClass;
     private final long startTime = System.currentTimeMillis();
     private final AtomicInteger mappedCount;
-    private final EntitiesEvictor entitiesEvictor;
-
     private long iteratorNextDuration;
     private long iteratorMapDuration;
-    private long iteratorEvictDuration;
+
 
     public NetexMappingIterator(NetexMapper netexMapper, Iterator<T> iterator, Class<N> netexClass, AtomicInteger mappedCount) {
         this.netexMapper = netexMapper;
         this.iterator = iterator;
         this.netexClass = netexClass;
         this.mappedCount = mappedCount;
-        this.entitiesEvictor = null;
-    }
-
-    public NetexMappingIterator(NetexMapper netexMapper, Iterator<T> iterator, Class<N> netexClass, AtomicInteger mappedCount, EntitiesEvictor entitiesEvictor) {
-        this.iterator = iterator;
-        this.netexMapper = netexMapper;
-        this.netexClass = netexClass;
-        this.mappedCount = mappedCount;
-        this.entitiesEvictor = entitiesEvictor;
-
-        if(entitiesEvictor == null) {
-            throw new IllegalArgumentException("entitiesEvictor cannot be null");
-        }
     }
 
     @Override
@@ -78,15 +62,6 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
         N mapped = netexMapper.getFacade().map(next, netexClass);
         var endTimeMap = System.currentTimeMillis();
         iteratorMapDuration += endTimeMap-startTimeMap;
-
-        if(entitiesEvictor !=null) {
-            var startTimeEvict = System.currentTimeMillis();
-            entitiesEvictor.evictKnownEntitiesFromSession(next);
-            var endTimeEvict = System.currentTimeMillis();
-
-            iteratorEvictDuration += endTimeEvict - startTimeEvict;
-        }
-
         logStatus();
         mappedCount.incrementAndGet();
         return mapped;
@@ -105,7 +80,7 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
             }
             logger.info("{} {}s marshalled. {} per second", count, netexClass.getSimpleName(), entityPerSecond);
 
-            logger.info("iteratorNextDuration {}, mappedDuration {} , evictionDuration {}", iteratorNextDuration, iteratorMapDuration, iteratorEvictDuration);
+            logger.info("iteratorNextDuration {}, mappedDuration {}", iteratorNextDuration, iteratorMapDuration);
         }
     }
 }

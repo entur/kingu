@@ -13,11 +13,20 @@
  * limitations under the Licence.
  */
 
-package org.entur.kingu.repository;
+package org.entur.kingu.service;
 
-import org.entur.kingu.model.TariffZone;
+import com.google.common.collect.ImmutableList;
+import org.entur.kingu.model.StopPlace;
+import org.springframework.stereotype.Service;
 
-public interface TariffZoneRepository extends EntityInVersionRepository<TariffZone>, TariffZoneRepositoryCustom {
+import java.util.List;
+import java.util.regex.Pattern;
+
+
+@Service
+public class TagCreator {
+    private static final String TAG_NAME_REGEX = "^[\\w\\dæøåÆØÅ]*$";
+    private static final Pattern TAG_PATTERN = Pattern.compile(TAG_NAME_REGEX, Pattern.UNICODE_CASE);
+    public static final List<Class> SUPPORTED_TAGGABLE_TYPES = ImmutableList.of(StopPlace.class);
 
 }
-

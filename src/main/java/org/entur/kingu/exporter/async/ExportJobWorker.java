@@ -17,12 +17,15 @@ package org.entur.kingu.exporter.async;
 
 
 import com.google.common.io.ByteStreams;
+import org.apache.camel.CamelContext;
+import org.apache.camel.ProducerTemplate;
 import org.entur.kingu.exporter.StreamingPublicationDelivery;
 import org.entur.kingu.model.job.ExportJob;
 import org.entur.kingu.model.job.JobStatus;
 import org.entur.kingu.netex.validation.NetexXmlReferenceValidator;
 
 
+import org.entur.kingu.route.export.TiamatExportTaskType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -37,8 +40,13 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+
+import static org.entur.kingu.Constants.EXPORT_LOCATION;
+import static org.entur.kingu.Constants.TASK_TYPE;
 
 public class ExportJobWorker implements Runnable {
 
@@ -52,19 +60,21 @@ public class ExportJobWorker implements Runnable {
     private final StreamingPublicationDelivery streamingPublicationDelivery;
     private final String localExportPath;
     private final String fileNameWithoutExtension;
-
     private final NetexXmlReferenceValidator netexXmlReferenceValidator;
+    private final CamelContext camelContext;
 
     public ExportJobWorker(ExportJob exportJob,
                            StreamingPublicationDelivery streamingPublicationDelivery,
                            String localExportPath,
                            String fileNameWithoutExtension,
-                           NetexXmlReferenceValidator netexXmlReferenceValidator) {
+                           NetexXmlReferenceValidator netexXmlReferenceValidator,
+                           CamelContext camelContext) {
         this.exportJob = exportJob;
         this.streamingPublicationDelivery = streamingPublicationDelivery;
         this.localExportPath = localExportPath;
         this.fileNameWithoutExtension = fileNameWithoutExtension;
         this.netexXmlReferenceValidator = netexXmlReferenceValidator;
+        this.camelContext =camelContext;
     }
 
 
@@ -86,6 +96,8 @@ public class ExportJobWorker implements Runnable {
 
             exportJob.setStatus(JobStatus.FINISHED);
             exportJob.setFinished(Instant.now());
+            logger.info("Sending finished job to jms");
+            sendJMS(exportJob);
             logger.warn("Duration(secs): {},Export job done: {} ",Duration.between(exportJob.getStarted(),exportJob.getFinished()).getSeconds(),exportJob);
 
         } catch (Exception e) {
@@ -100,8 +112,8 @@ public class ExportJobWorker implements Runnable {
         } finally {
             //TODO: Upload to gcp before deleting
             logger.info("Removing local files: {},{}", localExportZipFile, localExportXmlFile);
-            localExportZipFile.delete();
-            localExportXmlFile.delete();
+            //localExportZipFile.delete();
+            //localExportXmlFile.delete();
         }
     }
 
@@ -136,6 +148,20 @@ public class ExportJobWorker implements Runnable {
             } catch (IOException e) {
                 logger.error(String.format("Could not close zipoutput stream for file: %s", localZipFile), e);
             }
+        }
+    }
+
+    private void sendJMS(ExportJob exportJob) {
+        //todo dynamic bucket location
+        try(ProducerTemplate template = camelContext.createProducerTemplate()){
+            var url = "gs://tiamat-dev/" + exportJob.getSubFolder() + "/" + exportJob.getFileName();
+            var body = exportJob.getExportParams().toString();
+            HashMap<String, Object> headers = new HashMap<>();
+            headers.put(TASK_TYPE,TiamatExportTaskType.PROCESSED.toString());
+            headers.put(EXPORT_LOCATION, url);
+            template.sendBodyAndHeaders("activemq:TiamatExportQueue",body,headers);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

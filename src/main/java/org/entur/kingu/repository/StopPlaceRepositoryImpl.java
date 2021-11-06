@@ -541,11 +541,6 @@ public class StopPlaceRepositoryImpl implements org.entur.kingu.repository.StopP
 
         Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
         NativeQuery<StopPlace> sqlQuery = session.createNativeQuery(queryWithParams.getFirst(),StopPlace.class);
-        if(!ignorePaging) {
-            long firstResult = exportParams.getStopPlaceSearch().getPageable().getOffset();
-            sqlQuery.setFirstResult(Math.toIntExact(firstResult));
-            sqlQuery.setMaxResults(exportParams.getStopPlaceSearch().getPageable().getPageSize());
-        }
 
         sqlQuery.setReadOnly(true);
         sqlQuery.setCacheMode(CacheMode.GET);
@@ -605,12 +600,6 @@ public class StopPlaceRepositoryImpl implements org.entur.kingu.repository.StopP
         Pair<String, Map<String, Object>> pair = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
         Session session = entityManager.unwrap(Session.class);
         NativeQuery query = session.createNativeQuery("SELECT sub.id from (" + pair.getFirst() + ") sub");
-
-        if(!ignorePaging) {
-            long firstResult = exportParams.getStopPlaceSearch().getPageable().getOffset();
-            query.setFirstResult(Math.toIntExact(firstResult));
-            query.setMaxResults(exportParams.getStopPlaceSearch().getPageable().getPageSize());
-        }
         searchHelper.addParams(query, pair.getSecond());
 
         Set<Long> result = new HashSet<>();
@@ -623,21 +612,6 @@ public class StopPlaceRepositoryImpl implements org.entur.kingu.repository.StopP
         return result;
     }
 
-    @Override
-    public Page<StopPlace> findStopPlace(ExportParams exportParams) {
-        Pair<String, Map<String, Object>> queryWithParams = stopPlaceQueryFromSearchBuilder.buildQueryString(exportParams);
-
-        final Query nativeQuery = entityManager.createNativeQuery(queryWithParams.getFirst(), StopPlace.class);
-
-        queryWithParams.getSecond().forEach(nativeQuery::setParameter);
-        long firstResult = exportParams.getStopPlaceSearch().getPageable().getOffset();
-        nativeQuery.setFirstResult(Math.toIntExact(firstResult));
-        nativeQuery.setMaxResults(exportParams.getStopPlaceSearch().getPageable().getPageSize());
-
-        List<StopPlace> stopPlaces = nativeQuery.getResultList();
-        return new PageImpl<>(stopPlaces, exportParams.getStopPlaceSearch().getPageable(), stopPlaces.size());
-
-    }
 
     @Override
     public List<StopPlace> findAll(List<String> stopPlacesNetexIds) {
