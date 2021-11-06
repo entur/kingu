@@ -12,6 +12,7 @@ public class NetexExportRoute extends BaseRouteBuilder {
         super.configure();
 
         from("activemq:TiamatExportQueue?selector=taskType='PROCESS'")
+                .throttle(1).rejectExecution(true)
                 .log(LoggingLevel.INFO, "Starting Tiamat exports-1: ${body}")
                 .to("direct:tiamatExport")
                 .routeId("from-tiamat-export-queue-process");

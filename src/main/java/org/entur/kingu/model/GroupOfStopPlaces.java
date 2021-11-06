@@ -16,6 +16,7 @@
 package org.entur.kingu.model;
 
 import com.google.common.base.MoreObjects;
+import org.locationtech.jts.geom.Point;
 
 import javax.persistence.CascadeType;
 import javax.persistence.CollectionTable;
@@ -29,10 +30,10 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-public class GroupOfStopPlaces extends org.entur.kingu.model.GroupOfEntities_VersionStructure {
+public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<org.entur.kingu.model.AlternativeName> alternativeNames = new ArrayList<>();
+    private final List<AlternativeName> alternativeNames = new ArrayList<>();
     @ElementCollection(targetClass = StopPlaceReference.class, fetch = FetchType.LAZY)
     @CollectionTable(
             name = "group_of_stop_places_members"
@@ -40,7 +41,7 @@ public class GroupOfStopPlaces extends org.entur.kingu.model.GroupOfEntities_Ver
     private Set<StopPlaceReference> members = new HashSet<>();
     private Point centroid;
 
-    public GroupOfStopPlaces(org.entur.kingu.model.EmbeddableMultilingualString embeddableMultilingualString) {
+    public GroupOfStopPlaces(EmbeddableMultilingualString embeddableMultilingualString) {
         super(embeddableMultilingualString);
     }
 
@@ -59,7 +60,7 @@ public class GroupOfStopPlaces extends org.entur.kingu.model.GroupOfEntities_Ver
         return members;
     }
 
-    public List<org.entur.kingu.model.AlternativeName> getAlternativeNames() {
+    public List<AlternativeName> getAlternativeNames() {
         return alternativeNames;
     }
 

@@ -19,7 +19,7 @@ import javax.persistence.MappedSuperclass;
 
 
 @MappedSuperclass
-public class SiteElementRefStructure extends org.entur.kingu.model.AddressablePlaceRefStructure {
+public class SiteElementRefStructure extends AddressablePlaceRefStructure {
 
     public SiteElementRefStructure() {
         super();

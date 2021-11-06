@@ -18,7 +18,7 @@ package org.entur.kingu.model;
 import javax.persistence.Embeddable;
 
 @Embeddable
-public class StopPlaceReference extends org.entur.kingu.model.SiteRefStructure {
+public class StopPlaceReference extends SiteRefStructure {
 
     public StopPlaceReference() {
     }

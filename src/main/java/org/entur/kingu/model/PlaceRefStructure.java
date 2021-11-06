@@ -18,7 +18,7 @@ package org.entur.kingu.model;
 import javax.persistence.MappedSuperclass;
 
 @MappedSuperclass
-public class PlaceRefStructure extends org.entur.kingu.model.GroupOfEntitiesRefStructure {
+public class PlaceRefStructure extends GroupOfEntitiesRefStructure {
 
     public PlaceRefStructure() {
         super();

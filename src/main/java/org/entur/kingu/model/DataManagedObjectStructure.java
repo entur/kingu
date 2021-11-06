@@ -35,7 +35,7 @@ public abstract class DataManagedObjectStructure
 
     @Cache(usage = CacheConcurrencyStrategy.READ_ONLY)
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private final Map<String, org.entur.kingu.model.Value> keyValues = new HashMap<>();
+    private final Map<String, Value> keyValues = new HashMap<>();
 
     @Transient
     protected ExtensionsStructure extensions;
@@ -63,13 +63,13 @@ public abstract class DataManagedObjectStructure
         this.responsibilitySetRef = value;
     }
 
-    public Map<String, org.entur.kingu.model.Value> getKeyValues() {
+    public Map<String, Value> getKeyValues() {
         return keyValues;
     }
 
     public Set<String> getOrCreateValues(String key) {
         if (keyValues.get(key) == null) {
-            keyValues.put(key, new org.entur.kingu.model.Value());
+            keyValues.put(key, new Value());
         }
 
         return keyValues.get(key).getItems();

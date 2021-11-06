@@ -235,7 +235,7 @@ public class StreamingPublicationDelivery {
         prepareTopographicPlaces(exportParams, stopPlacePrimaryIds, mappedTopographicPlacesCount, netexSiteFrame);
         prepareTariffZones(exportParams, stopPlacePrimaryIds, mappedTariffZonesCount, netexSiteFrame);
         prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame);
-        //prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame);
+        prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame);
 
 
         PublicationDeliveryStructure publicationDeliveryStructure;

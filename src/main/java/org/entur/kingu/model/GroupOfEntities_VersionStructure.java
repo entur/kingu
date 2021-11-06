@@ -24,7 +24,7 @@ import javax.persistence.Transient;
 
 @MappedSuperclass
 public abstract class GroupOfEntities_VersionStructure
-        extends org.entur.kingu.model.DataManagedObjectStructure {
+        extends DataManagedObjectStructure {
 
     @AttributeOverrides({
             @AttributeOverride(name = "value", column = @Column(name = "name_value")),
@@ -49,7 +49,7 @@ public abstract class GroupOfEntities_VersionStructure
             @AttributeOverride(name = "type", column = @Column(name = "private_code_type"))
     })
     @Embedded
-    protected org.entur.kingu.model.PrivateCodeStructure privateCode;
+    protected PrivateCodeStructure privateCode;
 
 
     public GroupOfEntities_VersionStructure() {
@@ -83,11 +83,11 @@ public abstract class GroupOfEntities_VersionStructure
         this.description = value;
     }
 
-    public org.entur.kingu.model.PrivateCodeStructure getPrivateCode() {
+    public PrivateCodeStructure getPrivateCode() {
         return privateCode;
     }
 
-    public void setPrivateCode(org.entur.kingu.model.PrivateCodeStructure value) {
+    public void setPrivateCode(PrivateCodeStructure value) {
         this.privateCode = value;
     }
 

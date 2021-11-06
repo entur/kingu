@@ -32,10 +32,10 @@ public class EntityInVersionStructure extends EntityStructure {
     protected Instant created;
     protected Instant changed;
     @Transient
-    protected org.entur.kingu.model.ModificationEnumeration modification;
+    protected ModificationEnumeration modification;
     protected long version;
     @Transient
-    protected org.entur.kingu.model.StatusEnumeration status;
+    protected StatusEnumeration status;
     @Transient
     protected String derivedFromVersionRef;
     @Transient
@@ -47,7 +47,7 @@ public class EntityInVersionStructure extends EntityStructure {
             @AttributeOverride(name = "toDate", column = @Column(name = "to_date"))
     })
     @Embedded
-    private org.entur.kingu.model.ValidBetween validBetween;
+    private ValidBetween validBetween;
 
     public String getDataSourceRef() {
         return dataSourceRef;
@@ -78,24 +78,24 @@ public class EntityInVersionStructure extends EntityStructure {
         this.changed = value;
     }
 
-    public org.entur.kingu.model.ValidBetween getValidBetween() {
+    public ValidBetween getValidBetween() {
         return validBetween;
     }
 
-    public void setValidBetween(org.entur.kingu.model.ValidBetween validBetween) {
+    public void setValidBetween(ValidBetween validBetween) {
         this.validBetween = validBetween;
     }
 
-    public org.entur.kingu.model.ModificationEnumeration getModification() {
+    public ModificationEnumeration getModification() {
         if (modification == null) {
-            return org.entur.kingu.model.ModificationEnumeration.NEW;
+            return ModificationEnumeration.NEW;
         } else {
             return modification;
         }
     }
 
 
-    public void setModification(org.entur.kingu.model.ModificationEnumeration value) {
+    public void setModification(ModificationEnumeration value) {
         this.modification = value;
     }
 
@@ -110,16 +110,16 @@ public class EntityInVersionStructure extends EntityStructure {
     }
 
 
-    public org.entur.kingu.model.StatusEnumeration getStatus() {
+    public StatusEnumeration getStatus() {
         if (status == null) {
-            return org.entur.kingu.model.StatusEnumeration.ACTIVE;
+            return StatusEnumeration.ACTIVE;
         } else {
             return status;
         }
     }
 
 
-    public void setStatus(org.entur.kingu.model.StatusEnumeration value) {
+    public void setStatus(StatusEnumeration value) {
         this.status = value;
     }
 
