@@ -16,24 +16,17 @@
 package org.entur.kingu.repository;
 
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.StringUtils;
 import org.entur.kingu.config.ExportParams;
 import org.entur.kingu.config.VersionValidity;
+import org.entur.kingu.model.TariffZone;
+import org.entur.kingu.repository.iterator.ScrollableResultIterator;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.hibernate.internal.SessionImpl;
 import org.hibernate.query.NativeQuery;
-
-
-import org.entur.kingu.model.TariffZone;
-import org.entur.kingu.repository.iterator.ScrollableResultIterator;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -154,42 +147,24 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
 
 
     private String generateTariffZoneQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
-        var sql = "select" +
-                "        tz.* " +
-                "    from" +
-                "        (         select" +
-                "            tz1.id         " +
-                "        from" +
-                "            stop_place_tariff_zones sptz     " +
-                "        inner join" +
-                "            tariff_zone tz1              " +
-                "                ON tz1.netex_id = sptz.ref         " +
-                "                AND  sptz.stop_place_id IN(" + StringUtils.join(stopPlaceDbIds,',') +
-                "                )            " +
-                "                AND (" +
-                "                    (" +
-                "                        sptz.version IS NOT NULL                          " +
-                "                        AND cast(tz1.version AS text) = sptz.version                           " +
-                "                    )                                   " +
-                "                    OR (" +
-                "                        sptz.version IS NULL                          " +
-                "                        AND tz1.version = (" +
-                "                            SELECT" +
-                "                                MAX(tz2.version)                          " +
-                "                        FROM" +
-                "                            tariff_zone tz2                          " +
-                "                        WHERE" +
-                "                            tz2.netex_id = tz1.netex_id                                                         " +
-                "                            AND tz2.from_date < NOW()                                   " +
-                "                    )                       " +
-                "                )                 " +
-                "            )           " +
-                "        GROUP BY" +
-                "            tz1.id      ) tz1      " +
-                "        join" +
-                "            tariff_zone tz      " +
-                "                on tz.id = tz1.id";
-
+        var sql = """
+                SELECT TZ.*
+                FROM
+                	(SELECT TZ1.ID
+                		FROM STOP_PLACE_TARIFF_ZONES SPTZ
+                		INNER JOIN TARIFF_ZONE TZ1 ON TZ1.NETEX_ID = SPTZ.REF
+                		AND SPTZ.STOP_PLACE_ID IN ($stopPlaceIds)
+                		AND ((SPTZ.VERSION IS NOT NULL
+                								AND CAST(TZ1.VERSION AS text) = SPTZ.VERSION)
+                							OR (SPTZ.VERSION IS NULL
+                											AND TZ1.VERSION =
+                												(SELECT MAX(TZ2.VERSION)
+                													FROM TARIFF_ZONE TZ2
+                													WHERE TZ2.NETEX_ID = TZ1.NETEX_ID
+                														AND TZ2.FROM_DATE < NOW() )))
+                		GROUP BY TZ1.ID) TZ1
+                JOIN TARIFF_ZONE TZ ON TZ.ID = TZ1.ID
+                """.replace("$stopPlaceIds",StringUtils.join(stopPlaceDbIds,','));
 
         logger.debug(sql);
         return sql;
