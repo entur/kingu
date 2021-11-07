@@ -1,18 +1,15 @@
 package org.entur.kingu.route.rest;
 
-import org.apache.camel.ExchangePattern;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.builder.RouteBuilder;
-import org.entur.kingu.route.export.TiamatExportTask;
 import org.entur.kingu.service.TaskGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
+//TODO should be moved to cleint
 @Component
 public class RestRoute extends RouteBuilder {
 

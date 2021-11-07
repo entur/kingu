@@ -26,6 +26,7 @@ import org.entur.kingu.netex.validation.NetexXmlReferenceValidator;
 
 
 import org.entur.kingu.route.export.TiamatExportTaskType;
+import org.entur.kingu.service.BlobStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
@@ -56,6 +57,7 @@ public class ExportJobWorker implements Runnable {
      * Ignore paging for async export, to not let the default value interfer.
      */
     public static final boolean IGNORE_PAGING = true;
+    private final BlobStoreService blobStoreService;
     private final ExportJob exportJob;
     private final StreamingPublicationDelivery streamingPublicationDelivery;
     private final String localExportPath;
@@ -63,12 +65,15 @@ public class ExportJobWorker implements Runnable {
     private final NetexXmlReferenceValidator netexXmlReferenceValidator;
     private final CamelContext camelContext;
 
-    public ExportJobWorker(ExportJob exportJob,
+
+    public ExportJobWorker(BlobStoreService blobStoreService,
+                           ExportJob exportJob,
                            StreamingPublicationDelivery streamingPublicationDelivery,
                            String localExportPath,
                            String fileNameWithoutExtension,
                            NetexXmlReferenceValidator netexXmlReferenceValidator,
                            CamelContext camelContext) {
+        this.blobStoreService =blobStoreService;
         this.exportJob = exportJob;
         this.streamingPublicationDelivery = streamingPublicationDelivery;
         this.localExportPath = localExportPath;
@@ -110,10 +115,9 @@ public class ExportJobWorker implements Runnable {
                 Thread.currentThread().interrupt();
             }
         } finally {
-            //TODO: Upload to gcp before deleting
             logger.info("Removing local files: {},{}", localExportZipFile, localExportXmlFile);
-            //localExportZipFile.delete();
-            //localExportXmlFile.delete();
+            localExportZipFile.delete();
+            localExportXmlFile.delete();
         }
     }
 
@@ -126,7 +130,7 @@ public class ExportJobWorker implements Runnable {
     private void uploadToGcp(File localExportFile) throws FileNotFoundException {
         logger.info("Uploading to gcp: {} in folder: {}", exportJob.getFileName(), exportJob.getSubFolder());
         FileInputStream fileInputStream = new FileInputStream(localExportFile);
-        //blobStoreService.upload(exportJob.getSubFolder() + "/" + exportJob.getFileName(), fileInputStream);
+        blobStoreService.upload(exportJob.getSubFolder() + "/" + exportJob.getFileName(), fileInputStream);
     }
 
     private void exportToLocalZipFile(File localZipFile, File localExportZipFile) throws IOException, InterruptedException, JAXBException, XMLStreamException, SAXException {

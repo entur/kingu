@@ -22,6 +22,7 @@ import org.entur.kingu.exporter.async.ExportJobWorker;
 import org.entur.kingu.model.job.ExportJob;
 import org.entur.kingu.model.job.JobStatus;
 import org.entur.kingu.netex.validation.NetexXmlReferenceValidator;
+import org.entur.kingu.service.BlobStoreService;
 import org.entur.kingu.time.ExportTimeZone;
 
 import org.slf4j.Logger;
@@ -64,16 +65,22 @@ public class AsyncPublicationDeliveryExporter {
 
     private final CamelContext camelContext;
 
+    private final BlobStoreService blobStoreService;
+
 
     @Autowired
     public AsyncPublicationDeliveryExporter(@Qualifier("asyncStreamingPublicationDelivery") StreamingPublicationDelivery streamingPublicationDelivery,
-                                            NetexXmlReferenceValidator netexXmlReferenceValidator, ExportTimeZone exportTimeZone,
-                                            @Value("${async.export.path:/deployments/data/}") String localExportPath, CamelContext camelContext) {
+                                            NetexXmlReferenceValidator netexXmlReferenceValidator,
+                                            ExportTimeZone exportTimeZone,
+                                            @Value("${async.export.path:/deployments/data/}") String localExportPath,
+                                            CamelContext camelContext,
+                                            BlobStoreService blobStoreService) {
         this.streamingPublicationDelivery = streamingPublicationDelivery;
         this.netexXmlReferenceValidator = netexXmlReferenceValidator;
         this.exportTimeZone = exportTimeZone;
         this.localExportPath = localExportPath;
         this.camelContext = camelContext;
+        this.blobStoreService = blobStoreService;
 
 
         File exportFolder = new File(localExportPath);
@@ -106,7 +113,7 @@ public class AsyncPublicationDeliveryExporter {
         String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getStarted());
         exportJob.setFileName(fileNameWithoutExtention + ".zip");
 
-        ExportJobWorker exportJobWorker = new ExportJobWorker(exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, netexXmlReferenceValidator,camelContext);
+        ExportJobWorker exportJobWorker = new ExportJobWorker(blobStoreService,exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, netexXmlReferenceValidator,camelContext);
         exportService.submit(exportJobWorker);
         logger.info("Returning started export job {}", exportJob);
         setJobUrl(exportJob);

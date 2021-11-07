@@ -2,7 +2,7 @@ package org.entur.kingu.route.export;
 
 import org.apache.camel.LoggingLevel;
 import org.entur.kingu.route.BaseRouteBuilder;
-import org.entur.kingu.service.ExportJobWork;
+import org.entur.kingu.service.ExportJobInitiator;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -19,10 +19,10 @@ public class NetexExportRoute extends BaseRouteBuilder {
 
         from("direct:tiamatExport")
                 .log(LoggingLevel.INFO,"Start tiamat export: ${body}")
-                .bean(ExportJobWork.class,"startExport")
+                .bean(ExportJobInitiator.class,"startExport")
                 .routeId("tiamat-export");
 
-
+        //TODO should be removed /move to client kakka
         from("activemq:TiamatExportQueue?selector=taskType='PROCESSED'")
                 .log(LoggingLevel.INFO, "Done processing Tiamat exports: ${body}")
                 .log(LoggingLevel.INFO,"Export location is $simple{in.header.exportLocation}")

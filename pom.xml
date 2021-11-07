@@ -21,6 +21,9 @@
 		<hibernate.version>5.4.32.Final</hibernate.version>
 		<hibernate-spatial.version>5.4.32.Final</hibernate-spatial.version>
 		<hikariCP.version>5.0.0</hikariCP.version>
+		<google-cloud-storage.version>2.2.0</google-cloud-storage.version>
+		<rutebanken-gcp-storage.version>1.0.61</rutebanken-gcp-storage.version>
+
 	</properties>
 	<dependencyManagement>
 		<dependencies>
@@ -132,6 +135,16 @@
 			<groupId>com.zaxxer</groupId>
 			<artifactId>HikariCP</artifactId>
 			<version>${hikariCP.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.google.cloud</groupId>
+			<artifactId>google-cloud-storage</artifactId>
+			<version>${google-cloud-storage.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.entur.helpers</groupId>
+			<artifactId>gcp-storage</artifactId>
+			<version>${rutebanken-gcp-storage.version}</version>
 		</dependency>
 	</dependencies>
 

@@ -14,6 +14,8 @@ import java.util.List;
 
 import static org.entur.kingu.Constants.TASK_TYPE;
 
+//TODO should be removed /move to client kakka
+
 @Service
 public class TaskGenerator {
 

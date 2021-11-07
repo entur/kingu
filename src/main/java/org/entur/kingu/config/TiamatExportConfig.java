@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
 import java.util.List;
-
+//TODO should be moved to cleint
 @PropertySource(value = "${tiamat.exports.config.path}", factory = YamlPropertySourceFactory.class)
 @ConfigurationProperties(prefix = "tiamat")
 @Configuration
