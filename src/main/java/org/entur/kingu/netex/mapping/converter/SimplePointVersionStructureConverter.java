@@ -47,7 +47,7 @@ public class SimplePointVersionStructureConverter extends BidirectionalConverter
 
     private static final int SCALE = 6;
 
-    private static CRSAuthorityFactory factory = CRS.getAuthorityFactory(true);
+    private static final CRSAuthorityFactory factory = CRS.getAuthorityFactory(true);
 
     private final GeometryFactory geometryFactory;
 

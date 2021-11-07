@@ -35,6 +35,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -128,7 +129,7 @@ public class TariffZoneRepositoryImpl implements TariffZoneRepositoryCustom {
     public Iterator<TariffZone> scrollTariffZones(Set<Long> stopPlaceDbIds) {
 
         if (stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
-            return new ArrayList<TariffZone>().iterator();
+            return Collections.emptyIterator();
         }
         return scrollTariffZones(generateTariffZoneQueryFromStopPlaceIds(stopPlaceDbIds));
     }

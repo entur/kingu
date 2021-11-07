@@ -38,7 +38,7 @@ public class GroupOfStopPlaces extends GroupOfEntities_VersionStructure {
     @CollectionTable(
             name = "group_of_stop_places_members"
     )
-    private Set<StopPlaceReference> members = new HashSet<>();
+    private final Set<StopPlaceReference> members = new HashSet<>();
     private Point centroid;
 
     public GroupOfStopPlaces(EmbeddableMultilingualString embeddableMultilingualString) {

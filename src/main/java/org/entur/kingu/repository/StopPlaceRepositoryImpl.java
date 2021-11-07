@@ -76,7 +76,7 @@ public class StopPlaceRepositoryImpl implements org.entur.kingu.repository.StopP
 
     private static final int SCROLL_FETCH_SIZE = 1000;
 
-    private static BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
+    private static final BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
 
     /**
      * Part of SQL that checks that either the stop place named as *s* or the parent named *p* is valid at the point in time.

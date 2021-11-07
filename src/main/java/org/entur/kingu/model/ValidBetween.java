@@ -63,9 +63,7 @@ public class ValidBetween {
         ValidBetween that = (ValidBetween) o;
 
         if (fromDate != null ? !fromDate.equals(that.fromDate) : that.fromDate != null) return false;
-        if (toDate != null ? !toDate.equals(that.toDate) : that.toDate != null) return false;
-
-        return true;
+        return toDate != null ? toDate.equals(that.toDate) : that.toDate == null;
     }
 
     @Override

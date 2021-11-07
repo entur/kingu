@@ -78,9 +78,6 @@ public class ValidPrefixList {
         if (validPrefixes.contains(prefix)) {
             return true;
         }
-        if (validPrefixes.contains(ANY_PREFIX)) {
-            return true;
-        }
-        return false;
+        return validPrefixes.contains(ANY_PREFIX);
     }
 }

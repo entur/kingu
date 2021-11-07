@@ -16,28 +16,22 @@
 package org.entur.kingu.repository;
 
 import org.apache.commons.lang3.StringUtils;
-import org.hibernate.SQLQuery;
+import org.entur.kingu.model.GroupOfStopPlaces;
+import org.entur.kingu.repository.iterator.ScrollableResultIterator;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.hibernate.internal.SessionImpl;
 import org.hibernate.query.NativeQuery;
-
-import org.entur.kingu.model.GroupOfStopPlaces;
-import org.entur.kingu.repository.iterator.ScrollableResultIterator;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class GroupOfStopPlacesRepositoryImpl implements org.entur.kingu.repository.GroupOfStopPlacesRepositoryCustom {
@@ -72,14 +66,14 @@ public class GroupOfStopPlacesRepositoryImpl implements org.entur.kingu.reposito
     public Iterator<GroupOfStopPlaces> scrollGroupOfStopPlaces(Set<Long> stopPlaceDbIds) {
 
         if (stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
-            return new ArrayList<GroupOfStopPlaces>().iterator();
+            return Collections.emptyIterator();
         }
         return scrollGroupOfStopPlaces(generateGroupOfStopPlacesQueryFromStopPlaceIds(stopPlaceDbIds));
     }
 
     private Iterator<GroupOfStopPlaces> scrollGroupOfStopPlaces(String sql) {
         Session session = entityManager.unwrap(Session.class);
-        SQLQuery sqlQuery = session.createSQLQuery(sql);
+        NativeQuery sqlQuery = session.createNativeQuery(sql);
 
         final int fetchSize = 100;
 
@@ -88,31 +82,29 @@ public class GroupOfStopPlacesRepositoryImpl implements org.entur.kingu.reposito
         sqlQuery.setFetchSize(fetchSize);
         sqlQuery.setCacheable(false);
         ScrollableResults results = sqlQuery.scroll(ScrollMode.FORWARD_ONLY);
-        ScrollableResultIterator<GroupOfStopPlaces> groupOfStopPlacesIterator = new ScrollableResultIterator<>(results, fetchSize, session);
-        return groupOfStopPlacesIterator;
+        return new ScrollableResultIterator<>(results, fetchSize, session);
     }
 
     private String generateGroupOfStopPlacesQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
-        StringBuilder sqlStringBuilder = new StringBuilder("SELECT g.* FROM " +
-                "   (SELECT gosp1.id, gosp1.netex_id " +
-                "       FROM stop_place s " +
-                "       INNER JOIN group_of_stop_places_members members ON members.ref = s.netex_id " +
-                "       INNER JOIN group_of_stop_places gosp1 ON members.group_of_stop_places_id = gosp1.id " +
-                "       WHERE s.id IN (");
 
-        sqlStringBuilder.append(StringUtils.join(stopPlaceDbIds, ','));
-
-        sqlStringBuilder.append("   ) " +
-                "      AND gosp1.version = " +
-                "       (SELECT max(gospv.version) " +
-                "           FROM group_of_stop_places gospv " +
-                "           WHERE gospv.netex_id = gosp1.netex_id) " +
-                "      GROUP BY gosp1.id, gosp1.netex_id " +
-                "  ) gosp " +
-                "JOIN group_of_stop_places g ON gosp.netex_id = g.netex_id");
-
-        String sql = sqlStringBuilder.toString();
-        logger.debug(sql);
+        String sql = """
+                   SELECT G.*
+                     FROM
+                        (SELECT GOSP1.ID,
+                                GOSP1.NETEX_ID
+                            FROM STOP_PLACE S
+                            INNER JOIN GROUP_OF_STOP_PLACES_MEMBERS MEMBERS ON MEMBERS.REF = S.NETEX_ID
+                            INNER JOIN GROUP_OF_STOP_PLACES GOSP1 ON MEMBERS.GROUP_OF_STOP_PLACES_ID = GOSP1.ID
+                            WHERE S.ID IN ($stopPlaceIds)
+                     AND GOSP1.VERSION =
+                        (SELECT MAX(GOSPV.VERSION)
+                            FROM GROUP_OF_STOP_PLACES GOSPV
+                            WHERE GOSPV.NETEX_ID = GOSP1.NETEX_ID)
+                     GROUP BY GOSP1.ID,
+                        GOSP1.NETEX_ID ) GOSP
+                     JOIN GROUP_OF_STOP_PLACES G ON GOSP.NETEX_ID = G.NETEX_ID
+                """.replace("$stopPlaceIds",StringUtils.join(stopPlaceDbIds, ','));
+        logger.info(sql);
         return sql;
     }
 }

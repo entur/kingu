@@ -34,7 +34,7 @@ public class NetexIdHelper {
 
     private static final Logger logger = LoggerFactory.getLogger(NetexIdHelper.class);
 
-    private static Pattern NETEX_ID_PATTERN = Pattern.compile("\\w{3}:\\w{3,}:\\w+");
+    private static final Pattern NETEX_ID_PATTERN = Pattern.compile("\\w{3}:\\w{3,}:\\w+");
 
     private final ValidPrefixList validPrefixList;
 
@@ -111,7 +111,7 @@ public class NetexIdHelper {
             }
 
             logger.debug("Extracted prefix: {}, type: {} and numeric value: {}", prefix, type, numeric);
-            return prefix +":"+type+":"+String.valueOf(numeric);
+            return prefix +":"+type+":"+ numeric;
 
         } catch (IllegalArgumentException e) {
             logger.debug("Cannot strip leading zeros from numeric ID in {}. Returning value as is. Message: {}", originalIdValue, e.getMessage());

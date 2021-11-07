@@ -22,7 +22,7 @@ import org.entur.kingu.exporter.params.SearchObject;
 
 public class TopographicPlaceSearch implements SearchObject {
 
-    private VersionValidity versionValidity;
+    private final VersionValidity versionValidity;
 
 
     private TopographicPlaceSearch(Builder builder) {

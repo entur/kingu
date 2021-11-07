@@ -30,9 +30,7 @@ public class TagPK implements Serializable {
         TagPK tagPK = (TagPK) o;
 
         if (idReference != null ? !idReference.equals(tagPK.idReference) : tagPK.idReference != null) return false;
-        if (name != null ? !name.equals(tagPK.name) : tagPK.name != null) return false;
-
-        return true;
+        return name != null ? name.equals(tagPK.name) : tagPK.name == null;
     }
 
     @Override

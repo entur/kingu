@@ -34,9 +34,9 @@ public class ParentTreeTopographicPlaceFetchingIterator implements Iterator<Topo
     private final Iterator<TopographicPlace> iterator;
     private final TopographicPlaceRepository topographicPlaceRepository;
 
-    private Set<String> fetchedTopographicRefs = new HashSet<>();
+    private final Set<String> fetchedTopographicRefs = new HashSet<>();
 
-    private LinkedList<TopographicPlace> parents = new LinkedList<>();
+    private final LinkedList<TopographicPlace> parents = new LinkedList<>();
 
     private TopographicPlace next;
 

@@ -113,9 +113,7 @@ public class Tag implements Serializable {
         if (created != null ? !created.equals(tag.created) : tag.created != null) return false;
         if (comment != null ? !comment.equals(tag.comment) : tag.comment != null) return false;
         if (removed != null ? !removed.equals(tag.removed) : tag.removed != null) return false;
-        if (removedBy != null ? !removedBy.equals(tag.removedBy) : tag.removedBy != null) return false;
-
-        return true;
+        return removedBy != null ? removedBy.equals(tag.removedBy) : tag.removedBy == null;
     }
 
     @Override

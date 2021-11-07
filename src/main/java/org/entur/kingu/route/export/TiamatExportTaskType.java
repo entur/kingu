@@ -17,5 +17,5 @@
 package org.entur.kingu.route.export;
 
 public enum TiamatExportTaskType {
-    PROCESS, PROCESSED;
+    PROCESS, PROCESSED
 }

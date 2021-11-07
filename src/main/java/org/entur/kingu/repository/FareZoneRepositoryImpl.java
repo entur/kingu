@@ -41,6 +41,7 @@ import javax.persistence.Query;
 import java.math.BigInteger;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -115,7 +116,7 @@ public class FareZoneRepositoryImpl implements FareZoneRepositoryCustom {
     public Iterator<FareZone> scrollFareZones(Set<Long> stopPlaceDbIds) {
 
         if (stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
-            return new ArrayList<FareZone>().iterator();
+            return Collections.emptyIterator();
         }
         return scrollFareZones(generateFareZoneQueryFromStopPlaceIds(stopPlaceDbIds));
     }

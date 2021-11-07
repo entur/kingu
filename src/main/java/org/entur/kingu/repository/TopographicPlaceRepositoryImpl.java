@@ -38,6 +38,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -105,7 +106,7 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 	public Iterator<TopographicPlace> scrollTopographicPlaces(Set<Long> stopPlaceDbIds) {
 
 		if(stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
-			return new ArrayList<TopographicPlace>().iterator();
+			return Collections.emptyIterator();
 		}
 
 		return scrollTopographicPlaces(generateTopographicPlacesQueryFromStopPlaceIds(stopPlaceDbIds));
