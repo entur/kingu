@@ -65,6 +65,8 @@ public class AsyncPublicationDeliveryExporter {
 
     private final CamelContext camelContext;
 
+    private final String outGoingNetexExport;
+
     private final BlobStoreService blobStoreService;
 
 
@@ -74,12 +76,14 @@ public class AsyncPublicationDeliveryExporter {
                                             ExportTimeZone exportTimeZone,
                                             @Value("${async.export.path:/deployments/data/}") String localExportPath,
                                             CamelContext camelContext,
+                                            @Value("${kingu.outgoing.camel.route.topic.netex.export}") String outGoingNetexExport,
                                             BlobStoreService blobStoreService) {
         this.streamingPublicationDelivery = streamingPublicationDelivery;
         this.netexXmlReferenceValidator = netexXmlReferenceValidator;
         this.exportTimeZone = exportTimeZone;
         this.localExportPath = localExportPath;
         this.camelContext = camelContext;
+        this.outGoingNetexExport = outGoingNetexExport;
         this.blobStoreService = blobStoreService;
 
 
@@ -113,7 +117,7 @@ public class AsyncPublicationDeliveryExporter {
         String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getStarted());
         exportJob.setFileName(fileNameWithoutExtention + ".zip");
 
-        ExportJobWorker exportJobWorker = new ExportJobWorker(blobStoreService,exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, netexXmlReferenceValidator,camelContext);
+        ExportJobWorker exportJobWorker = new ExportJobWorker(blobStoreService,exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, netexXmlReferenceValidator,camelContext,outGoingNetexExport);
         exportService.submit(exportJobWorker);
         logger.info("Returning started export job {}", exportJob);
         setJobUrl(exportJob);

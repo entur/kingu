@@ -64,6 +64,7 @@ public class ExportJobWorker implements Runnable {
     private final String fileNameWithoutExtension;
     private final NetexXmlReferenceValidator netexXmlReferenceValidator;
     private final CamelContext camelContext;
+    private final String outGoingNetexExport;
 
 
     public ExportJobWorker(BlobStoreService blobStoreService,
@@ -72,7 +73,8 @@ public class ExportJobWorker implements Runnable {
                            String localExportPath,
                            String fileNameWithoutExtension,
                            NetexXmlReferenceValidator netexXmlReferenceValidator,
-                           CamelContext camelContext) {
+                           CamelContext camelContext,
+                           String outGoingNetexExport) {
         this.blobStoreService =blobStoreService;
         this.exportJob = exportJob;
         this.streamingPublicationDelivery = streamingPublicationDelivery;
@@ -80,6 +82,7 @@ public class ExportJobWorker implements Runnable {
         this.fileNameWithoutExtension = fileNameWithoutExtension;
         this.netexXmlReferenceValidator = netexXmlReferenceValidator;
         this.camelContext =camelContext;
+        this.outGoingNetexExport = outGoingNetexExport;
     }
 
 
@@ -160,10 +163,7 @@ public class ExportJobWorker implements Runnable {
         try(ProducerTemplate template = camelContext.createProducerTemplate()){
             var url = "gs://tiamat-dev/" + exportJob.getSubFolder() + "/" + exportJob.getFileName();
             var body = exportJob.getExportParams().toString();
-            HashMap<String, Object> headers = new HashMap<>();
-            headers.put(TASK_TYPE,TiamatExportTaskType.PROCESSED.toString());
-            headers.put(EXPORT_LOCATION, url);
-            template.sendBodyAndHeaders("activemq:TiamatExportQueue",body,headers);
+            template.sendBodyAndHeader(outGoingNetexExport,body,EXPORT_LOCATION,url);
         } catch (IOException e) {
             e.printStackTrace();
         }
