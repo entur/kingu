@@ -161,7 +161,7 @@ public class ExportJobWorker implements Runnable {
     private void sendJMS(ExportJob exportJob) {
         //todo dynamic bucket location
         try(ProducerTemplate template = camelContext.createProducerTemplate()){
-            var url = "gs://tiamat-dev/" + exportJob.getSubFolder() + "/" + exportJob.getFileName();
+            var url = exportJob.getSubFolder() + "/" + exportJob.getFileName();
             var body = exportJob.getExportParams().toString();
             template.sendBodyAndHeader(outGoingNetexExport,body,EXPORT_LOCATION,url);
         } catch (IOException e) {
