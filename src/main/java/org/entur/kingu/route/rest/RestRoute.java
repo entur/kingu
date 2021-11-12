@@ -38,9 +38,7 @@ public class RestRoute extends RouteBuilder {
                 .removeHeaders("CamelHttp*")
                 .removeHeaders("Authorization")
                 .log(LoggingLevel.INFO, "Starting Tiamat exports from rest")
-                .process(e -> {
-                    taskGenerator.addExportTasks(e);
-                })
+                    .process(e -> taskGenerator.addExportTasks(e))
                 .setBody(simple("done"))
                 .routeId("admin-tiamat-publish-export-full")
                 .endRest();

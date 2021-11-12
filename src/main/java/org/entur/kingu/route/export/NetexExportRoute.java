@@ -31,9 +31,14 @@ public class NetexExportRoute extends BaseRouteBuilder {
                 .routeId("tiamat-export");
 
         //TODO should be removed /move to client kakka
+        /*
         from(outGoingNetexExport)
                 .log(LoggingLevel.INFO, "Done processing Tiamat exports: ${body}")
                 .log(LoggingLevel.INFO,"Export location is $simple{in.header.exportLocation}")
                 .routeId("from-tiamat-export-queue-processed");
+
+         */
     }
+
+
 }
