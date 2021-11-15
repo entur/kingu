@@ -26,6 +26,7 @@ import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 
 public class NetexReferenceRemovingIterator implements Iterator<StopPlace> {
@@ -97,7 +98,7 @@ public class NetexReferenceRemovingIterator implements Iterator<StopPlace> {
                 final List<TariffZoneRef> tariffZoneRefs = stopPlace.getTariffZones().getTariffZoneRef().stream()
                         .filter(tariffZoneRef -> !tariffZoneRef.getRef().contains("FareZone"))
                         .map(tariffZoneRef -> new ObjectFactory().createTariffZoneRef().withRef(tariffZoneRef.getRef()).withVersion(tariffZoneRef.getVersion()))
-                        .toList();
+                        .collect(Collectors.toList());
                 stopPlace.withTariffZones(new TariffZoneRefs_RelStructure().withTariffZoneRef(tariffZoneRefs));
 
         }
