@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import static org.entur.kingu.Constants.EXPORT_JOB_NAME;
 import static org.entur.kingu.Constants.EXPORT_LOCATION;
 import static org.entur.kingu.Constants.TASK_TYPE;
 
@@ -159,11 +160,14 @@ public class ExportJobWorker implements Runnable {
     }
 
     private void sendJMS(ExportJob exportJob) {
-        //todo dynamic bucket location
         try(ProducerTemplate template = camelContext.createProducerTemplate()){
             var url = exportJob.getSubFolder() + "/" + exportJob.getFileName();
             var body = exportJob.getExportParams().toString();
-            template.sendBodyAndHeader(outGoingNetexExport,body,EXPORT_LOCATION,url);
+            logger.info("send to JMS: {}", body);
+            HashMap<String, Object> headers = new HashMap<>();
+            headers.put(EXPORT_JOB_NAME,exportJob.getExportParams().getName());
+            headers.put(EXPORT_LOCATION, url);
+            template.sendBodyAndHeaders(outGoingNetexExport,body,headers);
         } catch (IOException e) {
             e.printStackTrace();
         }
