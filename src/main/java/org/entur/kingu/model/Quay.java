@@ -41,10 +41,6 @@ public class Quay extends org.entur.kingu.model.StopPlaceSpace_VersionStructure 
     private final List<BoardingPosition> boardingPositions = new ArrayList<>();
     protected String publicCode;
 
-    /**
-     * TODO: reconsider data type for compass bearing.
-     * https://rutebanken.atlassian.net/browse/NRP-895
-     */
     protected Float compassBearing;
 
     public Quay(org.entur.kingu.model.EmbeddableMultilingualString name) {

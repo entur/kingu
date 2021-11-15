@@ -23,9 +23,6 @@ import javax.persistence.Transient;
 import java.math.BigInteger;
 
 
-/**
- * TODO: Remove "Assignment_VersionStructure_": Flatten model.
- */
 @MappedSuperclass
 public abstract class Assignment_VersionStructure_
         extends org.entur.kingu.model.DataManagedObjectStructure {

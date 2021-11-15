@@ -25,7 +25,6 @@ import org.entur.kingu.model.job.JobStatus;
 import org.entur.kingu.netex.validation.NetexXmlReferenceValidator;
 
 
-import org.entur.kingu.route.export.TiamatExportTaskType;
 import org.entur.kingu.service.BlobStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,7 +47,7 @@ import java.util.zip.ZipOutputStream;
 
 import static org.entur.kingu.Constants.EXPORT_JOB_NAME;
 import static org.entur.kingu.Constants.EXPORT_LOCATION;
-import static org.entur.kingu.Constants.TASK_TYPE;
+
 
 public class ExportJobWorker implements Runnable {
 
