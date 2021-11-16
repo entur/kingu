@@ -1,0 +1,8 @@
+gcp_project = "entur-ror-dev"
+cloudsql_project = "entur-ror-dev"
+storage_project = "entur-ror-dev"
+kube_namespace = "dev"
+bucket_instance_suffix = "dev"
+location = "europe-west1"
+service_account_bucket_role = "roles/storage.objectCreator"
+bucket_instance_prefix="kingu"
