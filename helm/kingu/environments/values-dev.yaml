@@ -1,0 +1,8 @@
+sql:
+  instance: entur-ror-dev:europe-west1:tiamat-db-1-replica=tcp:5432
+
+configMap:
+  gcpProjectId: entur-ror-dev
+  pubSubProjectId: entur-ror-dev
+  blobstoreProjectId: entur-ror-dev
+  gcsBucketName: kingu-dev

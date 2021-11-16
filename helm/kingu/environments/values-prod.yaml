@@ -1,0 +1,8 @@
+sql:
+  instance: entur-ror-prod:europe-west1:tiamat-db-1-replica=tcp:5432
+
+configMap:
+  gcpProjectId: entur-ror-prod
+  pubSubProjectId: entur-ror-prod
+  blobstoreProjectId: entur-ror-prod
+  gcsBucketName: kingu-production
