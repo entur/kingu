@@ -1,6 +1,7 @@
 gcp_project = "entur-ror-test"
 cloudsql_project = "entur-ror-test"
 storage_project = "entur-ror-test"
+gcp_pubsub_project = "entur-ror-test"
 kube_namespace = "staging"
 bucket_instance_suffix = "test"
 location = "europe-west1"
