@@ -119,14 +119,8 @@ resource "google_pubsub_subscription" "KinguExportOutgoingQueue" {
   labels = var.labels
 }
 # add service account as member to pubsub service in the resources project
-resource "google_project_iam_member" "pubsub_project_iam_member_subscriber" {
+resource "google_project_iam_member" "pubsub_member" {
   project = var.gcp_pubsub_project
-  role = "roles/pubsub.subscriber"
-  member = "serviceAccount:${google_service_account.kingu_service_account.email}"
-}
-
-resource "google_project_iam_member" "pubsub_project_iam_member_publisher" {
-  project = var.gcp_pubsub_project
-  role = "roles/pubsub.publisher"
+  role    = var.service_account_pubsub_role
   member = "serviceAccount:${google_service_account.kingu_service_account.email}"
 }
