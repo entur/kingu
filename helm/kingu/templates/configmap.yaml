@@ -49,7 +49,7 @@ data:
 
     #pubsub
     blobstore.gcs.project.id={{ .Values.configMap.blobstoreProjectId }}
-    blobstore.gcs.bucket.name={{ .Values.configMap.bucketName }}
+    blobstore.gcs.bucket.name={{ .Values.configMap.gcsBucketName }}
     blobstore.gcs.blob.path=export
     blobstore.gcs.credential.path=/etc/kingu/credentials.json
 
