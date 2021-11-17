@@ -19,7 +19,7 @@ resource "google_storage_bucket" "storage_bucket" {
   location           = var.location
   project            = var.storage_project
   storage_class      = var.storage_class
-  uniform_bucket_level_access = var.uniform_bucket_level_access
+  bucket_policy_only = var.bucket_policy_only
   labels             = var.labels
 
   versioning {
