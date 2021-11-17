@@ -104,9 +104,6 @@ resource "google_pubsub_subscription" "KinguExportIncomingQueue" {
   topic = google_pubsub_topic.KinguExportIncomingQueue.name
   project = var.gcp_pubsub_project
   labels = var.labels
-  retry_policy {
-    minimum_backoff = "10s"
-  }
 }
 
 resource "google_pubsub_topic" "KinguExportOutgoingQueue" {
@@ -120,9 +117,6 @@ resource "google_pubsub_subscription" "KinguExportOutgoingQueue" {
   topic = google_pubsub_topic.KinguExportOutgoingQueue.name
   project = var.gcp_pubsub_project
   labels = var.labels
-  retry_policy {
-    minimum_backoff = "10s"
-  }
 }
 # add service account as member to pubsub service in the resources project
 resource "google_project_iam_member" "pubsub_project_iam_member_subscriber" {
