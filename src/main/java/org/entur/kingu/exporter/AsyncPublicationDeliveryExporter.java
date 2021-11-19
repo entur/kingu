@@ -51,8 +51,7 @@ public class AsyncPublicationDeliveryExporter {
     private static final ExecutorService exportService = Executors.newFixedThreadPool(1, new ThreadFactoryBuilder()
             .setNameFormat("exporter-%d").build());
 
-    private static final DateTimeFormatter DATE_TIME_FORMATTER =  DateTimeFormatter.ofPattern("YYYYMMdd-HHmmssSSS");
-    private static final DateTimeFormatter DATE_TIME_FORMATTER2 = DateTimeFormatter.ofPattern("YYYYMMddHHmmssSSS");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("YYYYMMddHHmmssSSSS");
 
 
     private final StreamingPublicationDelivery streamingPublicationDelivery;
@@ -108,24 +107,31 @@ public class AsyncPublicationDeliveryExporter {
 
         ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
         final Instant now = Instant.now();
-        exportJob.setId(Long.valueOf(now.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER2)));
+        exportJob.setId(Long.valueOf(now.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER)));
         exportJob.setStarted(now);
         exportJob.setExportParams(exportParams);
         exportJob.setSubFolder(generateSubFolderName());
 
 
-        String fileNameWithoutExtention = createFileNameWithoutExtention(exportJob.getStarted());
-        exportJob.setFileName(fileNameWithoutExtention + ".zip");
+        String fileNameWithoutExtension = createFileNameWithoutExtension(exportJob.getStarted(),exportParams.getName());
+        exportJob.setFileName(fileNameWithoutExtension + ".zip");
 
-        ExportJobWorker exportJobWorker = new ExportJobWorker(blobStoreService,exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtention, netexXmlReferenceValidator,camelContext,outGoingNetexExport);
+        ExportJobWorker exportJobWorker = new ExportJobWorker(blobStoreService,exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtension, netexXmlReferenceValidator,camelContext,outGoingNetexExport);
         exportService.submit(exportJobWorker);
         logger.info("Returning started export job {}", exportJob);
         setJobUrl(exportJob);
         return exportJob;
     }
 
-    public String createFileNameWithoutExtention(Instant started) {
-        return "tiamat-export-" + started.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER);
+    public String createFileNameWithoutExtension(Instant started, String name) {
+        final String fileName;
+        var fileNameSuffix = started.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER);
+        if (name != null && !name.isEmpty()) {
+            fileName = "tiamat-export-"+name+ "-" + fileNameSuffix;
+        } else {
+            fileName = "tiamat-export-" + fileNameSuffix;
+        }
+        return fileName;
     }
 
 
