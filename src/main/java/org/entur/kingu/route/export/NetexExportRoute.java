@@ -1,6 +1,7 @@
 package org.entur.kingu.route.export;
 
 import org.apache.camel.LoggingLevel;
+import org.apache.camel.processor.ThrottlerRejectedExecutionException;
 import org.entur.kingu.route.BaseRouteBuilder;
 import org.entur.kingu.service.ExportJobInitiator;
 import org.springframework.beans.factory.annotation.Value;
@@ -18,6 +19,9 @@ public class NetexExportRoute extends BaseRouteBuilder {
     @Override
     public void configure() throws Exception {
         super.configure();
+
+        onException(ThrottlerRejectedExecutionException.class).handled(true)
+                .log("There are more than one inComing messages");
 
         from(inComingNetexExport)
                 .throttle(1).rejectExecution(true)
