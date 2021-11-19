@@ -24,7 +24,7 @@ data:
     spring.jpa.properties.hibernate.jdbc.batch_size=20
     spring.jpa.properties.hibernate.default_batch_fetch_size=16
     spring.datasource.hikari.maximumPoolSize=40
-    spring.datasource.hikari.leakDetectionThreshold=30000
+    spring.datasource.hikari.leakDetectionThreshold=60000
 
 
     spring.jpa.hibernate.ddl-auto=none
