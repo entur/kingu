@@ -21,10 +21,12 @@ import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.StopPlace;
 import org.rutebanken.netex.model.TariffZoneRef;
 import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
+import org.rutebanken.netex.model.ValidBetween;
 
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -33,17 +35,23 @@ public class NetexReferenceRemovingIterator implements Iterator<StopPlace> {
 
     public final Iterator<StopPlace> iterator;
 
+    Map<String,String> currentStops;
+
     private final Consumer<StopPlace> tariffZoneVersionRemover;
 
     private final Consumer<StopPlace> topographicPlaceVersionRemover;
 
     private final Consumer<StopPlace> fareZoneRefRemover;
 
+    private final Consumer<StopPlace> stopPlaceValidityRemover;
+
     private final Consumer<StopPlace> doNothingConsumer = s -> {
     };
 
-    public NetexReferenceRemovingIterator(Iterator<StopPlace> iterator, ExportParams exportParams) {
+    public NetexReferenceRemovingIterator(Iterator<StopPlace> iterator, ExportParams exportParams,  Map<String,String> currentStops) {
         this.iterator = iterator;
+        this.currentStops = currentStops;
+        this.stopPlaceValidityRemover = this::removeStoPlaceValidity;
 
         if (exportParams.getTariffZoneExportMode().equals(ExportMode.NONE)) {
             tariffZoneVersionRemover = this::removeTariffZoneRefsVersion;
@@ -77,8 +85,19 @@ public class NetexReferenceRemovingIterator implements Iterator<StopPlace> {
             tariffZoneVersionRemover.accept(next);
             topographicPlaceVersionRemover.accept(next);
             fareZoneRefRemover.accept(next);
+            stopPlaceValidityRemover.accept(next);
         }
         return next;
+    }
+
+    private void removeStoPlaceValidity(StopPlace stopPlace) {
+
+        final List<ValidBetween> validBetweenList = stopPlace.getValidBetween();
+
+        if (validBetweenList != null && currentStops.containsKey(stopPlace.getId()) && stopPlace.getVersion().equals(currentStops.get(stopPlace.getId()))) {
+            validBetweenList.forEach(validBetween -> validBetween.setToDate(null));
+        }
+
     }
 
     private void removeTariffZoneRefsVersion(StopPlace stopPlace) {

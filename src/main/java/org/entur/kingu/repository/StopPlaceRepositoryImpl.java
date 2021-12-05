@@ -504,6 +504,40 @@ public class StopPlaceRepositoryImpl implements org.entur.kingu.repository.StopP
         }
     }
 
+    @Override
+    public Map<String, String> findAllCurrentNetexIdsAndVersion() {
+
+        String sql = "SELECT SP.NETEX_ID AS stop_place_id,cast(SP.VERSION as varchar) AS version " +
+                "FROM STOP_PLACE SP " +
+                "WHERE SP.VERSION =" +
+                "(SELECT MAX(SPV.VERSION) " +
+                "FROM STOP_PLACE SPV " +
+                "WHERE SPV.NETEX_ID = SP.NETEX_ID AND TO_DATE IS NULL) " +
+                "AND SP.PARENT_SITE_REF IS NULL";
+
+        Query query = entityManager.createNativeQuery(sql);
+
+        try {
+            @SuppressWarnings("unchecked")
+            List<String[]> results = query.getResultList();
+            if (results.isEmpty()) {
+                return Collections.emptyMap();
+            } else {
+                Map<String, String> result = new HashMap<>();
+                for (Object[] strings : results) {
+                    String stopPlaceId = (String) strings[0];
+                    String version = (String) strings[1];
+                    result.put(stopPlaceId,version);
+                }
+                return result;
+            }
+        } catch (NoResultException noResultException) {
+            return null;
+        }
+
+
+    }
+
 
     @Override
     public Iterator<StopPlace> scrollStopPlaces() {

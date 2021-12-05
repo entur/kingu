@@ -81,4 +81,6 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
     Map<String, Set<String>> listStopPlaceIdsAndQuayIds(Instant validFrom, Instant validTo);
 
     int deleteStopPlaceTariffZoneRefs();
+
+    Map<String, String> findAllCurrentNetexIdsAndVersion();
 }

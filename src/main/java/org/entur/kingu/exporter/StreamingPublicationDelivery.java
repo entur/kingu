@@ -94,6 +94,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
@@ -358,13 +359,16 @@ public class StreamingPublicationDelivery {
 
             StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
 
+            final Map<String, String> allCurrentNetexIdsAndVersion = stopPlaceRepository.findAllCurrentNetexIdsAndVersion();
+
+            logger.info("current stop places netex ids size: {}",allCurrentNetexIdsAndVersion.size());
 
 
             // Use Listening iterator to collect stop place IDs.
             ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(allStopPlaces.iterator(), stopPlaceRepository);
             NetexMappingIterator<org.entur.kingu.model.StopPlace, StopPlace> netexMappingIterator = new NetexMappingIterator<>(netexMapper, parentStopFetchingIterator, StopPlace.class, mappedStopPlaceCount);
 
-            List<StopPlace> stopPlaces = new NetexMappingIteratorList<>(() -> new NetexReferenceRemovingIterator(netexMappingIterator, exportParams));
+            List<StopPlace> stopPlaces = new NetexMappingIteratorList<>(() -> new NetexReferenceRemovingIterator(netexMappingIterator, exportParams, allCurrentNetexIdsAndVersion));
 
             setField(StopPlacesInFrame_RelStructure.class, "stopPlace", stopPlacesInFrame_relStructure, stopPlaces);
             netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
