@@ -359,6 +359,8 @@ public class StreamingPublicationDelivery {
 
             StopPlacesInFrame_RelStructure stopPlacesInFrame_relStructure = new StopPlacesInFrame_RelStructure();
 
+            // a map netex_ids and version of all current stop places at start of export
+
             final Map<String, String> allCurrentNetexIdsAndVersion = stopPlaceRepository.findAllCurrentNetexIdsAndVersion();
 
             logger.info("current stop places netex ids size: {}",allCurrentNetexIdsAndVersion.size());

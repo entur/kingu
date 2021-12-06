@@ -90,6 +90,11 @@ public class NetexReferenceRemovingIterator implements Iterator<StopPlace> {
         return next;
     }
 
+    /*
+     *  This method makes sure that current  stop place is valid ,if a stop place has been changed/updated
+     *  while export is in progress.
+    */
+
     private void removeStoPlaceValidity(StopPlace stopPlace) {
 
         final List<ValidBetween> validBetweenList = stopPlace.getValidBetween();
