@@ -56,7 +56,7 @@ spec:
           env:
             - name: JAVA_OPTIONS
               value: -server -Xss{{ .Values.resources.xss }} -Xmx{{ .Values.resources.xmx }} -Dspring.config.location=/etc/application-config/application.properties
-                     -Dfile.encoding=UTF-8
+                     -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED
             - name: TZ
               value: Europe/Oslo
             - name: SPRING_DATASOURCE_PASSWORD

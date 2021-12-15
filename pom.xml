@@ -13,9 +13,10 @@
 	<name>kingu</name>
 	<description>NSR Netex Exporter</description>
 	<properties>
-		<java.version>11</java.version>
-		<maven.compiler.target>11</maven.compiler.target>
-		<maven.compiler.source>11</maven.compiler.source>
+		<enforcer.skip>true</enforcer.skip>
+		<java.version>17</java.version>
+		<maven.compiler.target>17</maven.compiler.target>
+		<maven.compiler.source>17</maven.compiler.source>
 		<entur.google.pubsub.emulator.download.skip>false</entur.google.pubsub.emulator.download.skip>
 		<camel.version>3.11.2</camel.version>
 		<entur.helpers.version>1.0.60</entur.helpers.version>
