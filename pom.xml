@@ -42,8 +42,6 @@
 		</dependencies>
 	</dependencyManagement>
 	<dependencies>
-		<!-- Entur -->
-
 		<dependency>
 			<groupId>org.entur.helpers</groupId>
 			<artifactId>camel3-entur-google-pubsub</artifactId>
