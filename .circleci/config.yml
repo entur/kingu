@@ -45,7 +45,7 @@ jobs:
       - restore_cache:
           key: dep-cache-1512211147
       - run: git clone git@github.com:entur/circleci-toolbox-image-java11.git circleci-toolbox
-      - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:go-offline -s /tools/m2/settings.xml
+      - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:go-offline -s ./circleci-toolbox/tools/m2/settings.xml
       - save_cache:
           paths:
             - ~/.m2
