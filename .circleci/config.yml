@@ -43,7 +43,7 @@ jobs:
     steps:
       - checkout
       - restore_cache:
-          key: dep-cache-1512211147
+          key: dep-cache-{{ checksum "pom.xml" }}
       - run: git clone git@github.com:entur/circleci-toolbox-image-java11.git circleci-toolbox
       - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:go-offline -s ./circleci-toolbox/tools/m2/settings.xml
       - save_cache:
@@ -51,7 +51,7 @@ jobs:
             - ~/.m2
           key: dep-cache-{{ checksum "pom.xml" }}
       # Cannot use -o because of snapshot dependencies.
-      - run: mvn verify -s /tools/m2/settings.xml
+      - run: mvn verify -s ./circleci-toolbox/tools/m2/settings.xml
       - run:
           name: Save test results
           command: |
@@ -70,6 +70,7 @@ jobs:
           root: ~/project
           paths:
             - target
+            - circleci-toolbox
             - Dockerfile
             - .circleci
             - ./version
