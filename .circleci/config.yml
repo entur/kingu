@@ -4,7 +4,7 @@ aliases:
     name: GCP Authenticate
     command: |
       echo 'export GCLOUD_SERVICE_KEY="$GCLOUD_SERVICE_KEY"' >> $BASH_ENV
-      /tools/gcp_authenticate.sh
+      ./circleci-toolbox/tools/gcp_authenticate.sh
   - &docker-login
     name: Docker login
     command: |
@@ -37,23 +37,21 @@ aliases:
 jobs:
   build:
     docker:
-      - image: eu.gcr.io/entur-system-1287/circleci-toolbox-image-java11
-        auth:
-          username: _json_key
-          password: $DOCKER_PASSWORD
+      - image:  cimg/openjdk:17.0.1
     environment:
       MAVEN_OPTS: -Xmx3G
     steps:
       - checkout
       - restore_cache:
           key: dep-cache-{{ checksum "pom.xml" }}
-      - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:go-offline -s /tools/m2/settings.xml
+      - run: git clone git@github.com:entur/circleci-toolbox-image-java11.git circleci-toolbox
+      - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:go-offline -s ./circleci-toolbox/tools/m2/settings.xml
       - save_cache:
           paths:
             - ~/.m2
           key: dep-cache-{{ checksum "pom.xml" }}
       # Cannot use -o because of snapshot dependencies.
-      - run: mvn verify -s /tools/m2/settings.xml
+      - run: mvn verify -s ./circleci-toolbox/tools/m2/settings.xml
       - run:
           name: Save test results
           command: |
@@ -72,15 +70,13 @@ jobs:
           root: ~/project
           paths:
             - target
+            - circleci-toolbox
             - Dockerfile
             - .circleci
             - ./version
   deploy-docker:
     docker:
-      - image: eu.gcr.io/entur-system-1287/circleci-toolbox-image-java11
-        auth:
-          username: _json_key
-          password: $DOCKER_PASSWORD
+      - image:  cimg/openjdk:17.0.1
     environment:
       DEBIAN_FRONTEND: "noninteractive"
     steps:
