@@ -19,8 +19,7 @@ import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.camel.CamelContext;
 import org.entur.kingu.config.ExportParams;
 import org.entur.kingu.exporter.async.ExportJobWorker;
-import org.entur.kingu.model.job.ExportJob;
-import org.entur.kingu.model.job.JobStatus;
+
 import org.entur.kingu.netex.validation.NetexXmlReferenceValidator;
 import org.entur.kingu.service.BlobStoreService;
 import org.entur.kingu.time.ExportTimeZone;
@@ -34,10 +33,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -50,8 +45,6 @@ public class AsyncPublicationDeliveryExporter {
 
     private static final ExecutorService exportService = Executors.newFixedThreadPool(1, new ThreadFactoryBuilder()
             .setNameFormat("exporter-%d").build());
-
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("YYYYMMddHHmmssSSSS");
 
 
     private final StreamingPublicationDelivery streamingPublicationDelivery;
@@ -101,48 +94,18 @@ public class AsyncPublicationDeliveryExporter {
     /**
      * Start export job with upload to google cloud storage
      * @param exportParams search params for stops
-     * @return export job with information about the started process
      */
-    public ExportJob startExportJob(ExportParams exportParams,String breadcrumbId) {
-
-        ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
-        final Instant now = Instant.now();
-        exportJob.setId(Long.valueOf(now.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER)));
-        exportJob.setStarted(now);
-        exportJob.setExportParams(exportParams);
-        exportJob.setSubFolder(generateSubFolderName());
-
-
-        String fileNameWithoutExtension = createFileNameWithoutExtension(exportJob.getStarted(),exportParams.getName());
-        exportJob.setFileName(fileNameWithoutExtension + ".zip");
-
-        ExportJobWorker exportJobWorker = new ExportJobWorker(blobStoreService,exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtension, netexXmlReferenceValidator,camelContext,outGoingNetexExport,breadcrumbId);
+    public void startExportJob(ExportParams exportParams,String breadcrumbId) {
+        ExportJobWorker exportJobWorker = new ExportJobWorker(blobStoreService,
+                exportParams,
+                exportTimeZone,
+                streamingPublicationDelivery,
+                localExportPath,
+                netexXmlReferenceValidator,
+                camelContext,
+                outGoingNetexExport,
+                breadcrumbId);
         exportService.submit(exportJobWorker);
-        logger.info("Returning started export job {}", exportJob);
-        setJobUrl(exportJob);
-        return exportJob;
     }
 
-    public String createFileNameWithoutExtension(Instant started, String name) {
-        final String fileName;
-        var fileNameSuffix = started.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER);
-        if (name != null && !name.isEmpty()) {
-            fileName = "tiamat-export-"+name+ "-" + fileNameSuffix;
-        } else {
-            fileName = "tiamat-export-" + fileNameSuffix;
-        }
-        return fileName;
-    }
-
-
-    private ExportJob setJobUrl(ExportJob exportJobWithId) {
-        exportJobWithId.setJobUrl("export" + "/" + exportJobWithId.getId());
-        return exportJobWithId;
-    }
-
-    private String generateSubFolderName() {
-        LocalDateTime localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
-        String gcpSubfolder = localDateTime.getYear() + "-" + String.format("%02d", localDateTime.getMonthValue());
-        return gcpSubfolder;
-    }
 }

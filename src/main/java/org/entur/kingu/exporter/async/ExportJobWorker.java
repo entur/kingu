@@ -19,6 +19,7 @@ package org.entur.kingu.exporter.async;
 import com.google.common.io.ByteStreams;
 import org.apache.camel.CamelContext;
 import org.apache.camel.ProducerTemplate;
+import org.entur.kingu.config.ExportParams;
 import org.entur.kingu.exporter.StreamingPublicationDelivery;
 import org.entur.kingu.model.job.ExportJob;
 import org.entur.kingu.model.job.JobStatus;
@@ -26,6 +27,7 @@ import org.entur.kingu.netex.validation.NetexXmlReferenceValidator;
 
 
 import org.entur.kingu.service.BlobStoreService;
+import org.entur.kingu.time.ExportTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -41,6 +43,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 
 import java.util.zip.ZipEntry;
@@ -53,16 +58,17 @@ import static org.entur.kingu.Constants.EXPORT_LOCATION;
 public class ExportJobWorker implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ExportJobWorker.class);
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("YYYYMMddHHmmssSSSS");
 
     /**
      * Ignore paging for async export, to not let the default value interfer.
      */
     public static final boolean IGNORE_PAGING = true;
     private final BlobStoreService blobStoreService;
-    private final ExportJob exportJob;
+    private final ExportParams exportParams;
+    private final ExportTimeZone exportTimeZone;
     private final StreamingPublicationDelivery streamingPublicationDelivery;
     private final String localExportPath;
-    private final String fileNameWithoutExtension;
     private final NetexXmlReferenceValidator netexXmlReferenceValidator;
     private final CamelContext camelContext;
     private final String outGoingNetexExport;
@@ -70,19 +76,19 @@ public class ExportJobWorker implements Runnable {
 
 
     public ExportJobWorker(BlobStoreService blobStoreService,
-                           ExportJob exportJob,
+                           ExportParams exportParams,
+                           ExportTimeZone exportTimeZone,
                            StreamingPublicationDelivery streamingPublicationDelivery,
                            String localExportPath,
-                           String fileNameWithoutExtension,
                            NetexXmlReferenceValidator netexXmlReferenceValidator,
                            CamelContext camelContext,
                            String outGoingNetexExport,
                            String breadcrumbId) {
         this.blobStoreService =blobStoreService;
-        this.exportJob = exportJob;
+        this.exportParams = exportParams;
+        this.exportTimeZone = exportTimeZone;
         this.streamingPublicationDelivery = streamingPublicationDelivery;
         this.localExportPath = localExportPath;
-        this.fileNameWithoutExtension = fileNameWithoutExtension;
         this.netexXmlReferenceValidator = netexXmlReferenceValidator;
         this.camelContext =camelContext;
         this.outGoingNetexExport = outGoingNetexExport;
@@ -92,20 +98,22 @@ public class ExportJobWorker implements Runnable {
 
     public void run() {
         MDC.put("camel.breadcrumbId",breadcrumbId );
+        final ExportJob exportJob = createExportJob();
         logger.info("Started export job: {}", exportJob);
         final File localExportZipFile = new File(localExportPath + File.separator + exportJob.getFileName());
+        var fileNameWithoutExtension= createFileNameWithoutExtension(exportJob.getStarted(),exportParams.getName());
         File localExportXmlFile = new File(localExportPath + File.separator + fileNameWithoutExtension + ".xml");
         try {
 
-            exportToLocalXmlFile(localExportXmlFile);
+            exportToLocalXmlFile(exportJob,localExportXmlFile);
 
             netexXmlReferenceValidator.validateNetexReferences(localExportXmlFile);
 
             localExportZipFile.createNewFile();
 
-            exportToLocalZipFile(localExportZipFile, localExportXmlFile);
+            exportToLocalZipFile(fileNameWithoutExtension,localExportZipFile, localExportXmlFile);
 
-            uploadToGcp(localExportZipFile);
+            uploadToGcp(exportJob,localExportZipFile);
 
             exportJob.setStatus(JobStatus.FINISHED);
             exportJob.setFinished(Instant.now());
@@ -131,19 +139,47 @@ public class ExportJobWorker implements Runnable {
         }
     }
 
-    private void exportToLocalXmlFile(File localExportXmlFile) throws InterruptedException, IOException, XMLStreamException, SAXException, JAXBException {
+    private ExportJob createExportJob() {
+        ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
+        final Instant now = Instant.now();
+        exportJob.setId(Long.valueOf(now.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER)));
+        exportJob.setStarted(now);
+        exportJob.setExportParams(exportParams);
+        exportJob.setSubFolder(generateSubFolderName());
+        String fileNameWithoutExtension = createFileNameWithoutExtension(exportJob.getStarted(),exportParams.getName());
+        exportJob.setFileName(fileNameWithoutExtension + ".zip");
+        exportJob.setJobUrl("export" + "/" + exportJob.getId());
+        return exportJob;
+    }
+    private String generateSubFolderName() {
+        LocalDateTime localDateTime = LocalDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
+        return localDateTime.getYear() + "-" + String.format("%02d", localDateTime.getMonthValue());
+    }
+
+    private String createFileNameWithoutExtension(Instant started, String name) {
+        final String fileName;
+        var fileNameSuffix = started.atZone(exportTimeZone.getDefaultTimeZoneId()).format(DATE_TIME_FORMATTER);
+        if (name != null && !name.isEmpty()) {
+            fileName = "tiamat-export-"+name+ "-" + fileNameSuffix;
+        } else {
+            fileName = "tiamat-export-" + fileNameSuffix;
+        }
+        return fileName;
+    }
+
+    private void exportToLocalXmlFile(ExportJob exportJob,File localExportXmlFile) throws InterruptedException, IOException, XMLStreamException, SAXException, JAXBException {
         logger.info("Start streaming publication delivery to local file {}", localExportXmlFile);
         FileOutputStream fileOutputStream = new FileOutputStream(localExportXmlFile);
         streamingPublicationDelivery.stream(exportJob.getExportParams(), fileOutputStream, IGNORE_PAGING);
     }
 
-    private void uploadToGcp(File localExportFile) throws FileNotFoundException {
+    private void uploadToGcp(ExportJob exportJob,File localExportFile) throws FileNotFoundException {
         logger.info("Uploading to gcp: {} in folder: {}", exportJob.getFileName(), exportJob.getSubFolder());
         FileInputStream fileInputStream = new FileInputStream(localExportFile);
         blobStoreService.upload(exportJob.getSubFolder() + "/" + exportJob.getFileName(), fileInputStream);
     }
 
-    private void exportToLocalZipFile(File localZipFile, File localExportZipFile) throws IOException, InterruptedException, JAXBException, XMLStreamException, SAXException {
+    private void exportToLocalZipFile(String fileNameWithoutExtension,File localZipFile, File localExportZipFile) throws IOException, InterruptedException, JAXBException, XMLStreamException, SAXException {
         logger.info("Adding {} to zip file: {}", localExportZipFile, localZipFile);
 
         final FileOutputStream fileOutputStream = new FileOutputStream(localZipFile);
