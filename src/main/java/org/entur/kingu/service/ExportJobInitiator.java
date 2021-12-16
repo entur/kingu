@@ -1,6 +1,7 @@
 package org.entur.kingu.service;
 
 import org.apache.camel.Exchange;
+import org.apache.camel.Header;
 import org.entur.kingu.config.ExportParams;
 import org.entur.kingu.exporter.AsyncPublicationDeliveryExporter;
 
@@ -16,13 +17,13 @@ public class ExportJobInitiator {
     @Autowired
     AsyncPublicationDeliveryExporter asyncPublicationDeliveryExporter;
 
-    public void startExport(Exchange exchange) {
+    public void startExport(Exchange exchange, @Header(value = Exchange.BREADCRUMB_ID) String breadcrumbId) {
         final String body = exchange.getIn().getBody(String.class);
         final ExportParams exportParams = ExportParams.fromString(body);
 
         logger.info("Task name: {}, and queryPram {}", exportParams.getName(), exportParams.getStopPlaceSearch().getVersionValidity());
 
-        asyncPublicationDeliveryExporter.startExportJob(exportParams);
+        asyncPublicationDeliveryExporter.startExportJob(exportParams,breadcrumbId);
 
         exchange.getIn().setBody(exportParams.toString());
 

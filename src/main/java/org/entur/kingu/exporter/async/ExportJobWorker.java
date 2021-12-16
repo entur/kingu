@@ -28,6 +28,7 @@ import org.entur.kingu.netex.validation.NetexXmlReferenceValidator;
 import org.entur.kingu.service.BlobStoreService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
@@ -65,6 +66,7 @@ public class ExportJobWorker implements Runnable {
     private final NetexXmlReferenceValidator netexXmlReferenceValidator;
     private final CamelContext camelContext;
     private final String outGoingNetexExport;
+    private final String breadcrumbId;
 
 
     public ExportJobWorker(BlobStoreService blobStoreService,
@@ -74,7 +76,8 @@ public class ExportJobWorker implements Runnable {
                            String fileNameWithoutExtension,
                            NetexXmlReferenceValidator netexXmlReferenceValidator,
                            CamelContext camelContext,
-                           String outGoingNetexExport) {
+                           String outGoingNetexExport,
+                           String breadcrumbId) {
         this.blobStoreService =blobStoreService;
         this.exportJob = exportJob;
         this.streamingPublicationDelivery = streamingPublicationDelivery;
@@ -83,10 +86,12 @@ public class ExportJobWorker implements Runnable {
         this.netexXmlReferenceValidator = netexXmlReferenceValidator;
         this.camelContext =camelContext;
         this.outGoingNetexExport = outGoingNetexExport;
+        this.breadcrumbId =breadcrumbId;
     }
 
 
     public void run() {
+        MDC.put("camel.breadcrumbId",breadcrumbId );
         logger.info("Started export job: {}", exportJob);
         final File localExportZipFile = new File(localExportPath + File.separator + exportJob.getFileName());
         File localExportXmlFile = new File(localExportPath + File.separator + fileNameWithoutExtension + ".xml");
@@ -121,6 +126,8 @@ public class ExportJobWorker implements Runnable {
             logger.info("Removing local files: {},{}", localExportZipFile, localExportXmlFile);
             localExportZipFile.delete();
             localExportXmlFile.delete();
+            MDC.remove("camel.breadcrumbId");
+
         }
     }
 

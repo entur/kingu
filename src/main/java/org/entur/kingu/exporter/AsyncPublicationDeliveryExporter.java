@@ -103,7 +103,7 @@ public class AsyncPublicationDeliveryExporter {
      * @param exportParams search params for stops
      * @return export job with information about the started process
      */
-    public ExportJob startExportJob(ExportParams exportParams) {
+    public ExportJob startExportJob(ExportParams exportParams,String breadcrumbId) {
 
         ExportJob exportJob = new ExportJob(JobStatus.PROCESSING);
         final Instant now = Instant.now();
@@ -116,7 +116,7 @@ public class AsyncPublicationDeliveryExporter {
         String fileNameWithoutExtension = createFileNameWithoutExtension(exportJob.getStarted(),exportParams.getName());
         exportJob.setFileName(fileNameWithoutExtension + ".zip");
 
-        ExportJobWorker exportJobWorker = new ExportJobWorker(blobStoreService,exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtension, netexXmlReferenceValidator,camelContext,outGoingNetexExport);
+        ExportJobWorker exportJobWorker = new ExportJobWorker(blobStoreService,exportJob, streamingPublicationDelivery, localExportPath, fileNameWithoutExtension, netexXmlReferenceValidator,camelContext,outGoingNetexExport,breadcrumbId);
         exportService.submit(exportJobWorker);
         logger.info("Returning started export job {}", exportJob);
         setJobUrl(exportJob);
