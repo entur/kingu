@@ -20,7 +20,8 @@ public class NetexExportRoute extends BaseRouteBuilder {
     public void configure() throws Exception {
         super.configure();
 
-        onException(ThrottlerRejectedExecutionException.class).continued(true)
+        onException(ThrottlerRejectedExecutionException.class)
+                .maximumRedeliveries(0)
                 .log("There are more than one inComing messages");
 
         from(inComingNetexExport)

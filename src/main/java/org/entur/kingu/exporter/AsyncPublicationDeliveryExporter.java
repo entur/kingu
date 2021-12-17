@@ -105,6 +105,7 @@ public class AsyncPublicationDeliveryExporter {
                 camelContext,
                 outGoingNetexExport,
                 breadcrumbId);
+        logger.info("Sending export job to exportService: {}", exportParams);
         exportService.submit(exportJobWorker);
     }
 
