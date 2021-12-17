@@ -25,7 +25,7 @@ public class NetexExportRoute extends BaseRouteBuilder {
                 .log("There are more than one inComing messages");
 
         from(inComingNetexExport)
-                .throttle(1).rejectExecution(true)
+                .throttle(3).rejectExecution(true)
                 .log(LoggingLevel.INFO, "Starting Tiamat exports-1: ${body}")
                 .to("direct:tiamatExport")
                 .routeId("from-tiamat-export-queue-process");
