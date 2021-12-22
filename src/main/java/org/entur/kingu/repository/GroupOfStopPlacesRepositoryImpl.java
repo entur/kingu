@@ -59,7 +59,7 @@ public class GroupOfStopPlacesRepositoryImpl implements org.entur.kingu.reposito
     public Iterator<GroupOfStopPlaces> scrollGroupOfStopPlaces() {
 
         return scrollGroupOfStopPlaces("select gosp.* from group_of_stop_places gosp where " +
-                "gosp.version = (select max(gospv.version) from group_of_stop_places gospv where gospv.netex_id = gosp.netex_id");
+                "gosp.version = (select max(gospv.version) from group_of_stop_places gospv where gospv.netex_id = gosp.netex_id)");
     }
 
     @Override
