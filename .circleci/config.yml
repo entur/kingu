@@ -48,7 +48,7 @@ jobs:
       - checkout
       - restore_cache:
           key: dep-cache-{{ checksum "pom.xml" }}
-      - run: git clone git@github.com:entur/circleci-toolbox-image-java11.git circleci-toolbox
+      - run: wget https://raw.githubusercontent.com/entur/circleci-toolbox-image-java11/master/tools/m2/settings.xml -O .circleci/settings.xml
       - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:go-offline -s ./circleci-toolbox/tools/m2/settings.xml
       - save_cache:
           paths:
