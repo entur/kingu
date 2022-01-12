@@ -19,26 +19,20 @@ import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
 import org.rutebanken.netex.model.AlternativeName;
 import org.rutebanken.netex.model.AlternativeNames_RelStructure;
+import org.rutebanken.netex.model.DataManagedObjectStructure;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.StopPlace;
-import org.entur.kingu.netex.mapping.PublicationDeliveryHelper;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 
 public class StopPlaceMapper extends CustomMapper<StopPlace, org.entur.kingu.model.StopPlace> {
 
     public static final String IS_PARENT_STOP_PLACE = "IS_PARENT_STOP_PLACE";
-
-    private final PublicationDeliveryHelper publicationDeliveryHelper;
-
-    @Autowired
-    public StopPlaceMapper(PublicationDeliveryHelper publicationDeliveryHelper) {
-        this.publicationDeliveryHelper = publicationDeliveryHelper;
-    }
 
     @Override
     public void mapAtoB(StopPlace netexStopPlace, org.entur.kingu.model.StopPlace stopPlace, MappingContext context) {
@@ -74,7 +68,7 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.entur.kingu.mod
             }
         }
 
-        String isParentStopPlaceStringValue = publicationDeliveryHelper.getValueByKey(netexStopPlace, IS_PARENT_STOP_PLACE);
+        String isParentStopPlaceStringValue = getValueByKey(netexStopPlace, IS_PARENT_STOP_PLACE);
         if(isParentStopPlaceStringValue != null) {
             if(isParentStopPlaceStringValue.equalsIgnoreCase("true")) {
                 stopPlace.setParentStopPlace(true);
@@ -128,5 +122,18 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.entur.kingu.mod
                         .withKey(IS_PARENT_STOP_PLACE)
                         .withValue(String.valueOf(stopPlace.isParentStopPlace())));
 
+    }
+
+    public String getValueByKey(DataManagedObjectStructure dataManagedObject, String key) {
+
+        return Stream.of(dataManagedObject)
+                .filter(Objects::nonNull)
+                .map(object -> object.getKeyList())
+                .filter(Objects::nonNull)
+                .flatMap(keyList -> keyList.getKeyValue().stream())
+                .filter(keyValueStructure -> keyValueStructure.getKey().equals(key))
+                .map(keyValue -> keyValue.getValue())
+                .flatMap(values -> Stream.of(values))
+                .findFirst().orElse(null);
     }
 }

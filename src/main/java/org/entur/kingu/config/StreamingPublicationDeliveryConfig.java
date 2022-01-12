@@ -16,10 +16,8 @@
 package org.entur.kingu.config;
 
 
+import org.entur.kingu.exporter.PublicationDeliveryHelper;
 import org.entur.kingu.exporter.StreamingPublicationDelivery;
-import org.entur.kingu.exporter.TiamatFareFrameExporter;
-import org.entur.kingu.exporter.TiamatServiceFrameExporter;
-import org.entur.kingu.exporter.TiamatSiteFrameExporter;
 import org.entur.kingu.netex.id.NetexIdHelper;
 import org.entur.kingu.netex.id.ValidPrefixList;
 import org.entur.kingu.netex.mapping.NetexMapper;
@@ -48,13 +46,7 @@ public class StreamingPublicationDeliveryConfig {
     private ParkingRepository parkingRepository;
 
     @Autowired
-    private TiamatSiteFrameExporter tiamatSiteFrameExporter;
-
-    @Autowired
-    private TiamatServiceFrameExporter tiamatServiceFrameExporter;
-
-    @Autowired
-    private TiamatFareFrameExporter tiamatFareFrameExporter;
+    private PublicationDeliveryHelper publicationDeliveryHelper;
 
     @Autowired
     private NetexMapper netexMapper;
@@ -98,7 +90,7 @@ public class StreamingPublicationDeliveryConfig {
 
     private StreamingPublicationDelivery createStreamingPublicationDelivery(boolean validate) throws IOException, SAXException {
         return new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, validPrefixList,
-                tiamatSiteFrameExporter,tiamatServiceFrameExporter,tiamatFareFrameExporter, netexMapper, tariffZoneRepository, fareZoneRepository, topographicPlaceRepository,
+                publicationDeliveryHelper, netexMapper, tariffZoneRepository, fareZoneRepository, topographicPlaceRepository,
                 groupOfStopPlacesRepository,groupOfTariffZonesRepository, netexIdHelper, validate);
     }
 }

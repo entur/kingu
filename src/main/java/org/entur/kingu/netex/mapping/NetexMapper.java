@@ -67,7 +67,6 @@ public class NetexMapper {
     @Autowired
     public NetexMapper(List<Converter> converters, KeyListToKeyValuesMapMapper keyListToKeyValuesMapMapper,
                        DataManagedObjectStructureMapper dataManagedObjectStructureMapper,
-                       PublicationDeliveryHelper publicationDeliveryHelper,
                        AccessibilityAssessmentMapper accessibilityAssessmentMapper) {
 
         logger.info("Setting up netexMapper with DI");
@@ -111,7 +110,7 @@ public class NetexMapper {
                 .exclude("localServices")
                 .exclude("postalAddress")
                 .exclude("roadAddress")
-                .customize(new StopPlaceMapper(publicationDeliveryHelper))
+                .customize(new StopPlaceMapper())
                 .byDefault()
                 .register();
 

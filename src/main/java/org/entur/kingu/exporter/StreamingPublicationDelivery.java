@@ -120,9 +120,7 @@ public class StreamingPublicationDelivery {
     private final StopPlaceRepository stopPlaceRepository;
     private final ParkingRepository parkingRepository;
     private final ValidPrefixList validPrefixList;
-    private final TiamatSiteFrameExporter tiamatSiteFrameExporter;
-    private final TiamatServiceFrameExporter tiamatServiceFrameExporter;
-    private final TiamatFareFrameExporter tiamatFareFrameExporter;
+    private final PublicationDeliveryHelper publicationDeliveryHelper;
     private final NetexMapper netexMapper;
     private final TariffZoneRepository tariffZoneRepository;
     private final FareZoneRepository fareZoneRepository;
@@ -144,9 +142,7 @@ public class StreamingPublicationDelivery {
     public StreamingPublicationDelivery(StopPlaceRepository stopPlaceRepository,
                                         ParkingRepository parkingRepository,
                                         ValidPrefixList validPrefixList,
-                                        TiamatSiteFrameExporter tiamatSiteFrameExporter,
-                                        TiamatServiceFrameExporter tiamatServiceFrameExporter,
-                                        TiamatFareFrameExporter tiamatFareFrameExporter,
+                                        PublicationDeliveryHelper publicationDeliveryHelper,
                                         NetexMapper netexMapper,
                                         TariffZoneRepository tariffZoneRepository,
                                         FareZoneRepository fareZoneRepository,
@@ -158,9 +154,7 @@ public class StreamingPublicationDelivery {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
         this.validPrefixList = validPrefixList;
-        this.tiamatSiteFrameExporter = tiamatSiteFrameExporter;
-        this.tiamatServiceFrameExporter = tiamatServiceFrameExporter;
-        this.tiamatFareFrameExporter = tiamatFareFrameExporter;
+        this.publicationDeliveryHelper = publicationDeliveryHelper;
         this.netexMapper = netexMapper;
         this.tariffZoneRepository = tariffZoneRepository;
         this.fareZoneRepository = fareZoneRepository;
@@ -189,10 +183,9 @@ public class StreamingPublicationDelivery {
 
     public void stream(ExportParams exportParams, OutputStream outputStream, boolean ignorePaging) throws JAXBException, XMLStreamException, IOException, InterruptedException, SAXException {
 
-        org.entur.kingu.model.SiteFrame siteFrame = tiamatSiteFrameExporter.createTiamatSiteFrame("Site frame " + exportParams);
-        final ServiceFrame serviceFrame = tiamatServiceFrameExporter.createTiamatServiceFrame("Service frame " + exportParams);
-
-        final FareFrame fareFrame = tiamatFareFrameExporter.createTiamatFareFrame("Fare frame " + exportParams);
+        org.entur.kingu.model.SiteFrame siteFrame = publicationDeliveryHelper.createTiamatSiteFrame("Site frame " + exportParams);
+        final ServiceFrame serviceFrame = publicationDeliveryHelper.createTiamatServiceFrame("Service frame " + exportParams);
+        final FareFrame fareFrame = publicationDeliveryHelper.createTiamatFareFrame("Fare frame " + exportParams);
 
         AtomicInteger mappedStopPlaceCount = new AtomicInteger();
         AtomicInteger mappedParkingCount = new AtomicInteger();
@@ -216,9 +209,6 @@ public class StreamingPublicationDelivery {
 
 
         logger.info("Got {} stop place IDs from stop place search", stopPlacePrimaryIds.size());
-
-
-        tiamatSiteFrameExporter.addRelevantPathLinks(stopPlacePrimaryIds, siteFrame);
 
 
         logger.info("Mapping site frame to netex model");
