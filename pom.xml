@@ -77,6 +77,10 @@
 			<version>${camel.version}</version>
 		</dependency>
 		<dependency>
+			<groupId>org.apache.camel.springboot</groupId>
+			<artifactId>camel-google-pubsub-starter</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 			<scope>runtime</scope>

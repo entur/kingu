@@ -7,6 +7,12 @@ aliases:
             username: $DOCKERHUB_LOGIN
             password: $DOCKERHUB_PASSWORD
 
+  - &jfrog-login
+    name: Rename jfrog environment variable for maven setting.xml
+    command: |
+      echo "export JFROG_USER=$ARTIFACTORY_USER"  >> $BASH_ENV
+      echo "export JFROG_PASS=$ARTIFACTORY_PASSWORD"  >> $BASH_ENV
+
   - &tag-git-version
     name: Tag git commit with build version and push to github
     command: |
@@ -31,7 +37,7 @@ aliases:
       docker build -t $IMAGE .
       docker tag $IMAGE "${IMAGE}":"${VERSION}"
       docker login -u _json_key --password-stdin https://eu.gcr.io <<< "${DOCKER_PASSWORD}"
-      docker push $IMAGE
+      docker push "${IMAGE}":"${VERSION}"
 
 jobs:
   build:
@@ -44,6 +50,7 @@ jobs:
       - restore_cache:
           key: dep-cache-{{ checksum "pom.xml" }}
       - run: wget https://raw.githubusercontent.com/entur/circleci-toolbox-image-java11/master/tools/m2/settings.xml -O .circleci/settings.xml
+      - run: *jfrog-login
       - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:go-offline -s .circleci/settings.xml
       - save_cache:
           paths:
@@ -87,7 +94,7 @@ workflows:
   build_test_deploy:
     jobs:
       - build:
-          context: dev
+          context: global
       - deploy-docker:
           context: global
           requires:
