@@ -1,5 +1,5 @@
 sql:
-  instance: entur-ror-test:europe-west1:tiamat-db-1-replica=tcp:5432
+  instance: entur-ror-test:europe-west1:tiamat-db-replica=tcp:5432
 
 configMap:
   gcpProjectId: entur-ror-test
