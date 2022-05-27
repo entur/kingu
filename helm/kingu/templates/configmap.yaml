@@ -38,6 +38,8 @@ data:
     spring.jpa.open-in-view=false
 
 
+    #netex
+    netex.profile.version:1.12:NO-NeTEx-stops:1.4
 
     spring.profiles.active=gcs-blobstore
 

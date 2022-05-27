@@ -112,7 +112,8 @@ public class StreamingPublicationDelivery {
 
     private static final Logger logger = LoggerFactory.getLogger(StreamingPublicationDelivery.class);
 
-    private static final AtomicLong publicationDeliveryId = new AtomicLong();
+    @Value("${netex.profile.version:1.12:NO-NeTEx-stops:1.4}")
+    private String publicationDeliveryId;
 
     private static final JAXBContext publicationDeliveryContext = createContext(PublicationDeliveryStructure.class);
     private static final ObjectFactory netexObjectFactory = new ObjectFactory();
@@ -628,7 +629,7 @@ public class StreamingPublicationDelivery {
     }
     private PublicationDeliveryStructure createPublicationDelivery() {
         PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
-                .withVersion(String.valueOf(publicationDeliveryId.incrementAndGet()))
+                .withVersion(publicationDeliveryId)
                 .withPublicationTimestamp(LocalDateTime.now())
                 .withParticipantRef(validPrefixList.getValidNetexPrefix());
         return publicationDeliveryStructure;
