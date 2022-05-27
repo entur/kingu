@@ -628,10 +628,9 @@ public class StreamingPublicationDelivery {
         return publicationDeliveryStructure;
     }
     private PublicationDeliveryStructure createPublicationDelivery() {
-        PublicationDeliveryStructure publicationDeliveryStructure = new PublicationDeliveryStructure()
+        return new PublicationDeliveryStructure()
                 .withVersion(publicationDeliveryId)
                 .withPublicationTimestamp(LocalDateTime.now())
                 .withParticipantRef(validPrefixList.getValidNetexPrefix());
-        return publicationDeliveryStructure;
     }
 }

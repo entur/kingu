@@ -39,6 +39,20 @@ aliases:
       docker login -u _json_key --password-stdin https://eu.gcr.io <<< "${DOCKER_PASSWORD}"
       docker push "${IMAGE}":"${VERSION}"
 
+  - &sonar-scan
+    name: Sonar scan
+    command: |
+      mvn -s /tools/m2/settings.xml \
+        org.jacoco:jacoco-maven-plugin:prepare-agent verify \
+        org.jacoco:jacoco-maven-plugin:report sonar:sonar \
+        -Dmaven.main.skip \
+        -DskipTests \
+        -Dsonar.projectKey=entur_${CIRCLE_PROJECT_REPONAME} \
+        -Dsonar.organization=${SONAR_ORG} \
+        -Dsonar.projectName=${CIRCLE_PROJECT_REPONAME} \
+        -Dsonar.host.url=https://sonarcloud.io \
+        -Dsonar.login=${ENTUR_SONAR_PASSWORD}
+
 jobs:
   build:
     docker:
@@ -58,6 +72,7 @@ jobs:
           key: dep-cache-{{ checksum "pom.xml" }}
       # Cannot use -o because of snapshot dependencies.
       - run: mvn verify -s .circleci/settings.xml
+      - run: *sonar-scan
       - run:
           name: Save test results
           command: |
