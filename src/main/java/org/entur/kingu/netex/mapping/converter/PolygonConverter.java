@@ -38,10 +38,11 @@ import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBElement;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.stream.Collectors;
+
 
 @Component
 public class PolygonConverter extends BidirectionalConverter<Polygon, PolygonType> {
@@ -73,7 +74,7 @@ public class PolygonConverter extends BidirectionalConverter<Polygon, PolygonTyp
                 .map(PolygonType::getInterior)
                 .map(list -> list.stream()
                         .map(this::extractValues)
-                        .collect(Collectors.toList()))
+                        .toList())
                 .filter(list -> !list.isEmpty());
 
 
@@ -101,13 +102,14 @@ public class PolygonConverter extends BidirectionalConverter<Polygon, PolygonTyp
     }
 
     public List<Double> extractValues(AbstractRingPropertyType abstractRingPropertyType) {
-        return Optional.of(abstractRingPropertyType)
+        final Optional<List<Double>> doubles = Optional.of(abstractRingPropertyType)
                 .map(AbstractRingPropertyType::getAbstractRing)
                 .map(JAXBElement::getValue)
                 .map(abstractRing -> ((LinearRingType) abstractRing))
                 .map(LinearRingType::getPosList)
-                .map(DirectPositionListType::getValue)
-                .get();
+                .map(DirectPositionListType::getValue);
+
+        return doubles.orElse(Collections.emptyList());
     }
 
     @Override
