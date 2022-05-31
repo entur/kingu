@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.xml.XMLConstants;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamConstants;
 import javax.xml.stream.XMLStreamException;
@@ -68,7 +69,16 @@ public class NetexXmlReferenceValidator {
 
         try {
             XMLStreamReader xmlStreamReader = null;
-            xmlStreamReader = XMLInputFactory.newInstance().createXMLStreamReader(inputStream);
+
+            final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
+            // This disables DTDs entirely for that factory
+            xmlInputFactory.setProperty(XMLInputFactory.SUPPORT_DTD, false);
+            // This causes XMLStreamException to be thrown if external DTDs are accessed.
+            xmlInputFactory.setProperty(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+            // disable external entities
+            xmlInputFactory.setProperty("javax.xml.stream.isSupportingExternalEntities", false);
+
+            xmlStreamReader = xmlInputFactory.createXMLStreamReader(inputStream);
 
             Set<String> references = new HashSet<>();
 
