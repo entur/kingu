@@ -54,7 +54,7 @@ public class ParkingAreaListConverter extends BidirectionalConverter<List<Parkin
     public List<ParkingArea> convertFrom(ParkingAreas_RelStructure parkingAreas_relStructure, Type<List<ParkingArea>> destinationType, MappingContext mappingContext) {
         logger.debug("Mapping {} quays to internal model", parkingAreas_relStructure != null ? parkingAreas_relStructure.getParkingAreaRefOrParkingArea().size() : 0);
         List<ParkingArea> parkingAreas = new ArrayList<>();
-        if(parkingAreas_relStructure.getParkingAreaRefOrParkingArea() != null) {
+        if(parkingAreas_relStructure != null && parkingAreas_relStructure.getParkingAreaRefOrParkingArea() != null) {
             parkingAreas_relStructure.getParkingAreaRefOrParkingArea().stream()
                     .filter(object -> object instanceof org.rutebanken.netex.model.ParkingArea)
                     .map(object -> ((org.rutebanken.netex.model.ParkingArea) object))
