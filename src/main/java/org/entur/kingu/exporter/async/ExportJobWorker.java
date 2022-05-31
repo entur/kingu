@@ -58,7 +58,7 @@ import static org.entur.kingu.Constants.EXPORT_LOCATION;
 public class ExportJobWorker implements Runnable {
 
     private static final Logger logger = LoggerFactory.getLogger(ExportJobWorker.class);
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("YYYYMMddHHmmssSSSS");
+    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyyMMddHHmmssSSSS");
 
     /**
      * Ignore paging for async export, to not let the default value interfer.
