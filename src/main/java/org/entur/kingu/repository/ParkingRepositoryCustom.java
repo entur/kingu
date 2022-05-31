@@ -28,8 +28,5 @@ public interface ParkingRepositoryCustom extends DataManagedObjectStructureRepos
 
     int countResult(Set<Long> stopPlaceIds);
 
-    Iterator<Parking> scrollParkings();
-
-
 }
 

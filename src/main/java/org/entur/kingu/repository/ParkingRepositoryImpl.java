@@ -93,19 +93,9 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
     }
 
     @Override
-    public Iterator<Parking> scrollParkings() {
-
-        return scrollParkings();
-    }
-
-
-
-    @Override
     public Iterator<Parking> scrollParkings(Set<Long> stopPlaceIds) {
         return scrollParkings(getParkingsByStopPlaceIdsSQL(stopPlaceIds));
     }
-
-
 
     @Override
     public int countResult(Set<Long> stopPlaceIds) {
