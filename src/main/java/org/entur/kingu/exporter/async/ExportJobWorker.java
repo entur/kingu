@@ -24,8 +24,6 @@ import org.entur.kingu.exporter.StreamingPublicationDelivery;
 import org.entur.kingu.model.job.ExportJob;
 import org.entur.kingu.model.job.JobStatus;
 import org.entur.kingu.netex.validation.NetexXmlReferenceValidator;
-
-
 import org.entur.kingu.service.BlobStoreService;
 import org.entur.kingu.time.ExportTimeZone;
 import org.slf4j.Logger;
@@ -41,13 +39,14 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
-
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -109,7 +108,11 @@ public class ExportJobWorker implements Runnable {
 
             netexXmlReferenceValidator.validateNetexReferences(localExportXmlFile);
 
-            localExportZipFile.createNewFile();
+            var newFile = localExportZipFile.createNewFile();
+
+            if (newFile) {
+                logger.debug("Created new localZipFile");
+            }
 
             exportToLocalZipFile(fileNameWithoutExtension,localExportZipFile, localExportXmlFile);
 
@@ -132,8 +135,14 @@ public class ExportJobWorker implements Runnable {
             }
         } finally {
             logger.info("Removing local files: {},{}", localExportZipFile, localExportXmlFile);
-            localExportZipFile.delete();
-            localExportXmlFile.delete();
+
+            try {
+                cleanUp(localExportZipFile.toPath());
+                cleanUp(localExportXmlFile.toPath());
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
             MDC.remove("camel.breadcrumbId");
 
         }
@@ -213,5 +222,9 @@ public class ExportJobWorker implements Runnable {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private void cleanUp(Path path) throws IOException {
+        Files.delete(path);
     }
 }
