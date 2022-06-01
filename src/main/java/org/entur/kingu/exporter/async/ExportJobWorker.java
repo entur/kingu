@@ -188,26 +188,20 @@ public class ExportJobWorker implements Runnable {
         blobStoreService.upload(exportJob.getSubFolder() + "/" + exportJob.getFileName(), fileInputStream);
     }
 
-    private void exportToLocalZipFile(String fileNameWithoutExtension,File localZipFile, File localExportZipFile) throws IOException, InterruptedException, JAXBException, XMLStreamException, SAXException {
+    private void exportToLocalZipFile(String fileNameWithoutExtension,File localZipFile, File localExportZipFile) throws IOException {
         logger.info("Adding {} to zip file: {}", localExportZipFile, localZipFile);
 
         final FileOutputStream fileOutputStream = new FileOutputStream(localZipFile);
-        final ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream);
 
-        try {
+        try(ZipOutputStream zipOutputStream = new ZipOutputStream(fileOutputStream)) {
             zipOutputStream.putNextEntry(new ZipEntry(fileNameWithoutExtension + ".xml"));
-
             InputStream fileInputStream = new FileInputStream(localExportZipFile);
             ByteStreams.copy(fileInputStream,zipOutputStream);
             zipOutputStream.closeEntry();
             logger.info("Written to disk {}", localZipFile);
-        } finally {
-            try {
-                zipOutputStream.close();
-            } catch (IOException e) {
-                logger.error(String.format("Could not close zipoutput stream for file: %s", localZipFile), e);
+        } catch (IOException e) {
+                logger.error(String.format("Could not close zip output stream for file: %s", localZipFile), e);
             }
-        }
     }
 
     private void sendJMS(ExportJob exportJob) {
