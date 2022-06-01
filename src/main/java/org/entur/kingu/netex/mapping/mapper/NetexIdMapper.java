@@ -16,12 +16,12 @@
 package org.entur.kingu.netex.mapping.mapper;
 
 import com.google.common.base.Strings;
-import org.rutebanken.netex.model.KeyValueStructure;
 import org.entur.kingu.model.DataManagedObjectStructure;
 import org.entur.kingu.model.EntityInVersionStructure;
 import org.entur.kingu.model.EntityStructure;
 import org.entur.kingu.netex.id.NetexIdHelper;
 import org.entur.kingu.netex.id.ValidPrefixList;
+import org.rutebanken.netex.model.KeyValueStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,7 +109,7 @@ public class NetexIdMapper {
                         continue;
                     }
 
-                    boolean ignoreEmptyPostfix = (key.equals(ORIGINAL_ID_KEY) | key.equals(MERGED_ID_KEY));
+                    boolean ignoreEmptyPostfix = (key.equals(ORIGINAL_ID_KEY) || key.equals(MERGED_ID_KEY));
 
                     if (value.contains(",")) {
                         String[] originalIds = value.split(",");

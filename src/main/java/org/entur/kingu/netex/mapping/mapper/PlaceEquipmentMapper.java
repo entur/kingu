@@ -17,6 +17,7 @@ package org.entur.kingu.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
+import org.entur.kingu.model.PlaceEquipment;
 import org.rutebanken.netex.model.CycleStorageEquipment;
 import org.rutebanken.netex.model.GeneralSign;
 import org.rutebanken.netex.model.InstalledEquipment_VersionStructure;
@@ -26,12 +27,10 @@ import org.rutebanken.netex.model.SanitaryEquipment;
 import org.rutebanken.netex.model.ShelterEquipment;
 import org.rutebanken.netex.model.TicketingEquipment;
 import org.rutebanken.netex.model.WaitingRoomEquipment;
-import org.entur.kingu.model.PlaceEquipment;
 import org.springframework.stereotype.Component;
 
 import javax.xml.bind.JAXBElement;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Component
 public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStructure, PlaceEquipment> {
@@ -49,15 +48,15 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
                 .stream()
                 .filter(jaxbElement -> {
                     Object equipment = jaxbElement.getValue();
-                    return (equipment instanceof SanitaryEquipment |
-                            equipment instanceof TicketingEquipment |
-                            equipment instanceof WaitingRoomEquipment |
-                            equipment instanceof CycleStorageEquipment |
-                            equipment instanceof ShelterEquipment |
+                    return (equipment instanceof SanitaryEquipment ||
+                            equipment instanceof TicketingEquipment ||
+                            equipment instanceof WaitingRoomEquipment ||
+                            equipment instanceof CycleStorageEquipment ||
+                            equipment instanceof ShelterEquipment ||
                             equipment instanceof GeneralSign);
                 })
                 .map(jaxbElement -> (InstalledEquipment_VersionStructure)jaxbElement.getValue())
-                .collect(Collectors.toList());
+                .toList();
         List<org.entur.kingu.model.InstalledEquipment_VersionStructure> installedEquipment_versionStructures = mapperFacade.mapAsList(netexInstalledEquipmentList, org.entur.kingu.model.InstalledEquipment_VersionStructure.class, context);
 
         if (!installedEquipment_versionStructures.isEmpty()) {
@@ -73,11 +72,11 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
 
         List<JAXBElement<? extends InstalledEquipment_VersionStructure>> jaxbElements = installedEquipment_versionStructures
                 .stream()
-                .filter(equipment -> (equipment instanceof SanitaryEquipment |
-                        equipment instanceof TicketingEquipment |
-                        equipment instanceof WaitingRoomEquipment |
-                        equipment instanceof CycleStorageEquipment |
-                        equipment instanceof ShelterEquipment |
+                .filter(equipment -> (equipment instanceof SanitaryEquipment ||
+                        equipment instanceof TicketingEquipment ||
+                        equipment instanceof WaitingRoomEquipment ||
+                        equipment instanceof CycleStorageEquipment ||
+                        equipment instanceof ShelterEquipment ||
                         equipment instanceof GeneralSign))
                 .map(equipment -> {
                     if (equipment instanceof SanitaryEquipment) {
@@ -95,7 +94,7 @@ public class PlaceEquipmentMapper extends CustomMapper<PlaceEquipments_RelStruct
                     }
                     return null;
                 })
-                .collect(Collectors.toList());
+                .toList();
 
 
         if (!jaxbElements.isEmpty()) {

@@ -16,10 +16,8 @@
 package org.entur.kingu.repository.search;
 
 import org.apache.commons.lang3.StringUtils;
-
 import org.entur.kingu.config.ExportParams;
 import org.entur.kingu.config.VersionValidity;
-
 import org.entur.kingu.model.Quay;
 import org.entur.kingu.model.StopPlace;
 import org.entur.kingu.model.StopTypeEnumeration;
@@ -238,7 +236,7 @@ public class StopPlaceQueryFromSearchBuilder {
             }
 
             if (hasCountryFilter) {
-                String suffix = hasCountyFilter | hasMunicipalityFilter ? ")" : "";
+                String suffix = hasCountyFilter || hasMunicipalityFilter ? ")" : "";
                 String countryQuery = "topographic_place_id in (" +
                         "select tp.id from topographic_place tp " +
                             "left join topographic_place ptp " +
