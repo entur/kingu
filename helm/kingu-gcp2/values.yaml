@@ -1,0 +1,46 @@
+kingu:
+  database: tiamat
+common:
+  app: kingu
+  shortname: kingu
+  team: ror
+  container:
+    image: ${artifact.metadata.image}
+    cpuLimit: 1200m
+    memoryLimit: 10000
+    memory: 7500
+    cpu: 1.2
+    probes:
+      liveness:
+        path: /actuator/health
+        periodSeconds: 10
+        failureThreshold: 3
+      readiness:
+        path: /actuator/health
+        periodSeconds: 10
+        failureThreshold: 3
+    envFrom:
+      - configMapRef:
+          name: kingu-application
+    prometheus:
+      enabled: true
+      path: /health/scrape
+    volumeMounts:
+      - mountPath: /etc/application-config
+        name: application-config
+        readOnly: true
+    volumes:
+      - configMap:
+          defaultMode: 420
+          name: kingu-application
+        name: application-config
+
+  postgres:
+    enabled: true
+  configmap:
+    data:
+      JAVA_OPTIONS: -server -Xss1024m -Xmx7g -Dspring.config.location=/etc/application-config/application.properties
+        -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED
+      TZ: Europe/Oslo
+    enabled: true
+    toEnv: true

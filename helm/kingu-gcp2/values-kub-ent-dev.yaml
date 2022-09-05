@@ -1,0 +1,17 @@
+common:
+  env: dev
+  ingress:
+    enabled: false
+  service:
+    enabled: false
+    internalPort: 9001
+  replicas: 2
+
+configMap:
+  gcpProjectId: entur-ror-dev
+  pubSubProjectId: entur-ror-dev
+  blobstoreProjectId: entur-ror-dev
+  gcsBucketName: kingu-dev
+
+sql:
+  instance: entur-ror-dev:europe-west1:tiamat-db-replica=tcp:5432
