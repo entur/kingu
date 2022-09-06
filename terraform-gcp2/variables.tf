@@ -14,6 +14,6 @@ variable "labels" {
      }
 }
 
-variable ror-tiamat-db-password {
+variable ror-kingu-db-password {
   description = "Tiamat database password"
 }

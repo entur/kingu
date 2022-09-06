@@ -19,6 +19,6 @@ resource "kubernetes_secret" "ror-kingu-db-password" {
   }
 
   data = {
-  "PGPASSWORD"  = var.ror-tiamat-db-password
+  "PGPASSWORD"  = var.ror-kingu-db-password
   }
 }
