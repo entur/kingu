@@ -15,7 +15,9 @@
 
 package org.entur.kingu.service;
 
+import com.google.cloud.http.HttpTransportOptions;
 import com.google.cloud.storage.Storage;
+import com.google.cloud.storage.StorageOptions;
 import org.rutebanken.helper.gcp.BlobStoreHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +31,8 @@ import java.io.InputStream;
 @Service
 @Profile("gcs-blobstore")
 public class GcsBlobStoreService implements BlobStoreService {
+
+    private static final int CONNECT_AND_READ_TIMEOUT = 60000;
 
     private static final Logger logger = LoggerFactory.getLogger(GcsBlobStoreService.class);
 
@@ -66,7 +70,15 @@ public class GcsBlobStoreService implements BlobStoreService {
             logger.info("Get storage for project {}", projectId);
             if (credentialPath == null || credentialPath.isEmpty()) {
                 // Use default default gcp credentials
-                return BlobStoreHelper.getStorage(projectId);
+                //todo replace this implementation by using BlobStoreHelper.getStorage(projectId) available in entur-helper 1.83
+                HttpTransportOptions transportOptions = StorageOptions.getDefaultHttpTransportOptions();
+                transportOptions = transportOptions.toBuilder().setConnectTimeout(CONNECT_AND_READ_TIMEOUT).setReadTimeout(CONNECT_AND_READ_TIMEOUT)
+                        .build();
+
+                return StorageOptions.newBuilder()
+                        .setProjectId(projectId)
+                        .setTransportOptions(transportOptions)
+                        .build().getService();
             }
             return BlobStoreHelper.getStorage(credentialPath, projectId);
         } catch (RuntimeException e) {
