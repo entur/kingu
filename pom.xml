@@ -19,7 +19,8 @@
 		<maven.compiler.source>17</maven.compiler.source>
 		<entur.google.pubsub.emulator.download.skip>false</entur.google.pubsub.emulator.download.skip>
 		<camel.version>3.11.2</camel.version>
-		<entur.helpers.version>1.83</entur.helpers.version>
+		<entur.helpers.version>1.0.60</entur.helpers.version>
+		<entur.gcp-storage.version>1.83</entur.gcp-storage.version>
 		<guava.version>31.0.1-jre</guava.version>
 		<netex-java-model.version>1.0.12-SNAPSHOT</netex-java-model.version>
 		<orika-core.version>1.5.4</orika-core.version>
@@ -43,14 +44,14 @@
 	</dependencyManagement>
 	<dependencies>
 		<dependency>
-			<groupId>org.entur.ror.helpers</groupId>
+			<groupId>org.entur.helpers</groupId>
 			<artifactId>camel3-entur-google-pubsub</artifactId>
 			<version>${entur.helpers.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.entur.ror.helpers</groupId>
 			<artifactId>gcp-storage</artifactId>
-			<version>${entur.helpers.version}</version>
+			<version>${entur.gcp-storage.version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>javax.servlet</groupId>
