@@ -14,4 +14,4 @@ configMap:
   gcsBucketName: kingu-dev
 
 sql:
-  instance: ent-tiamat-dev:europe-west1:tiamat-db-replica=tcp:5432
+  instance: ent-tiamat-dev:europe-west1:tiamat-db-pg13-replica=tcp:5432
