@@ -1,0 +1,19 @@
+common:
+  env: prd
+  ingress:
+    enabled: false
+  service:
+    enabled: false
+    internalPort: 9001
+  replicas: 2
+  container:
+    forceReplicas: 2
+
+configMap:
+  gcpProjectId: entur-ror-prod
+  pubSubProjectId: entur-ror-prod
+  blobstoreProjectId: entur-ror-prod
+  gcsBucketName: kingu-production
+
+sql:
+  instance: ent-tiamat-prd:europe-west1:tiamat-db-1-replica=tcp:5432
