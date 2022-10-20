@@ -7,11 +7,10 @@ aliases:
             username: $DOCKERHUB_LOGIN
             password: $DOCKERHUB_PASSWORD
 
-  - &jfrog-login
-    name: Rename jfrog environment variable for maven setting.xml
+  - &jfrog-settings
+    name: Write artifactory settings to file
     command: |
-      echo "export JFROG_USER=$ARTIFACTORY_USER"  >> $BASH_ENV
-      echo "export JFROG_PASS=$ARTIFACTORY_PASSWORD"  >> $BASH_ENV
+      echo "$ARTIFACTORY_SETTINGS" | base64 --decode > .circleci/settings.xml
 
   - &tag-git-version
     name: Tag git commit with build version and push to github
@@ -63,8 +62,7 @@ jobs:
       - checkout
       - restore_cache:
           key: dep-cache-{{ checksum "pom.xml" }}
-      - run: wget https://raw.githubusercontent.com/entur/circleci-toolbox-image-java11/master/tools/m2/settings.xml -O .circleci/settings.xml
-      - run: *jfrog-login
+      - run: *jfrog-settings
       - run: mvn org.apache.maven.plugins:maven-dependency-plugin:3.1.0:go-offline -s .circleci/settings.xml
       - save_cache:
           paths:
