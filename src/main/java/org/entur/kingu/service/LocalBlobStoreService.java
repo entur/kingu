@@ -25,7 +25,7 @@ public class LocalBlobStoreService implements BlobStoreService {
 
     @Override
     public void upload(String fileName, InputStream inputStream) {
-        logger.debug("Upload blob called in local-disk blob store on " + fileName);
+        logger.debug("Upload blob called in local-disk blob store on {} ", fileName);
         try {
             Path localPath = Paths.get(fileName);
 
@@ -44,13 +44,13 @@ public class LocalBlobStoreService implements BlobStoreService {
     @Override
     public InputStream download(String fileName) {
 
-        logger.debug("get blob called in local-disk blob store on " + fileName);
+        logger.debug("get blob called in local-disk blob store on {} ", fileName);
         Path path = Paths.get(baseFolder).resolve(fileName);
         if (!path.toFile().exists()) {
-            logger.debug("getBlob(): File not found in local-disk blob store: " + path);
+            logger.debug("getBlob(): File not found in local-disk blob store: {} ", path);
             return null;
         }
-        logger.debug("getBlob(): File found in local-disk blob store: " + path);
+        logger.debug("getBlob(): File found in local-disk blob store: {}", path);
         try {
             // converted as ByteArrayInputStream so that Camel stream cache can reopen it
             // since ByteArrayInputStream.close() does nothing
