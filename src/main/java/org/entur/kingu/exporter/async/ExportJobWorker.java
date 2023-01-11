@@ -29,6 +29,7 @@ import org.entur.kingu.time.ExportTimeZone;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
+import org.springframework.transaction.TransactionSystemException;
 import org.xml.sax.SAXException;
 
 import javax.xml.bind.JAXBException;
@@ -129,8 +130,13 @@ public class ExportJobWorker implements Runnable {
             String message = "Error executing export job " + exportJob.getId() + ". " + e.getClass().getSimpleName() + " - " + e.getMessage();
             logger.error("{}.\nExport job was {}", message, exportJob, e);
             exportJob.setMessage(message);
-            if (e instanceof InterruptedException) {
+            if (e instanceof InterruptedException ) {
                 logger.info("The export job was interrupted: {}", exportJob);
+                Thread.currentThread().interrupt();
+            }
+            if (e instanceof TransactionSystemException) {
+                //Export job failed because of failed transaction e.g. replication issue in database.
+                logger.info("The export job was interrupted(TransactionSystemException): {}", exportJob);
                 Thread.currentThread().interrupt();
             }
         } finally {
