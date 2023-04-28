@@ -1,2 +1,2 @@
 
-kube_namespace = "kingu"
+pubsub_project= "ent-kingu-prd"

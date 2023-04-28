@@ -17,3 +17,13 @@ variable "labels" {
 variable ror-kingu-db-password {
   description = "Tiamat database password"
 }
+
+variable "kingu_netex_export_topic" {
+  default = "ror.kingu.outbound.topic.netex.export"
+}
+variable "pubsub_project" {
+  description = "pubsub project name"
+}
+variable "kingu_netex_export_subscription" {
+  default = "ror.kingu.inbound.subscription.kakka.netex.export"
+}

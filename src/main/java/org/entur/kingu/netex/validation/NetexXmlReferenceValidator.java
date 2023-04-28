@@ -68,7 +68,6 @@ public class NetexXmlReferenceValidator {
         long start = System.currentTimeMillis();
 
         try {
-            XMLStreamReader xmlStreamReader = null;
 
             final XMLInputFactory xmlInputFactory = XMLInputFactory.newInstance();
             // This disables DTDs entirely for that factory
@@ -78,20 +77,20 @@ public class NetexXmlReferenceValidator {
             // disable external entities
             xmlInputFactory.setProperty("javax.xml.stream.isSupportingExternalEntities", false);
 
-            xmlStreamReader = xmlInputFactory.createXMLStreamReader(inputStream);
+            XMLStreamReader xmlStreamReader = xmlInputFactory.createXMLStreamReader(inputStream);
 
             Set<String> references = new HashSet<>();
 
-            // List, because of intentions to detect and report duplicate identificators.
-            List<String> identificators = new ArrayList<>();
+            // List, because of intentions to detect and report duplicate identifiers.
+            List<String> identifiers = new ArrayList<>();
 
-            traverseXml(xmlStreamReader, references, identificators);
+            traverseXml(xmlStreamReader, references, identifiers);
 
-            Set<String> distinctIdentificators = Sets.newHashSet(identificators);
-            Set<String> invalidReferences = Sets.difference(references, distinctIdentificators);
+            Set<String> distinctIdentifiers = Sets.newHashSet(identifiers);
+            Set<String> invalidReferences = Sets.difference(references, distinctIdentifiers);
 
             if (invalidReferences.isEmpty()) {
-                logger.info("{} is valid. {} distinct identificators. {} references", xmlNameForLogging, distinctIdentificators.size(), references.size());
+                logger.info("{} is valid. {} distinct identifiers. {} references", xmlNameForLogging, distinctIdentifiers.size(), references.size());
             } else {
                 String message = xmlNameForLogging + " is NOT valid. Invalid references detected: " + invalidReferences.size();
                 logger.warn("{}: {}", message, invalidReferences);
@@ -107,7 +106,7 @@ public class NetexXmlReferenceValidator {
         }
     }
 
-    private void traverseXml(XMLStreamReader xmlStreamReader, Set<String> references, List<String> identificators) throws XMLStreamException {
+    private void traverseXml(XMLStreamReader xmlStreamReader, Set<String> references, List<String> identifiers) throws XMLStreamException {
         while (xmlStreamReader.hasNext()) {
 
             int eventCode = xmlStreamReader.next();
@@ -117,7 +116,7 @@ public class NetexXmlReferenceValidator {
                 if (localName.contains(REF_ELEMENT_NAME_POSTFIX) && !localName.contains(COUNTRY_REF)) {
                     processReference(xmlStreamReader, references);
                 } else {
-                    processId(xmlStreamReader, identificators);
+                    processId(xmlStreamReader, identifiers);
                 }
             }
         }
@@ -133,18 +132,16 @@ public class NetexXmlReferenceValidator {
         }
     }
 
-    private void processId(XMLStreamReader xmlStreamReader, List<String> identificators) {
+    private void processId(XMLStreamReader xmlStreamReader, List<String> identifiers) {
         String id = getAttributeValue(ID_ATTRIBUTE, xmlStreamReader);
 
         if (id != null) {
             String version = getAttributeValue(VERSION_ATTRIBUTE, xmlStreamReader);
+            identifiers.add(id);
             if (version != null) {
                 // It should be possible for a reference to not have version.
                 // So both should be added
-                identificators.add(id);
-                identificators.add(id + ID_VERSION_SEPARATOR + version);
-            } else {
-                identificators.add(id);
+                identifiers.add(id + ID_VERSION_SEPARATOR + version);
             }
         }
     }

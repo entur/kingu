@@ -3,9 +3,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>org.rutebanken.superpom</groupId>
+		<groupId>org.entur.ror</groupId>
 		<artifactId>superpom</artifactId>
-		<version>1.0.31</version>
+		<version>1.53</version>
 	</parent>
 	<groupId>org.entur</groupId>
 	<artifactId>kingu</artifactId>
@@ -18,9 +18,8 @@
 		<maven.compiler.target>17</maven.compiler.target>
 		<maven.compiler.source>17</maven.compiler.source>
 		<entur.google.pubsub.emulator.download.skip>false</entur.google.pubsub.emulator.download.skip>
-		<camel.version>3.11.2</camel.version>
-		<entur.helpers.version>1.0.60</entur.helpers.version>
-		<entur.gcp-storage.version>1.83</entur.gcp-storage.version>
+		<camel.version>3.18.5</camel.version>
+		<entur.helpers.version>1.85</entur.helpers.version>
 		<guava.version>31.0.1-jre</guava.version>
 		<netex-java-model.version>1.0.12-SNAPSHOT</netex-java-model.version>
 		<orika-core.version>1.5.4</orika-core.version>
@@ -28,7 +27,7 @@
 		<geotools.version>20.1</geotools.version>
 		<hibernate-spatial.version>5.4.32.Final</hibernate-spatial.version>
 		<hikariCP.version>5.0.0</hikariCP.version>
-		<google-cloud-storage.version>2.2.0</google-cloud-storage.version>
+
 
 	</properties>
 	<dependencyManagement>
@@ -44,12 +43,12 @@
 	</dependencyManagement>
 	<dependencies>
 		<dependency>
-			<groupId>org.entur.helpers</groupId>
-			<artifactId>camel3-entur-google-pubsub</artifactId>
+			<groupId>org.entur.ror.helpers</groupId>
+			<artifactId>entur-google-pubsub</artifactId>
 			<version>${entur.helpers.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.entur.helpers</groupId>
+			<groupId>org.entur.ror.helpers</groupId>
 			<artifactId>gcp-storage</artifactId>
 			<version>${entur.helpers.version}</version>
 			<exclusions>
@@ -93,6 +92,11 @@
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.camel</groupId>
+			<artifactId>camel-test-spring-junit5</artifactId>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

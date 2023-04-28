@@ -16,11 +16,10 @@
 package org.entur.kingu.model.job;
 
 import com.google.common.base.MoreObjects;
-
 import org.entur.kingu.config.ExportParams;
 
-
 import javax.xml.bind.annotation.XmlRootElement;
+import java.io.File;
 import java.time.Instant;
 
 
@@ -28,9 +27,6 @@ import java.time.Instant;
 @XmlRootElement
 
 public class ExportJob {
-
-
-
     private Long id;
 
     @Deprecated
@@ -52,6 +48,12 @@ public class ExportJob {
     private JobStatus status;
 
     private ExportParams exportParams;
+
+    private File localExportXmlFile;
+
+    private File localExportZipFile;
+
+
 
     public ExportJob() {
     }
@@ -145,5 +147,20 @@ public class ExportJob {
 
     public void setSubFolder(String subFolder) {
         this.subFolder = subFolder;
+    }
+
+    public File getLocalExportXmlFile() {
+        return localExportXmlFile;
+    }
+
+    public void setLocalExportXmlFile(File localExportXmlFile) {
+        this.localExportXmlFile = localExportXmlFile;
+    }
+
+    public void setLocalExportZipFile(File localExportZipFile) {
+        this.localExportZipFile = localExportZipFile;
+    }
+    public File getLocalExportZipFile() {
+        return localExportZipFile;
     }
 }
