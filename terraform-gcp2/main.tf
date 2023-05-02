@@ -34,6 +34,32 @@ resource "google_pubsub_subscription" "kingu_netex_export_subscription" {
 
 }
 
+# Create bucket
+
+resource "google_storage_bucket" "storage_bucket" {
+  name               = "${var.bucket_instance_prefix}-${var.bucket_instance_suffix}"
+  force_destroy      = var.force_destroy
+  location           = var.location
+  project            = var.storage_project
+  storage_class      = var.storage_class
+  bucket_policy_only = var.bucket_policy_only
+  labels             = var.labels
+
+  versioning {
+    enabled = var.versioning
+  }
+  logging {
+    log_bucket        = var.log_bucket
+    log_object_prefix = "${var.bucket_instance_prefix}-${var.bucket_instance_suffix}"
+  }
+}
+# Create folder in a bucket
+resource "google_storage_bucket_object" "content_folder" {
+  name          = "export/"
+  content       = "Not really a directory, but it's empty."
+  bucket        = google_storage_bucket.storage_bucket.name
+}
+
 
 #
 resource "kubernetes_secret" "ror-kingu-db-password" {

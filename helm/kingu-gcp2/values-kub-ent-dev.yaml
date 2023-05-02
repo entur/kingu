@@ -8,10 +8,10 @@ common:
   replicas: 2
 
 configMap:
-  gcpProjectId: entur-ror-dev
-  pubSubProjectId: entur-ror-dev
-  blobstoreProjectId: entur-ror-dev
-  gcsBucketName: kingu-dev
+  gcpProjectId: ent-kingu-dev
+  pubSubProjectId: ent-kingu-dev
+  blobstoreProjectId: ent-kingu-dev
+  gcsBucketName: ror-kingu-dev
 
 sql:
   instance: ent-tiamat-dev:europe-west1:tiamat-db-1-replica=tcp:5432

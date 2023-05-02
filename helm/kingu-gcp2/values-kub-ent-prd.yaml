@@ -10,10 +10,10 @@ common:
     forceReplicas: 2
 
 configMap:
-  gcpProjectId: entur-ror-prod
-  pubSubProjectId: entur-ror-prod
-  blobstoreProjectId: entur-ror-prod
-  gcsBucketName: kingu-production
+  gcpProjectId: ent-kingu-prd
+  pubSubProjectId: ent-kingu-prd
+  blobstoreProjectId: ent-kingu-prd
+  gcsBucketName: ror-kingu-production
 
 sql:
   instance: ent-tiamat-prd:europe-west1:tiamat-db-1-replica=tcp:5432
