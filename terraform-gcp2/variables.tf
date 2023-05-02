@@ -42,12 +42,12 @@ variable "force_destroy" {
 
 variable "storage_class" {
   description = "GCP storage class"
-  default     = "REGIONAL"
+  default     = "STANDARD"
 }
 
 variable "versioning" {
   description = "The bucket's Versioning configuration."
-  default     = "true"
+  default     = "false"
 }
 
 variable "log_bucket" {
@@ -55,10 +55,6 @@ variable "log_bucket" {
   default     = "false"
 }
 
-variable "bucket_policy_only" {
-  description = "Enables Bucket Policy Only access to a bucket"
-  default     = "false"
-}
 
 variable ror-kingu-db-password {
   description = "Tiamat database password"
