@@ -44,7 +44,7 @@ resource "google_storage_bucket" "storage_bucket" {
   project            = var.storage_project
   storage_class      = var.storage_class
   labels             = var.labels
-
+  uniform_bucket_level_access = true
   versioning {
     enabled = var.versioning
   }
