@@ -4,6 +4,7 @@ package org.entur.kingu.config;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.entur.kingu.repository.search.StopPlaceSearch;
+import org.entur.kingu.service.NetexExportJobBuilderException;
 
 import java.io.IOException;
 import java.io.Serializable;
@@ -151,12 +152,12 @@ public class ExportParams implements Serializable {
         }
     }
 
-    public static ExportParams fromString(String exportJob) {
+    public static ExportParams fromString(String exportJob) throws NetexExportJobBuilderException {
         ObjectMapper mapper = new ObjectMapper();
         try {
             return mapper.readValue(exportJob, ExportParams.class);
         } catch (JsonProcessingException e) {
-            throw new RuntimeException(e);
+            throw new NetexExportJobBuilderException(e.getMessage());
         }
     }
 

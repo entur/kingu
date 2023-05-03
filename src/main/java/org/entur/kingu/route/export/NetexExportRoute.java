@@ -11,6 +11,7 @@ import org.entur.kingu.netex.validation.NetexReferenceValidatorException;
 import org.entur.kingu.netex.validation.NetexXmlReferenceValidator;
 import org.entur.kingu.route.BaseRouteBuilder;
 import org.entur.kingu.service.BlobStoreService;
+import org.entur.kingu.service.NetexExportJobBuilderException;
 import org.entur.kingu.service.NetexJobBuilder;
 import org.entur.kingu.utils.ZipFileUtils;
 import org.hibernate.TransactionException;
@@ -65,6 +66,10 @@ public class NetexExportRoute extends BaseRouteBuilder {
                 .log(LoggingLevel.WARN, "Netex export validation failed ");
 
         onException(TransactionException.class)
+                .stop()
+                .log(LoggingLevel.ERROR,"Error while export ${body}");
+
+        onException(NetexExportJobBuilderException.class)
                 .stop()
                 .log(LoggingLevel.ERROR,"Error while export ${body}");
 

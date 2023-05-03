@@ -27,7 +27,7 @@ public class NetexJobBuilder {
     @Autowired
     ExportTimeZone exportTimeZone;
 
-    public ExportJob createExportJob(Exchange exchange, @Header(Exchange.FILE_PARENT) String localExportPath) {
+    public ExportJob createExportJob(Exchange exchange, @Header(Exchange.FILE_PARENT) String localExportPath) throws NetexExportJobBuilderException {
         final String body = exchange.getIn().getBody(String.class);
         final ExportParams exportParams = ExportParams.fromString(body);
         logger.info("Task name: {}, and queryPram {}", exportParams.getName(), exportParams.getStopPlaceSearch().getVersionValidity());
