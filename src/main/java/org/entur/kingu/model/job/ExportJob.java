@@ -19,7 +19,6 @@ import com.google.common.base.MoreObjects;
 import org.entur.kingu.config.ExportParams;
 
 import javax.xml.bind.annotation.XmlRootElement;
-import java.io.File;
 import java.time.Instant;
 
 
@@ -49,9 +48,9 @@ public class ExportJob {
 
     private ExportParams exportParams;
 
-    private File localExportXmlFile;
+    private String localExportXmlFile;
 
-    private File localExportZipFile;
+    private String localExportZipFile;
 
 
 
@@ -149,18 +148,18 @@ public class ExportJob {
         this.subFolder = subFolder;
     }
 
-    public File getLocalExportXmlFile() {
+    public String getLocalExportXmlFile() {
         return localExportXmlFile;
     }
 
-    public void setLocalExportXmlFile(File localExportXmlFile) {
+    public void setLocalExportXmlFile(String localExportXmlFile) {
         this.localExportXmlFile = localExportXmlFile;
     }
 
-    public void setLocalExportZipFile(File localExportZipFile) {
+    public void setLocalExportZipFile(String localExportZipFile) {
         this.localExportZipFile = localExportZipFile;
     }
-    public File getLocalExportZipFile() {
+    public String getLocalExportZipFile() {
         return localExportZipFile;
     }
 }

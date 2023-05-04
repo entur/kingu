@@ -3,7 +3,6 @@ package org.entur.kingu.route.export;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.processor.ThrottlerRejectedExecutionException;
-import org.apache.tomcat.util.http.fileupload.FileUtils;
 import org.entur.kingu.exporter.async.NetexExporter;
 import org.entur.kingu.model.job.ExportJob;
 import org.entur.kingu.model.job.JobStatus;
@@ -22,6 +21,9 @@ import org.springframework.stereotype.Component;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
 
@@ -29,6 +31,8 @@ import static org.entur.kingu.Constants.EXPORT_JOB_NAME;
 import static org.entur.kingu.Constants.EXPORT_LOCATION;
 import static org.entur.kingu.Constants.NETEX_EXPORT_STATUS_HEADER;
 import static org.entur.kingu.Constants.NETEX_EXPORT_STATUS_VALUE;
+import static org.entur.kingu.Constants.XML_FILE_PATH;
+import static org.entur.kingu.Constants.ZIP_FILE_PATH;
 
 @Component
 public class NetexExportRoute extends BaseRouteBuilder {
@@ -101,13 +105,14 @@ public class NetexExportRoute extends BaseRouteBuilder {
                 .log(LoggingLevel.INFO,"Validating netex export: ${body}")
                 .process(e -> {
                     final ExportJob exportJob = e.getIn().getBody(ExportJob.class);
-                    netexXmlReferenceValidator.validateNetexReferences(exportJob.getLocalExportXmlFile());
+                    netexXmlReferenceValidator.validateNetexReferences(new File(exportJob.getLocalExportXmlFile()));
                 })
                 .to("direct:zipNetexExport")
                 .routeId("netex-reference-validator-route");
 
         from("direct:zipNetexExport")
-                .log(LoggingLevel.INFO,"zipping netex export: ${body}")
+                .log(LoggingLevel.INFO,"" +
+                        ": ${body}")
                 .process(e -> {
                     final ExportJob exportJob = e.getIn().getBody(ExportJob.class);
                     ZipFileUtils.exportToLocalZipFile(exportJob.getLocalExportZipFile(),exportJob.getLocalExportXmlFile());
@@ -120,8 +125,8 @@ public class NetexExportRoute extends BaseRouteBuilder {
 
                 .process(e -> {
                     final ExportJob exportJob = e.getIn().getBody(ExportJob.class);
-                    FileInputStream fileInputStream = new FileInputStream(exportJob.getLocalExportXmlFile());
-                    final String fileName = exportJob.getSubFolder() + File.separator + exportJob.getFileName();
+                    FileInputStream fileInputStream = new FileInputStream(exportJob.getLocalExportZipFile());
+                    final String fileName = exportJob.getSubFolder() + File.separator + exportJob.getFileName() + ".zip";
                     blobStoreService.upload(fileName, fileInputStream);
                     exportJob.setStatus(JobStatus.FINISHED);
                     exportJob.setFinished(Instant.now());
@@ -129,6 +134,8 @@ public class NetexExportRoute extends BaseRouteBuilder {
 
                     e.getIn().setHeader(EXPORT_JOB_NAME,exportJob.getExportParams().getName());
                     e.getIn().setHeader(EXPORT_LOCATION, fileName);
+                    e.getIn().setHeader(ZIP_FILE_PATH, exportJob.getLocalExportZipFile());
+                    e.getIn().setHeader(XML_FILE_PATH, exportJob.getLocalExportXmlFile());
                     e.getIn().setHeader(NETEX_EXPORT_STATUS_HEADER,NETEX_EXPORT_STATUS_VALUE);
                 })
                 .convertBodyTo(String.class)
@@ -139,16 +146,18 @@ public class NetexExportRoute extends BaseRouteBuilder {
 
 
         from("direct:cleanUpLocalDirectory")
-                .log(LoggingLevel.INFO, getClass().getName(), "Deleting local directory ${header." + Exchange.FILE_PARENT + "} ...")
+                .log(LoggingLevel.INFO, getClass().getName(), "Deleting local files ${header." + ZIP_FILE_PATH + "} and ${header." + XML_FILE_PATH + "}")
                 .process(exchange -> {
-                    File directory = new File(exchange.getIn().getHeader(Exchange.FILE_PARENT, String.class));
+                    Path zipFilePath = Paths.get(exchange.getIn().getHeader(ZIP_FILE_PATH, String.class));
+                    Path xmlFilePath = Paths.get(exchange.getIn().getHeader(XML_FILE_PATH, String.class));
                     try {
-                        FileUtils.cleanDirectory(directory);
+                        Files.delete(zipFilePath);
+                        Files.delete(xmlFilePath);
                     } catch (IOException e) {
                         log.info("Error delete temporary files: {}", e.getMessage());
                     }
                 })
-                .log(LoggingLevel.INFO, getClass().getName(), "Local directory ${header." + Exchange.FILE_PARENT + "} cleanup done.")
+                .log(LoggingLevel.INFO, getClass().getName(), "Local files ${header." + ZIP_FILE_PATH + "} and ${header." + XML_FILE_PATH + "} cleanup done.")
                 .routeId("cleanup-local-dir");
 
     }

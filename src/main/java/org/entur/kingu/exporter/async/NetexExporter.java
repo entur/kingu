@@ -48,23 +48,26 @@ public class NetexExporter {
 
     public ExportJob process(Exchange exchange) throws InterruptedException, IOException, XMLStreamException, SAXException, JAXBException {
 
-        // TODO: camelContext.setUseMDCLogging(true);    camelContext.setUseBreadcrumb(true);
         MDC.put("camel.breadcrumbId", (String) exchange.getIn().getHeader(Exchange.BREADCRUMB_ID));
         final ExportJob exportJob = exchange.getIn().getBody(ExportJob.class);
-        try {
-
 
             logger.info("Export export job: {}", exportJob);
 
-            File localExportXmlFile = exportJob.getLocalExportXmlFile();
-            localExportXmlFile.createNewFile();
-            logger.info("Start streaming publication delivery to local file {}", localExportXmlFile);
-            FileOutputStream fileOutputStream = new FileOutputStream(localExportXmlFile,false);
-            streamingPublicationDelivery.stream(exportJob.getExportParams(), fileOutputStream, true);
-
-            exportJob.setStatus(JobStatus.FINISHED);
-            exportJob.setFinished(Instant.now());
-        } finally {
+            File localExportXmlFile = new File(exportJob.getLocalExportXmlFile());
+            try {
+                boolean localExportXmlFileNewFileCreated = localExportXmlFile.createNewFile();
+                if (localExportXmlFileNewFileCreated) {
+                    logger.info("Start streaming publication delivery to local file {}", localExportXmlFile);
+                    FileOutputStream fileOutputStream = new FileOutputStream(localExportXmlFile,false);
+                    streamingPublicationDelivery.stream(exportJob.getExportParams(), fileOutputStream, true);
+                    exportJob.setStatus(JobStatus.FINISHED);
+                    exportJob.setFinished(Instant.now());
+                } else {
+                    throw new IOException("Unable to create file: " + exportJob.getLocalExportZipFile());
+                }
+            } catch (IOException e) {
+                throw new IOException("Unable to create file: " + exportJob.getLocalExportZipFile());
+            } finally {
             MDC.remove("camel.breadcrumbId");
         }
 

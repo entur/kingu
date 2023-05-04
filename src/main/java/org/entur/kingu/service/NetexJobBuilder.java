@@ -41,11 +41,11 @@ public class NetexJobBuilder {
         exportJob.setExportParams(exportParams);
         exportJob.setSubFolder(generateSubFolderName(startTime));
         String fileNameWithoutExtension = createFileNameWithoutExtension(startTime,exportParams.getName());
-        exportJob.setFileName(fileNameWithoutExtension + ".zip");
+        exportJob.setFileName(fileNameWithoutExtension);
         exportJob.setJobUrl("export" + "/" + exportJob.getId());
 
-        exportJob.setLocalExportXmlFile(generateLocalFile(localExportPath, fileNameWithoutExtension,"xml"));
-        exportJob.setLocalExportZipFile(generateLocalFile(localExportPath, fileNameWithoutExtension,"zip"));
+        exportJob.setLocalExportXmlFile(localExportPath + File.separator + fileNameWithoutExtension + ".xml");
+        exportJob.setLocalExportZipFile(localExportPath + File.separator + fileNameWithoutExtension + ".zip");
 
         logger.info("Started export job: {}", exportJob);
 
@@ -62,10 +62,6 @@ public class NetexJobBuilder {
         }
         return fileName;
     }
-    private File generateLocalFile(String localExportPath,String fileNameWithoutExtension, String extension) {
-        return new File(localExportPath + File.separator + fileNameWithoutExtension + "." + extension);
-    }
-
     private String generateSubFolderName(Instant startTime) {
         LocalDateTime localDateTime = LocalDateTime.ofInstant(startTime, ZoneId.systemDefault());
         return localDateTime.getYear() + "-" + String.format("%02d", localDateTime.getMonthValue());

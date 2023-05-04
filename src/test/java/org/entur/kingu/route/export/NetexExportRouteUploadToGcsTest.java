@@ -15,6 +15,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.io.File;
+
 import static org.entur.kingu.Constants.NETEX_EXPORT_STATUS_HEADER;
 import static org.entur.kingu.Constants.NETEX_EXPORT_STATUS_VALUE;
 
@@ -43,7 +45,11 @@ class NetexExportRouteUploadToGcsTest extends KingRouteBuilderIntegrationTestBas
 
         context.start();
 
-        sentToPubSub.sendBody(createExportJob(JobStatus.PROCESSING));
+        final ExportJob exportJob = createExportJob(JobStatus.PROCESSING);
+
+        final boolean newZipFile = new File(exportJob.getLocalExportZipFile()).createNewFile();
+
+        sentToPubSub.sendBody(exportJob);
 
         mockPubSubTopic.expectedBodiesReceived("test");
 
@@ -52,9 +58,7 @@ class NetexExportRouteUploadToGcsTest extends KingRouteBuilderIntegrationTestBas
         mockPubSubTopic.assertIsSatisfied();
 
         final Exchange exchange = mockPubSubTopic.assertExchangeReceived(0);
-        final ExportJob exportJob = exchange.getIn().getBody(ExportJob.class);
 
-        //Assertions.assertEquals(JobStatus.FINISHED, exportJob.getStatus());
 
         Assertions.assertEquals(NETEX_EXPORT_STATUS_VALUE, exchange.getIn().getHeader(NETEX_EXPORT_STATUS_HEADER));
 

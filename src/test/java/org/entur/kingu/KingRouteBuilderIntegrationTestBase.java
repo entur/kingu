@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 
-import java.io.File;
 import java.io.IOException;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -32,9 +31,9 @@ public abstract class KingRouteBuilderIntegrationTestBase {
 
     protected ExportJob createExportJob(JobStatus jobStatus) throws IOException {
         final Instant start = ZonedDateTime.of(2023,04,22,00,00,00,00, ZoneId.systemDefault()).toInstant();
-        File localExportZipFile = new File("/tmp/tiamat-export.zip");
 
-        File localExportXmlFile = new File("src/test/resources/org/entur/kingu/route/export/tiamat-export.xml");
+        final String zipFilePath = "/tmp/tiamat-export.zip";
+        final String xmlFilePath = "src/test/resources/org/entur/kingu/route/export/tiamat-export.xml";
 
         ExportJob exportJob = new ExportJob(jobStatus);
         exportJob.setId(1L);
@@ -42,8 +41,8 @@ public abstract class KingRouteBuilderIntegrationTestBase {
         exportJob.setFileName("tiamat-export");
         exportJob.setSubFolder("tiamat-export");
         exportJob.setStarted(start);
-        exportJob.setLocalExportZipFile(localExportZipFile);
-        exportJob.setLocalExportXmlFile(localExportXmlFile);
+        exportJob.setLocalExportZipFile(zipFilePath);
+        exportJob.setLocalExportXmlFile(xmlFilePath);
         if (jobStatus.equals(JobStatus.FINISHED)) {
             exportJob.setFinished(start.plus(10, ChronoUnit.MINUTES));
         }

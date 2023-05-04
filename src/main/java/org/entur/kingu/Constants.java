@@ -7,5 +7,7 @@ public class Constants {
     public static final String EXPORT_LOCATION="exportLocation";
     public static final String NETEX_EXPORT_STATUS_HEADER = "EnturNetexExportStatus";
     public static final String NETEX_EXPORT_STATUS_VALUE = "Completed";
+    public static final String ZIP_FILE_PATH = "ZipFilePath";
+    public static final String XML_FILE_PATH = "XMLFilePath";
     private Constants(){}
 }
