@@ -59,6 +59,7 @@ public class NetexXmlReferenceValidator {
         try {
             validateNetexReferences(new FileInputStream(file), file.getName());
         } catch (FileNotFoundException e) {
+            logger.warn("Error reading file {} - {}  ", file.getName(), e.getStackTrace());
             throw new org.entur.kingu.netex.validation.NetexReferenceValidatorException("Error reading file path " + file.getName(), e);
         }
     }
@@ -100,6 +101,7 @@ public class NetexXmlReferenceValidator {
             }
 
         } catch (XMLStreamException e) {
+            logger.warn("Error streaming {} - {}  ", xmlNameForLogging, e.getStackTrace());
             throw new org.entur.kingu.netex.validation.NetexReferenceValidatorException("Error streaming " + xmlNameForLogging, e);
         } finally {
             logger.info("Spent {} ms validating {}", System.currentTimeMillis() - start, xmlNameForLogging);
