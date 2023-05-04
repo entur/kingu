@@ -27,7 +27,7 @@
 		<geotools.version>20.1</geotools.version>
 		<hibernate-spatial.version>5.4.32.Final</hibernate-spatial.version>
 		<hikariCP.version>5.0.0</hikariCP.version>
-
+		<micrometer-registry-prometheus.version>1.10.6</micrometer-registry-prometheus.version>
 
 	</properties>
 	<dependencyManagement>
@@ -186,6 +186,7 @@
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
+			<version>${micrometer-registry-prometheus.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.logstash.logback</groupId>

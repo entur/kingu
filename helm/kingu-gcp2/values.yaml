@@ -24,7 +24,7 @@ common:
           name: kingu-application
     prometheus:
       enabled: true
-      path: /health/scrape
+      path: /actuator/prometheus
     volumeMounts:
       - mountPath: /etc/application-config
         name: application-config

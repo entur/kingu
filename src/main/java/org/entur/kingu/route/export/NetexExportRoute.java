@@ -1,5 +1,6 @@
 package org.entur.kingu.route.export;
 
+import io.micrometer.core.instrument.Timer;
 import org.apache.camel.Exchange;
 import org.apache.camel.LoggingLevel;
 import org.apache.camel.processor.ThrottlerRejectedExecutionException;
@@ -12,6 +13,7 @@ import org.entur.kingu.route.BaseRouteBuilder;
 import org.entur.kingu.service.BlobStoreService;
 import org.entur.kingu.service.NetexExportJobBuilderException;
 import org.entur.kingu.service.NetexJobBuilder;
+import org.entur.kingu.service.PrometheusMetricsService;
 import org.entur.kingu.utils.ZipFileUtils;
 import org.hibernate.TransactionException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,6 +28,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.concurrent.TimeUnit;
 
 import static org.entur.kingu.Constants.EXPORT_JOB_NAME;
 import static org.entur.kingu.Constants.EXPORT_LOCATION;
@@ -57,6 +60,9 @@ public class NetexExportRoute extends BaseRouteBuilder {
 
     @Autowired
     BlobStoreService blobStoreService;
+
+    @Autowired
+    PrometheusMetricsService metricsService;
 
     @Override
     public void configure() throws Exception {
@@ -130,8 +136,11 @@ public class NetexExportRoute extends BaseRouteBuilder {
                     blobStoreService.upload(fileName, fileInputStream);
                     exportJob.setStatus(JobStatus.FINISHED);
                     exportJob.setFinished(Instant.now());
-                    log.warn("Duration(secs): {},Export job done: {} ", Duration.between(exportJob.getStarted(),exportJob.getFinished()).getSeconds(),exportJob);
-
+                    final long duration = Duration.between(exportJob.getStarted(), exportJob.getFinished()).getSeconds();
+                    log.info("Duration(secs): {},Export job done: {} ", duration,exportJob);
+                    final Timer timer = metricsService.exportTimer(exportJob.getExportParams().getName());
+                    timer.record(duration, TimeUnit.SECONDS);
+                    metricsService.exportCounter();
                     e.getIn().setHeader(EXPORT_JOB_NAME,exportJob.getExportParams().getName());
                     e.getIn().setHeader(EXPORT_LOCATION, fileName);
                     e.getIn().setHeader(ZIP_FILE_PATH, exportJob.getLocalExportZipFile());
