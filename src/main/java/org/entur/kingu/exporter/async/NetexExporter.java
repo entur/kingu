@@ -33,6 +33,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 
+import static org.entur.kingu.Constants.CAMEL_BREADCRUMB_ID;
+import static org.entur.kingu.Constants.NETEX_EXPORT_NAME;
+
 
 @Service
 public class NetexExporter {
@@ -48,8 +51,9 @@ public class NetexExporter {
 
     public ExportJob process(Exchange exchange) throws InterruptedException, IOException, XMLStreamException, SAXException, JAXBException {
 
-        MDC.put("camel.breadcrumbId", (String) exchange.getIn().getHeader(Exchange.BREADCRUMB_ID));
+        MDC.put(CAMEL_BREADCRUMB_ID, (String) exchange.getIn().getHeader(Exchange.BREADCRUMB_ID));
         final ExportJob exportJob = exchange.getIn().getBody(ExportJob.class);
+        MDC.put(NETEX_EXPORT_NAME, exportJob.getExportParams().getName());
 
             logger.info("Export export job: {}", exportJob);
 
@@ -68,7 +72,8 @@ public class NetexExporter {
             } catch (IOException e) {
                 throw new IOException("Unable to create file: " + exportJob.getLocalExportZipFile());
             } finally {
-            MDC.remove("camel.breadcrumbId");
+            MDC.remove(CAMEL_BREADCRUMB_ID);
+            MDC.remove(NETEX_EXPORT_NAME);
         }
 
         return exportJob;

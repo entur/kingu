@@ -32,6 +32,7 @@ public class PrometheusMetricsService {
     private static final String METRICS_PREFIX = "app.kingu.";
     private static final String NETEX_EXPORT_COUNTER_NAME = METRICS_PREFIX + "netex.export.count";
     private static final String NETEX_EXPORT_TIMER_NAME = METRICS_PREFIX + "netex.export.timer";
+    private static final String EXPORT_TIMER = "export.name" ;
 
     private final PrometheusMeterRegistry registry;
 
@@ -54,7 +55,7 @@ public class PrometheusMetricsService {
 
     public Timer exportTimer(String exportName) {
         List<Tag> counterTags = new ArrayList<>();
-        counterTags.add(new ImmutableTag(NETEX_EXPORT_TIMER_NAME, exportName));
+        counterTags.add(new ImmutableTag(EXPORT_TIMER, exportName));
 
         return registry.timer(NETEX_EXPORT_TIMER_NAME, counterTags);
     }

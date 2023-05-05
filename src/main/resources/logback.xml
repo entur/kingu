@@ -32,6 +32,7 @@
                             <pattern>
                                 {
                                 "breadcrumb": "%X{camel.breadcrumbId}",
+                                "exportName": "%X{netex.export.name}",
                                 "serviceContext": {
                                 "service": "kingu"
                                 },

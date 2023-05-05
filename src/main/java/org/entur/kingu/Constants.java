@@ -9,5 +9,7 @@ public class Constants {
     public static final String NETEX_EXPORT_STATUS_VALUE = "Completed";
     public static final String ZIP_FILE_PATH = "ZipFilePath";
     public static final String XML_FILE_PATH = "XMLFilePath";
+    public static final String CAMEL_BREADCRUMB_ID = "camel.breadcrumbId";
+    public static final String NETEX_EXPORT_NAME = "netex.export.name";
     private Constants(){}
 }

@@ -16,6 +16,7 @@ import org.entur.kingu.service.NetexJobBuilder;
 import org.entur.kingu.service.PrometheusMetricsService;
 import org.entur.kingu.utils.ZipFileUtils;
 import org.hibernate.TransactionException;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -30,8 +31,10 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
+import static org.entur.kingu.Constants.CAMEL_BREADCRUMB_ID;
 import static org.entur.kingu.Constants.EXPORT_JOB_NAME;
 import static org.entur.kingu.Constants.EXPORT_LOCATION;
+import static org.entur.kingu.Constants.NETEX_EXPORT_NAME;
 import static org.entur.kingu.Constants.NETEX_EXPORT_STATUS_HEADER;
 import static org.entur.kingu.Constants.NETEX_EXPORT_STATUS_VALUE;
 import static org.entur.kingu.Constants.XML_FILE_PATH;
@@ -110,18 +113,23 @@ public class NetexExportRoute extends BaseRouteBuilder {
         from("direct:validateNetexExport")
                 .log(LoggingLevel.INFO,"Validating netex export: ${body}")
                 .process(e -> {
+                    MDC.put(CAMEL_BREADCRUMB_ID, (String) e.getIn().getHeader(Exchange.BREADCRUMB_ID));
                     final ExportJob exportJob = e.getIn().getBody(ExportJob.class);
+                    MDC.put(NETEX_EXPORT_NAME, exportJob.getExportParams().getName());
                     netexXmlReferenceValidator.validateNetexReferences(new File(exportJob.getLocalExportXmlFile()));
                 })
                 .to("direct:zipNetexExport")
                 .routeId("netex-reference-validator-route");
 
         from("direct:zipNetexExport")
-                .log(LoggingLevel.INFO,"" +
-                        ": ${body}")
+                .log(LoggingLevel.INFO,"zip local export file: ${body}")
                 .process(e -> {
+                    MDC.put(CAMEL_BREADCRUMB_ID, (String) e.getIn().getHeader(Exchange.BREADCRUMB_ID));
                     final ExportJob exportJob = e.getIn().getBody(ExportJob.class);
+                    MDC.put(NETEX_EXPORT_NAME, exportJob.getExportParams().getName());
                     ZipFileUtils.exportToLocalZipFile(exportJob.getLocalExportZipFile(),exportJob.getLocalExportXmlFile());
+                    MDC.remove(CAMEL_BREADCRUMB_ID);
+                    MDC.remove(NETEX_EXPORT_NAME);
                 })
                 .to("direct:uploadToGcsBucket")
                 .routeId("zip-netex-export-route");
@@ -130,7 +138,9 @@ public class NetexExportRoute extends BaseRouteBuilder {
                 .log(LoggingLevel.INFO,"uploading to gcs bucket netex export: ${body}")
 
                 .process(e -> {
+                    MDC.put(CAMEL_BREADCRUMB_ID, (String) e.getIn().getHeader(Exchange.BREADCRUMB_ID));
                     final ExportJob exportJob = e.getIn().getBody(ExportJob.class);
+                    MDC.put(NETEX_EXPORT_NAME, exportJob.getExportParams().getName());
                     FileInputStream fileInputStream = new FileInputStream(exportJob.getLocalExportZipFile());
                     final String fileName = exportJob.getSubFolder() + File.separator + exportJob.getFileName() + ".zip";
                     blobStoreService.upload(fileName, fileInputStream);
@@ -146,6 +156,9 @@ public class NetexExportRoute extends BaseRouteBuilder {
                     e.getIn().setHeader(ZIP_FILE_PATH, exportJob.getLocalExportZipFile());
                     e.getIn().setHeader(XML_FILE_PATH, exportJob.getLocalExportXmlFile());
                     e.getIn().setHeader(NETEX_EXPORT_STATUS_HEADER,NETEX_EXPORT_STATUS_VALUE);
+
+                    MDC.remove(CAMEL_BREADCRUMB_ID);
+                    MDC.remove(NETEX_EXPORT_NAME);
                 })
                 .convertBodyTo(String.class)
                 .to(netexExportTopic)
