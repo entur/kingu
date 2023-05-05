@@ -17,6 +17,7 @@ package org.entur.kingu.exporter.async;
 
 import org.entur.kingu.model.EntityStructure;
 import org.entur.kingu.netex.mapping.NetexMapper;
+import org.entur.kingu.service.PrometheusMetricsService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,13 +35,22 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
     private final AtomicInteger mappedCount;
     private long iteratorNextDuration;
     private long iteratorMapDuration;
+    private final PrometheusMetricsService prometheusMetricsService;
+    private final String exportName;
 
 
-    public NetexMappingIterator(NetexMapper netexMapper, Iterator<T> iterator, Class<N> netexClass, AtomicInteger mappedCount) {
+    public NetexMappingIterator(NetexMapper netexMapper,
+                                Iterator<T> iterator,
+                                Class<N> netexClass,
+                                AtomicInteger mappedCount,
+                                PrometheusMetricsService prometheusMetricsService,
+                                String exportName) {
         this.netexMapper = netexMapper;
         this.iterator = iterator;
         this.netexClass = netexClass;
         this.mappedCount = mappedCount;
+        this.prometheusMetricsService = prometheusMetricsService;
+        this.exportName = exportName;
     }
 
     @Override
@@ -63,6 +73,7 @@ public class NetexMappingIterator<T extends EntityStructure, N extends org.ruteb
         var endTimeMap = System.currentTimeMillis();
         iteratorMapDuration += endTimeMap-startTimeMap;
         logStatus();
+        prometheusMetricsService.exportCounter(exportName,netexClass.getSimpleName());
         mappedCount.incrementAndGet();
         return mapped;
     }

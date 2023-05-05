@@ -28,6 +28,7 @@ import org.entur.kingu.repository.ParkingRepository;
 import org.entur.kingu.repository.StopPlaceRepository;
 import org.entur.kingu.repository.TariffZoneRepository;
 import org.entur.kingu.repository.TopographicPlaceRepository;
+import org.entur.kingu.service.PrometheusMetricsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -70,6 +71,9 @@ public class StreamingPublicationDeliveryConfig {
     private GroupOfTariffZonesRepository groupOfTariffZonesRepository;
 
     @Autowired
+    private PrometheusMetricsService prometheusMetricsService;
+
+    @Autowired
     private NetexIdHelper netexIdHelper;
 
     @Value("${asyncNetexExport.validateAgainstSchema:false}")
@@ -91,6 +95,6 @@ public class StreamingPublicationDeliveryConfig {
     private StreamingPublicationDelivery createStreamingPublicationDelivery(boolean validate) throws IOException, SAXException {
         return new StreamingPublicationDelivery(stopPlaceRepository, parkingRepository, validPrefixList,
                 publicationDeliveryHelper, netexMapper, tariffZoneRepository, fareZoneRepository, topographicPlaceRepository,
-                groupOfStopPlacesRepository,groupOfTariffZonesRepository, netexIdHelper, validate);
+                groupOfStopPlacesRepository,groupOfTariffZonesRepository, netexIdHelper, validate, prometheusMetricsService);
     }
 }

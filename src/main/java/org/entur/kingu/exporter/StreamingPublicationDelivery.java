@@ -17,24 +17,19 @@ package org.entur.kingu.exporter;
 
 import org.entur.kingu.config.ExportMode;
 import org.entur.kingu.config.ExportParams;
+import org.entur.kingu.exporter.async.NetexMappingIterator;
+import org.entur.kingu.exporter.async.NetexMappingIteratorList;
+import org.entur.kingu.exporter.async.NetexReferenceRemovingIterator;
+import org.entur.kingu.exporter.async.ParentStopFetchingIterator;
+import org.entur.kingu.exporter.async.ParentTreeTopographicPlaceFetchingIterator;
 import org.entur.kingu.model.FareFrame;
 import org.entur.kingu.model.GroupOfStopPlaces;
 import org.entur.kingu.model.GroupOfTariffZones;
 import org.entur.kingu.model.Quay;
 import org.entur.kingu.model.ServiceFrame;
 import org.entur.kingu.model.TopographicPlace;
-import org.entur.kingu.netex.id.ValidPrefixList;
-import org.hibernate.Session;
-import org.hibernate.internal.SessionImpl;
-
-import org.entur.kingu.exporter.async.NetexMappingIterator;
-import org.entur.kingu.exporter.async.NetexMappingIteratorList;
-import org.entur.kingu.exporter.async.NetexReferenceRemovingIterator;
-import org.entur.kingu.exporter.async.ParentStopFetchingIterator;
-import org.entur.kingu.exporter.async.ParentTreeTopographicPlaceFetchingIterator;
-
-
 import org.entur.kingu.netex.id.NetexIdHelper;
+import org.entur.kingu.netex.id.ValidPrefixList;
 import org.entur.kingu.netex.mapping.NetexMapper;
 import org.entur.kingu.repository.FareZoneRepository;
 import org.entur.kingu.repository.GroupOfStopPlacesRepository;
@@ -43,6 +38,7 @@ import org.entur.kingu.repository.ParkingRepository;
 import org.entur.kingu.repository.StopPlaceRepository;
 import org.entur.kingu.repository.TariffZoneRepository;
 import org.entur.kingu.repository.TopographicPlaceRepository;
+import org.entur.kingu.service.PrometheusMetricsService;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.GroupsOfStopPlacesInFrame_RelStructure;
@@ -97,7 +93,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 
 import static javax.xml.bind.JAXBContext.newInstance;
@@ -136,6 +131,8 @@ public class StreamingPublicationDelivery {
      */
     private final boolean validateAgainstSchema;
 
+    private final PrometheusMetricsService prometheusMetricsService;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -151,7 +148,8 @@ public class StreamingPublicationDelivery {
                                         GroupOfStopPlacesRepository groupOfStopPlacesRepository,
                                         GroupOfTariffZonesRepository groupOfTariffZonesRepository,
                                         NetexIdHelper netexIdHelper,
-                                        @Value("${asyncNetexExport.validateAgainstSchema:false}") boolean validateAgainstSchema) throws IOException, SAXException {
+                                        @Value("${asyncNetexExport.validateAgainstSchema:false}") boolean validateAgainstSchema,
+                                        PrometheusMetricsService prometheusMetricsService) throws IOException, SAXException {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
         this.validPrefixList = validPrefixList;
@@ -164,6 +162,7 @@ public class StreamingPublicationDelivery {
         this.groupOfTariffZonesRepository = groupOfTariffZonesRepository;
         this.netexIdHelper = netexIdHelper;
         this.validateAgainstSchema = validateAgainstSchema;
+        this.prometheusMetricsService = prometheusMetricsService;
     }
 
     private static JAXBContext createContext(Class clazz) {
@@ -274,7 +273,7 @@ public class StreamingPublicationDelivery {
         }
             var fareZonesInFrameRelStructure = new FareZonesInFrame_RelStructure();
             List<FareZone> netexFareZone = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, fareZoneIterator,
-                    FareZone.class, mappedFareZonesCount));
+                    FareZone.class, mappedFareZonesCount,prometheusMetricsService,exportParams.getName()));
 
             setField(FareZonesInFrame_RelStructure.class,"fareZone", fareZonesInFrameRelStructure, netexFareZone);
             netexFareFrame.setFareZones(fareZonesInFrameRelStructure);
@@ -334,7 +333,7 @@ public class StreamingPublicationDelivery {
             logger.info("Parking count is {}, will create parking in publication delivery", parkingsCount);
             ParkingsInFrame_RelStructure parkingsInFrame_relStructure = new ParkingsInFrame_RelStructure();
             List<Parking> parkings = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, parkingRepository.scrollParkings(stopPlacePrimaryIds),
-                    Parking.class, mappedParkingCount));
+                    Parking.class, mappedParkingCount,prometheusMetricsService,exportParams.getName()));
 
             setField(ParkingsInFrame_RelStructure.class, "parking", parkingsInFrame_relStructure, parkings);
             netexSiteFrame.setParkings(parkingsInFrame_relStructure);
@@ -359,7 +358,7 @@ public class StreamingPublicationDelivery {
 
             // Use Listening iterator to collect stop place IDs.
             ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(allStopPlaces.iterator(), stopPlaceRepository);
-            NetexMappingIterator<org.entur.kingu.model.StopPlace, StopPlace> netexMappingIterator = new NetexMappingIterator<>(netexMapper, parentStopFetchingIterator, StopPlace.class, mappedStopPlaceCount);
+            NetexMappingIterator<org.entur.kingu.model.StopPlace, StopPlace> netexMappingIterator = new NetexMappingIterator<>(netexMapper, parentStopFetchingIterator, StopPlace.class, mappedStopPlaceCount, prometheusMetricsService,exportParams.getName());
 
             List<StopPlace> stopPlaces = new NetexMappingIteratorList<>(() -> new NetexReferenceRemovingIterator(netexMappingIterator, exportParams, allCurrentNetexIdsAndVersion));
 
@@ -502,7 +501,7 @@ public class StreamingPublicationDelivery {
         if (relevantTopographicPlacesIterator.hasNext()) {
 
             NetexMappingIterator<TopographicPlace, org.rutebanken.netex.model.TopographicPlace> topographicPlaceNetexMappingIterator = new NetexMappingIterator<>(
-                    netexMapper, relevantTopographicPlacesIterator, org.rutebanken.netex.model.TopographicPlace.class, mappedTopographicPlacesCount);
+                    netexMapper, relevantTopographicPlacesIterator, org.rutebanken.netex.model.TopographicPlace.class, mappedTopographicPlacesCount, prometheusMetricsService, exportParams.getName());
 
             List<org.rutebanken.netex.model.TopographicPlace> topographicPlaces = new NetexMappingIteratorList<>(() -> topographicPlaceNetexMappingIterator);
 
@@ -533,7 +532,7 @@ public class StreamingPublicationDelivery {
         if (groupOfStopPlacesIterator.hasNext()) {
 
             NetexMappingIterator<GroupOfStopPlaces, org.rutebanken.netex.model.GroupOfStopPlaces> netexMappingIterator = new NetexMappingIterator<>(
-                    netexMapper, groupOfStopPlacesIterator, org.rutebanken.netex.model.GroupOfStopPlaces.class, mappedGroupOfStopPlacesCount);
+                    netexMapper, groupOfStopPlacesIterator, org.rutebanken.netex.model.GroupOfStopPlaces.class, mappedGroupOfStopPlacesCount, prometheusMetricsService, exportParams.getName());
 
             List<org.rutebanken.netex.model.GroupOfStopPlaces> groupOfStopPlacesList = new NetexMappingIteratorList<>(() -> netexMappingIterator);
 
@@ -561,7 +560,7 @@ public class StreamingPublicationDelivery {
 
         if (groupOfTariffZonesIterator.hasNext()) {
             NetexMappingIterator<GroupOfTariffZones, org.rutebanken.netex.model.GroupOfTariffZones> netexMappingIterator = new NetexMappingIterator<>(
-                    netexMapper, groupOfTariffZonesIterator, org.rutebanken.netex.model.GroupOfTariffZones.class,mappedGroupOfTariffZonesCount);
+                    netexMapper, groupOfTariffZonesIterator, org.rutebanken.netex.model.GroupOfTariffZones.class,mappedGroupOfTariffZonesCount, prometheusMetricsService, exportParams.getName());
 
             List<org.rutebanken.netex.model.GroupOfTariffZones> groupOfTariffZonesList = new NetexMappingIteratorList<>(() -> netexMappingIterator);
 
