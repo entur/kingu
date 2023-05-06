@@ -37,7 +37,7 @@ data:
 
 
     pubsub.kingu.outbound.topic.netex.export=google-pubsub:{{ .Values.configMap.pubSubProjectId }}:ror.kingu.outbound.topic.netex.export
-    pubsub.kingu.inbound.subscription.netex.export=google-pubsub:{{ .Values.configMap.pubSubProjectId }}:ror.kingu.inbound.subscription.kakka.netex.export
+    pubsub.kingu.inbound.subscription.netex.export=google-pubsub:{{ .Values.configMap.pubSubProjectId }}:ror.kingu.inbound.subscription.kakka.netex.export?maxAckExtensionPeriod=7200
     #spring
     spring.jpa.open-in-view=false
 
