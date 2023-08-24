@@ -22,6 +22,7 @@ import ma.glasnost.orika.impl.DefaultMapperFactory;
 import org.entur.kingu.netex.mapping.mapper.AccessibilityAssessmentMapper;
 import org.entur.kingu.netex.mapping.mapper.DataManagedObjectStructureMapper;
 import org.entur.kingu.netex.mapping.mapper.FareZoneMapper;
+import org.entur.kingu.netex.mapping.mapper.GroupOfStopPlacesMapper;
 import org.entur.kingu.netex.mapping.mapper.GroupOfTariffZonesMapper;
 import org.entur.kingu.netex.mapping.mapper.KeyListToKeyValuesMapMapper;
 import org.entur.kingu.netex.mapping.mapper.ParkingMapper;
@@ -41,7 +42,9 @@ import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.PathLink;
 import org.rutebanken.netex.model.PathLinkEndStructure;
 import org.rutebanken.netex.model.PlaceEquipments_RelStructure;
+import org.rutebanken.netex.model.PurposeOfGrouping;
 import org.rutebanken.netex.model.Quay;
+import org.rutebanken.netex.model.ResourceFrame;
 import org.rutebanken.netex.model.SanitaryEquipment;
 import org.rutebanken.netex.model.ServiceFrame;
 import org.rutebanken.netex.model.ShelterEquipment;
@@ -51,7 +54,6 @@ import org.rutebanken.netex.model.TariffZone;
 import org.rutebanken.netex.model.TicketingEquipment;
 import org.rutebanken.netex.model.TopographicPlace;
 import org.rutebanken.netex.model.WaitingRoomEquipment;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -94,6 +96,12 @@ public class NetexMapper {
                 .register();
 
         mapperFactory.classMap(GroupOfStopPlaces.class, org.entur.kingu.model.GroupOfStopPlaces.class)
+                .byDefault()
+                .fieldBToA("purposeOfGrouping", "purposeOfGroupingRef")
+                .customize(new GroupOfStopPlacesMapper())
+                .register();
+
+        mapperFactory.classMap(PurposeOfGrouping.class, org.entur.kingu.model.PurposeOfGrouping.class)
                 .byDefault()
                 .register();
 
@@ -212,6 +220,10 @@ public class NetexMapper {
         return facade.map(topographicPlace, TopographicPlace.class);
     }
 
+    public PurposeOfGrouping mapToNetexModel(org.entur.kingu.model.PurposeOfGrouping purposeOfGrouping){
+        return facade.map(purposeOfGrouping,PurposeOfGrouping.class);
+    }
+
     public TariffZone mapToNetexModel(org.entur.kingu.model.TariffZone tariffZone) {
         return facade.map(tariffZone, TariffZone.class);
     }
@@ -232,6 +244,11 @@ public class NetexMapper {
     public FareFrame mapToNetexModel(org.entur.kingu.model.FareFrame tiamatFareFrame) {
         FareFrame fareFrame = facade.map(tiamatFareFrame, FareFrame.class);
         return fareFrame;
+    }
+
+    public ResourceFrame mapToNetexModel(org.entur.kingu.model.ResourceFrame tiamatResourceFrame){
+        ResourceFrame resourceFrame = facade.map(tiamatResourceFrame, ResourceFrame.class);
+        return resourceFrame;
     }
 
     public StopPlace mapToNetexModel(org.entur.kingu.model.StopPlace tiamatStopPlace) {

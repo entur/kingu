@@ -11,5 +11,6 @@ public class Constants {
     public static final String XML_FILE_PATH = "XMLFilePath";
     public static final String CAMEL_BREADCRUMB_ID = "camel.breadcrumbId";
     public static final String NETEX_EXPORT_NAME = "netex.export.name";
+    public static final String MAX_ACK_EXTENSION_PERIOD="maxAckExtensionPeriod";
     private Constants(){}
 }

@@ -25,7 +25,9 @@ import org.entur.kingu.exporter.async.ParentTreeTopographicPlaceFetchingIterator
 import org.entur.kingu.model.FareFrame;
 import org.entur.kingu.model.GroupOfStopPlaces;
 import org.entur.kingu.model.GroupOfTariffZones;
+import org.entur.kingu.model.PurposeOfGrouping;
 import org.entur.kingu.model.Quay;
+import org.entur.kingu.model.ResourceFrame;
 import org.entur.kingu.model.ServiceFrame;
 import org.entur.kingu.model.TopographicPlace;
 import org.entur.kingu.netex.id.NetexIdHelper;
@@ -35,10 +37,12 @@ import org.entur.kingu.repository.FareZoneRepository;
 import org.entur.kingu.repository.GroupOfStopPlacesRepository;
 import org.entur.kingu.repository.GroupOfTariffZonesRepository;
 import org.entur.kingu.repository.ParkingRepository;
+import org.entur.kingu.repository.PurposeOfGroupingRepository;
 import org.entur.kingu.repository.StopPlaceRepository;
 import org.entur.kingu.repository.TariffZoneRepository;
 import org.entur.kingu.repository.TopographicPlaceRepository;
 import org.entur.kingu.service.PrometheusMetricsService;
+import org.rutebanken.netex.model.DataManagedObjectStructure;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.GroupsOfStopPlacesInFrame_RelStructure;
@@ -123,6 +127,7 @@ public class StreamingPublicationDelivery {
     private final TopographicPlaceRepository topographicPlaceRepository;
     private final GroupOfStopPlacesRepository groupOfStopPlacesRepository;
     private final GroupOfTariffZonesRepository groupOfTariffZonesRepository;
+    private final PurposeOfGroupingRepository purposeOfGroupingRepository;
     private final NeTExValidator neTExValidator = NeTExValidator.getNeTExValidator();
     private final NetexIdHelper netexIdHelper;
     /**
@@ -149,7 +154,8 @@ public class StreamingPublicationDelivery {
                                         GroupOfTariffZonesRepository groupOfTariffZonesRepository,
                                         NetexIdHelper netexIdHelper,
                                         @Value("${asyncNetexExport.validateAgainstSchema:false}") boolean validateAgainstSchema,
-                                        PrometheusMetricsService prometheusMetricsService) throws IOException, SAXException {
+                                        PrometheusMetricsService prometheusMetricsService,
+                                        PurposeOfGroupingRepository purposeOfGroupingRepository) throws IOException, SAXException {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
         this.validPrefixList = validPrefixList;
@@ -163,6 +169,7 @@ public class StreamingPublicationDelivery {
         this.netexIdHelper = netexIdHelper;
         this.validateAgainstSchema = validateAgainstSchema;
         this.prometheusMetricsService = prometheusMetricsService;
+        this.purposeOfGroupingRepository = purposeOfGroupingRepository;
     }
 
     private static JAXBContext createContext(Class clazz) {
@@ -186,6 +193,7 @@ public class StreamingPublicationDelivery {
         org.entur.kingu.model.SiteFrame siteFrame = publicationDeliveryHelper.createTiamatSiteFrame("Site frame " + exportParams);
         final ServiceFrame serviceFrame = publicationDeliveryHelper.createTiamatServiceFrame("Service frame " + exportParams);
         final FareFrame fareFrame = publicationDeliveryHelper.createTiamatFareFrame("Fare frame " + exportParams);
+        final ResourceFrame resourceFrame= publicationDeliveryHelper.createTiamatRescourceFrame("Resource frame" + exportParams);
 
         AtomicInteger mappedStopPlaceCount = new AtomicInteger();
         AtomicInteger mappedParkingCount = new AtomicInteger();
@@ -220,13 +228,16 @@ public class StreamingPublicationDelivery {
         logger.info("Mapping fare frame to netex model");
         final org.rutebanken.netex.model.FareFrame netexFareFrame = netexMapper.mapToNetexModel(fareFrame);
 
+        logger.info("Mapping resource frame to netex model");
+        final org.rutebanken.netex.model.ResourceFrame netexResourceFrame = netexMapper.mapToNetexModel(resourceFrame);
+
 
         logger.info("Preparing scrollable iterators");
         prepareStopPlaces(exportParams, allStopPlaces, mappedStopPlaceCount, netexSiteFrame);
         prepareTopographicPlaces(exportParams, stopPlacePrimaryIds, mappedTopographicPlacesCount, netexSiteFrame);
         prepareTariffZones(exportParams, stopPlacePrimaryIds, mappedTariffZonesCount, netexSiteFrame);
         prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame);
-        prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame);
+        prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame,netexResourceFrame);
 
 
         PublicationDeliveryStructure publicationDeliveryStructure;
@@ -234,9 +245,9 @@ public class StreamingPublicationDelivery {
         if (exportParams.getServiceFrameExportMode() == ExportMode.ALL) {
             prepareFareZones(exportParams,stopPlacePrimaryIds,mappedFareZonesCount,mappedGroupOfTariffZonesCount,netexSiteFrame,netexFareFrame);
             prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
-            publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame, netexServiceFrame,netexFareFrame);
+            publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame, netexServiceFrame,netexFareFrame,netexResourceFrame);
         } else {
-            publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame);
+            publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame,netexResourceFrame);
         }
 
         Marshaller marshaller = createMarshaller();
@@ -513,9 +524,12 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    private void prepareGroupOfStopPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedGroupOfStopPlacesCount, SiteFrame netexSiteFrame) {
+    private void prepareGroupOfStopPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedGroupOfStopPlacesCount, SiteFrame netexSiteFrame, org.rutebanken.netex.model.ResourceFrame netexResourceFrame) {
 
         Iterator<GroupOfStopPlaces> groupOfStopPlacesIterator;
+
+        final List<PurposeOfGrouping> allPurposeOfGrouping = purposeOfGroupingRepository.findAllPurposeOfGrouping();
+        logger.info("allPurposeOfGrouping in database: {}",allPurposeOfGrouping.size());
 
         if (exportParams.getGroupOfStopPlacesExportMode() == null || exportParams.getGroupOfStopPlacesExportMode().equals(ExportMode.ALL)) {
             logger.info("Prepare scrolling for all group of stop places");
@@ -539,6 +553,18 @@ public class StreamingPublicationDelivery {
             GroupsOfStopPlacesInFrame_RelStructure groupsOfStopPlacesInFrame_relStructure = new GroupsOfStopPlacesInFrame_RelStructure();
             setField(GroupsOfStopPlacesInFrame_RelStructure.class, "groupOfStopPlaces", groupsOfStopPlacesInFrame_relStructure, groupOfStopPlacesList);
             netexSiteFrame.setGroupsOfStopPlaces(groupsOfStopPlacesInFrame_relStructure);
+
+            if(!allPurposeOfGrouping.isEmpty()) {
+                List<JAXBElement<? extends DataManagedObjectStructure>> netexPurposeOfGroupingList2 = new ArrayList<>();
+                for (PurposeOfGrouping purposeOfGrouping : allPurposeOfGrouping) {
+                    final org.rutebanken.netex.model.PurposeOfGrouping netexPurposeOfGrouping = netexMapper.mapToNetexModel(purposeOfGrouping);
+                    final JAXBElement<org.rutebanken.netex.model.PurposeOfGrouping> purposeOfGrouping2= new ObjectFactory().createPurposeOfGrouping(netexPurposeOfGrouping);
+                    netexPurposeOfGroupingList2.add(purposeOfGrouping2);
+                }
+                netexResourceFrame.withTypesOfValue(new ObjectFactory()
+                        .createTypesOfValueInFrame_RelStructure().withValueSetOrTypeOfValue(netexPurposeOfGroupingList2));
+            }
+
         } else {
             netexSiteFrame.setGroupsOfStopPlaces(null);
         }
@@ -601,7 +627,8 @@ public class StreamingPublicationDelivery {
     @SuppressWarnings("unchecked")
     public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
                                                                   org.rutebanken.netex.model.ServiceFrame serviceFrame,
-                                                                  org.rutebanken.netex.model.FareFrame fareFrame) {
+                                                                  org.rutebanken.netex.model.FareFrame fareFrame,
+                                                                  org.rutebanken.netex.model.ResourceFrame resourceFrame) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
 
         publicationDeliveryStructure.withDataObjects
@@ -610,6 +637,7 @@ public class StreamingPublicationDelivery {
                                 .withCompositeFrameOrCommonFrame(new ObjectFactory().createServiceFrame(serviceFrame))
                                 .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
                                 .withCompositeFrameOrCommonFrame(new ObjectFactory().createFareFrame(fareFrame))
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createResourceFrame(resourceFrame))
 
                 );
 
@@ -617,11 +645,13 @@ public class StreamingPublicationDelivery {
         return publicationDeliveryStructure;
     }
     @SuppressWarnings("unchecked")
-    private PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame) {
+    private PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame, org.rutebanken.netex.model.ResourceFrame resourceFrame) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
         publicationDeliveryStructure.withDataObjects(
                 new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame)));
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
+                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createResourceFrame(resourceFrame))
+        );
 
         logger.info("Returning publication delivery {} with site frame", publicationDeliveryStructure);
         return publicationDeliveryStructure;

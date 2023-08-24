@@ -18,6 +18,7 @@ package org.entur.kingu.exporter;
 import org.entur.kingu.model.FareFrame;
 import org.entur.kingu.model.LocaleStructure;
 import org.entur.kingu.model.MultilingualStringEntity;
+import org.entur.kingu.model.ResourceFrame;
 import org.entur.kingu.model.ServiceFrame;
 import org.entur.kingu.model.VersionFrameDefaultsStructure;
 import org.entur.kingu.netex.id.NetexIdHelper;
@@ -81,4 +82,12 @@ public class PublicationDeliveryHelper {
         return versionFrameDefaultsStructure;
     }
 
+    public ResourceFrame createTiamatRescourceFrame(String description) {
+        ResourceFrame resourceFrame = new ResourceFrame();
+        resourceFrame.setDescription(new MultilingualStringEntity(description));
+        resourceFrame.setVersion(1L);
+        resourceFrame.setNetexId(netexIdHelper.getNetexId(resourceFrame,resourceFrame.hashCode()));
+
+        return resourceFrame;
+    }
 }

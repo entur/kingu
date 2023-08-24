@@ -34,6 +34,7 @@ import java.util.concurrent.TimeUnit;
 import static org.entur.kingu.Constants.CAMEL_BREADCRUMB_ID;
 import static org.entur.kingu.Constants.EXPORT_JOB_NAME;
 import static org.entur.kingu.Constants.EXPORT_LOCATION;
+import static org.entur.kingu.Constants.MAX_ACK_EXTENSION_PERIOD;
 import static org.entur.kingu.Constants.NETEX_EXPORT_NAME;
 import static org.entur.kingu.Constants.NETEX_EXPORT_STATUS_HEADER;
 import static org.entur.kingu.Constants.NETEX_EXPORT_STATUS_VALUE;
@@ -90,6 +91,7 @@ public class NetexExportRoute extends BaseRouteBuilder {
         //todo better not daisychain move in to first route
 
         from(netexExportSubscription)
+                .setProperty(MAX_ACK_EXTENSION_PERIOD, constant(7200))
                 .throttle(3).rejectExecution(true)
                 .log(LoggingLevel.INFO, "Starting Tiamat exports-1: ${body}")
                 .to("direct:netexJobBuilder")
