@@ -21,7 +21,7 @@
 		<camel.version>3.18.5</camel.version>
 		<entur.helpers.version>1.85</entur.helpers.version>
 		<guava.version>31.0.1-jre</guava.version>
-		<netex-java-model.version>1.0.12-SNAPSHOT</netex-java-model.version>
+		<netex-java-model.version>1.0.14</netex-java-model.version>
 		<orika-core.version>1.5.4</orika-core.version>
 		<jts-core.version>1.16.0</jts-core.version>
 		<geotools.version>20.1</geotools.version>
