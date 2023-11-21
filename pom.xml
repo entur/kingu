@@ -19,7 +19,7 @@
 		<maven.compiler.source>17</maven.compiler.source>
 		<entur.google.pubsub.emulator.download.skip>false</entur.google.pubsub.emulator.download.skip>
 		<camel.version>3.18.5</camel.version>
-		<entur.helpers.version>1.85</entur.helpers.version>
+		<entur.helpers.version>1.100</entur.helpers.version>
 		<guava.version>31.0.1-jre</guava.version>
 		<netex-java-model.version>1.0.14</netex-java-model.version>
 		<orika-core.version>1.5.4</orika-core.version>
