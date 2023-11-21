@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.entur.ror</groupId>
 		<artifactId>superpom</artifactId>
-		<version>1.53</version>
+		<version>1.65</version>
 	</parent>
 	<groupId>org.entur</groupId>
 	<artifactId>kingu</artifactId>
@@ -28,6 +28,7 @@
 		<hibernate-spatial.version>5.4.32.Final</hibernate-spatial.version>
 		<hikariCP.version>5.0.0</hikariCP.version>
 		<micrometer-registry-prometheus.version>1.10.6</micrometer-registry-prometheus.version>
+		<argLine/>
 
 	</properties>
 	<dependencyManagement>
@@ -201,6 +202,14 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<configuration>
+					<argLine>@{argLine} -Xms500m -Xmx1000m -Xss256k --add-opens java.base/java.lang=ALL-UNNAMED</argLine>
+					<runOrder>alphabetical</runOrder>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
