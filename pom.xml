@@ -32,6 +32,18 @@
 		<argLine/>
 
 	</properties>
+	<repositories>
+		<repository>
+			<id>central2</id>
+			<name>Check central first to avoid a lot of not found warnings</name>
+			<url>https://repo.maven.apache.org/maven2</url>
+		</repository>
+		<repository>
+			<id>osgeo</id>
+			<name>Open Source Geospatial Foundation Repository</name>
+			<url>https://repo.osgeo.org/repository/release/</url>
+		</repository>
+	</repositories>
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
