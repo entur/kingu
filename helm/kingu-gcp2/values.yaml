@@ -6,7 +6,6 @@ common:
   team: ror
   container:
     image: ${artifact.metadata.image}
-    cpuLimit: 1200m
     memoryLimit: 10000
     memory: 7500
     cpu: 1.2
