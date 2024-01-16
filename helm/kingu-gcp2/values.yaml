@@ -37,8 +37,8 @@ common:
 
   postgres:
     enabled: true
-    cpu: 0.1
-    cpuLimit: 0.1
+    cpu: 0.5
+    cpuLimit: 0.5
   configmap:
     data:
       JAVA_OPTIONS: -server -Xss1024m -Xmx7g -Dspring.config.location=/etc/application-config/application.properties
