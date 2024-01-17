@@ -5,11 +5,10 @@ common:
   shortname: kingu
   team: ror
   container:
-    image: ${artifact.metadata.image}
+    image: <+artifacts.primary.image>
     memoryLimit: 10000
     memory: 7500
     cpu: 1.2
-    cpuLimit: 1.2
     probes:
       liveness:
         path: /actuator/health
