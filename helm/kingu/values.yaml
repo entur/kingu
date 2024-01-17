@@ -45,4 +45,4 @@ common:
     enabled: true
     toEnv: true
   secrets:
-    psql-credentials: [PGPASSWORD]
+    psql-credentials: [PGUSER, PGPASSWORD]
