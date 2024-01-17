@@ -5,7 +5,6 @@ common:
   service:
     enabled: false
     internalPort: 9001
-  replicas: 2
   container:
     forceReplicas: 2
 
