@@ -7,23 +7,23 @@ variable "pubsub_project" {
 
 variable "kube_namespace" {
   description = "The Kubernetes namespace"
-  default = "kingu"
+  default     = "kingu"
 }
 
 variable "labels" {
   description = "Labels used in all resources"
   type        = map(string)
-     default = {
-       manager = "terraform"
-       team    = "ror"
-       slack   = "talk-ror"
-       app     = "kingu"
-     }
+  default = {
+    manager = "terraform"
+    team    = "ror"
+    slack   = "talk-ror"
+    app     = "kingu"
+  }
 }
 
 variable "location" {
   description = "GCP bucket location"
-  default = "europe-west1"
+  default     = "europe-west1"
 }
 
 variable "bucket_instance_suffix" {
@@ -32,7 +32,7 @@ variable "bucket_instance_suffix" {
 
 variable "bucket_instance_prefix" {
   description = "A prefix for the bucket instance, may be changed if environment is destroyed and then needed again (name collision workaround) - also bucket names must be globally unique"
-  default = "ror-kingu"
+  default     = "ror-kingu"
 }
 
 variable "force_destroy" {
@@ -55,11 +55,6 @@ variable "log_bucket" {
   default     = "false"
 }
 
-
-variable ror-kingu-db-password {
-  description = "Tiamat database password"
-}
-
 variable "kingu_netex_export_topic" {
   default = "ror.kingu.outbound.topic.netex.export"
 }
@@ -67,3 +62,4 @@ variable "kingu_netex_export_topic" {
 variable "kingu_netex_export_subscription" {
   default = "ror.kingu.inbound.subscription.kakka.netex.export"
 }
+

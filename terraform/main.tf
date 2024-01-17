@@ -14,17 +14,17 @@ terraform {
 }
 
 resource "google_pubsub_topic" "kingu_netex_export_topic" {
-  name = var.kingu_netex_export_topic
+  name    = var.kingu_netex_export_topic
   project = var.pubsub_project
-  labels = var.labels
+  labels  = var.labels
 }
 
 resource "google_pubsub_subscription" "kingu_netex_export_subscription" {
-  name =var.kingu_netex_export_subscription
-  topic =google_pubsub_topic.kingu_netex_export_topic.name
-  filter = "attributes.EnturNetexExportStatus = \"Initiated\""
-  project = var.pubsub_project
-  labels = var.labels
+  name                 = var.kingu_netex_export_subscription
+  topic                = google_pubsub_topic.kingu_netex_export_topic.name
+  filter               = "attributes.EnturNetexExportStatus = \"Initiated\""
+  project              = var.pubsub_project
+  labels               = var.labels
   ack_deadline_seconds = 10
   retry_policy {
     minimum_backoff = "10s"
@@ -38,12 +38,12 @@ resource "google_pubsub_subscription" "kingu_netex_export_subscription" {
 # Create bucket
 
 resource "google_storage_bucket" "storage_bucket" {
-  name               = "${var.bucket_instance_prefix}-${var.bucket_instance_suffix}"
-  force_destroy      = var.force_destroy
-  location           = var.location
-  project            = var.storage_project
-  storage_class      = var.storage_class
-  labels             = var.labels
+  name                        = "${var.bucket_instance_prefix}-${var.bucket_instance_suffix}"
+  force_destroy               = var.force_destroy
+  location                    = var.location
+  project                     = var.storage_project
+  storage_class               = var.storage_class
+  labels                      = var.labels
   uniform_bucket_level_access = true
   versioning {
     enabled = var.versioning
@@ -55,20 +55,7 @@ resource "google_storage_bucket" "storage_bucket" {
 }
 # Create folder in a bucket
 resource "google_storage_bucket_object" "content_folder" {
-  name          = "export/"
-  content       = "Not really a directory, but it's empty."
-  bucket        = google_storage_bucket.storage_bucket.name
-}
-
-
-#
-resource "kubernetes_secret" "ror-kingu-db-password" {
-  metadata {
-  name      = "kingu-psql-credentials"
-  namespace = var.kube_namespace
-  }
-
-  data = {
-  "PGPASSWORD"  = var.ror-kingu-db-password
-  }
+  name    = "export/"
+  content = "Not really a directory, but it's empty."
+  bucket  = google_storage_bucket.storage_bucket.name
 }

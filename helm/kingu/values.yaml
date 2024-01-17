@@ -33,7 +33,6 @@ common:
           defaultMode: 420
           name: kingu-application
         name: application-config
-
   postgres:
     enabled: true
     cpu: 0.5
@@ -45,3 +44,5 @@ common:
       TZ: Europe/Oslo
     enabled: true
     toEnv: true
+  secrets:
+    psql-credentials: [PGPASSWORD]
