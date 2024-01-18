@@ -5,7 +5,7 @@ common:
   service:
     enabled: false
     internalPort: 9001
-  container:
+  deployment:
     forceReplicas: 2
 
 configMap:
