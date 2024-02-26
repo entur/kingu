@@ -14,9 +14,7 @@
 	<description>NSR Netex Exporter</description>
 	<properties>
 		<enforcer.skip>true</enforcer.skip>
-		<java.version>17</java.version>
-		<maven.compiler.target>17</maven.compiler.target>
-		<maven.compiler.source>17</maven.compiler.source>
+		<java.version>21</java.version>
 		<entur.google.pubsub.emulator.download.skip>false</entur.google.pubsub.emulator.download.skip>
 		<camel.version>3.18.8</camel.version>
 		<entur.helpers.version>1.100</entur.helpers.version>
