@@ -15,11 +15,11 @@
 
 package org.entur.kingu.repository;
 
+import jakarta.persistence.QueryHint;
 import org.entur.kingu.model.tag.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.QueryHints;
 
-import javax.persistence.QueryHint;
 import java.util.Set;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {

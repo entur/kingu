@@ -15,6 +15,7 @@
 
 package org.entur.kingu.netex.mapping.mapper;
 
+import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
 import org.entur.kingu.model.PlaceEquipment;
@@ -29,7 +30,6 @@ import org.rutebanken.netex.model.TicketingEquipment;
 import org.rutebanken.netex.model.WaitingRoomEquipment;
 import org.springframework.stereotype.Component;
 
-import javax.xml.bind.JAXBElement;
 import java.util.List;
 
 @Component

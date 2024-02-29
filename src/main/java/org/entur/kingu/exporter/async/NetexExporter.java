@@ -16,6 +16,7 @@
 package org.entur.kingu.exporter.async;
 
 
+import jakarta.xml.bind.JAXBException;
 import org.apache.camel.Exchange;
 import org.entur.kingu.exporter.StreamingPublicationDelivery;
 import org.entur.kingu.model.job.ExportJob;
@@ -26,7 +27,6 @@ import org.slf4j.MDC;
 import org.springframework.stereotype.Service;
 import org.xml.sax.SAXException;
 
-import javax.xml.bind.JAXBException;
 import javax.xml.stream.XMLStreamException;
 import java.io.File;
 import java.io.FileOutputStream;

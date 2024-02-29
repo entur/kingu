@@ -15,8 +15,8 @@
 
 package org.entur.kingu.model;
 
-import javax.persistence.Entity;
-import javax.persistence.Transient;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Transient;
 
 
 @Entity

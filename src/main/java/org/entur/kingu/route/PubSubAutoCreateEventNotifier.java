@@ -45,12 +45,9 @@ public class PubSubAutoCreateEventNotifier extends EventNotifierSupport {
     @Override
     public void notify(CamelEvent event) {
 
-        if (event instanceof CamelEvent.CamelContextStartingEvent startingEvent) {
-            CamelContext context = startingEvent.getContext();
-            context.getEndpoints().stream().filter(e -> {
-                LOGGER.debug("creating topic subscription for: {} " , e.getEndpointUri());
-                return e.getEndpointUri().startsWith("google-pubsub");
-            }).forEach(this::createSubscriptionIfMissing);
+        if (event instanceof CamelEvent.CamelContextStartingEvent camelContextStartingEvent) {
+            CamelContext context = camelContextStartingEvent.getContext();
+            context.getEndpoints().stream().filter(e -> e.getEndpointUri().contains("google-pubsub:")).forEach(this::createSubscriptionIfMissing);
         }
 
     }

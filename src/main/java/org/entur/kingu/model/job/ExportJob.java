@@ -16,9 +16,9 @@
 package org.entur.kingu.model.job;
 
 import com.google.common.base.MoreObjects;
+import jakarta.xml.bind.annotation.XmlRootElement;
 import org.entur.kingu.config.ExportParams;
 
-import javax.xml.bind.annotation.XmlRootElement;
 import java.time.Instant;
 
 

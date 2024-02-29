@@ -15,6 +15,9 @@
 
 package org.entur.kingu.repository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.apache.commons.lang3.StringUtils;
 import org.entur.kingu.model.GroupOfStopPlaces;
 import org.entur.kingu.repository.iterator.ScrollableResultIterator;
@@ -25,9 +28,6 @@ import org.hibernate.query.NativeQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;

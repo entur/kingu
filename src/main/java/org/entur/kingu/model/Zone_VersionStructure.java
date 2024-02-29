@@ -16,13 +16,13 @@
 package org.entur.kingu.model;
 
 import com.google.common.base.MoreObjects;
-import org.locationtech.jts.geom.Polygon;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.OneToOne;
+import jakarta.persistence.Transient;
 import org.locationtech.jts.geom.Point;
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToOne;
-import javax.persistence.Transient;
+import org.locationtech.jts.geom.Polygon;
 
 
 @MappedSuperclass

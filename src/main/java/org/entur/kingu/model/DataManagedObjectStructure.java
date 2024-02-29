@@ -15,15 +15,15 @@
 
 package org.entur.kingu.model;
 
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.MappedSuperclass;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Transient;
+import org.entur.kingu.netex.mapping.mapper.NetexIdMapper;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-import org.entur.kingu.netex.mapping.mapper.NetexIdMapper;
 
-import javax.persistence.CascadeType;
-import javax.persistence.FetchType;
-import javax.persistence.MappedSuperclass;
-import javax.persistence.OneToMany;
-import javax.persistence.Transient;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
