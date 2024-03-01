@@ -1,4 +1,4 @@
-package org.entur.kingu.route;
+package org.entur.kingu.routes;
 
 import com.google.api.gax.rpc.AlreadyExistsException;
 import com.google.cloud.spring.pubsub.PubSubAdmin;

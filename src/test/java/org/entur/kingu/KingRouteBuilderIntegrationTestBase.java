@@ -1,7 +1,7 @@
 package org.entur.kingu;
 
 import com.google.cloud.spring.pubsub.core.PubSubTemplate;
-import org.apache.camel.model.ModelCamelContext;
+import org.apache.camel.CamelContext;
 import org.apache.camel.test.spring.junit5.CamelSpringBootTest;
 import org.apache.camel.test.spring.junit5.UseAdviceWith;
 import org.entur.kingu.config.ExportParams;
@@ -23,7 +23,7 @@ import java.time.temporal.ChronoUnit;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public abstract class KingRouteBuilderIntegrationTestBase {
     @Autowired
-    protected ModelCamelContext context;
+    protected CamelContext context;
 
     @Autowired
     protected PubSubTemplate pubSubTemplate;

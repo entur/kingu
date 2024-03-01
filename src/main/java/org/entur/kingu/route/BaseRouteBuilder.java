@@ -18,7 +18,8 @@ import static org.entur.kingu.Constants.SINGLETON_ROUTE_DEFINITION_GROUP_NAME;
 
 /**
  * Defines common route behavior.
- */@Component
+ */
+@Component
 public abstract class BaseRouteBuilder extends RouteBuilder {
 
     @Value("${kingu.camel.redelivery.max:1}")
