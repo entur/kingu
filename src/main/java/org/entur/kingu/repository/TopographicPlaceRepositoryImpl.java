@@ -16,33 +16,22 @@
 package org.entur.kingu.repository;
 
 
-import com.google.common.base.Strings;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.apache.commons.lang3.NotImplementedException;
-import org.entur.kingu.repository.search.TopographicPlaceSearch;
+import org.entur.kingu.model.TopographicPlace;
+import org.entur.kingu.repository.iterator.ScrollableResultIterator;
+import org.entur.kingu.repository.search.TopographicPlaceQueryFromSearchBuilder;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
-import org.entur.kingu.model.TopographicPlace;
-import org.entur.kingu.model.TopographicPlaceTypeEnumeration;
-import org.entur.kingu.repository.iterator.ScrollableResultIterator;
-import org.entur.kingu.repository.search.TopographicPlaceQueryFromSearchBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -57,49 +46,10 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 	@Autowired
 	private TopographicPlaceQueryFromSearchBuilder topographicPlaceQueryFromSearchBuilder;
 
-	@Override
-	public List<TopographicPlace> findTopographicPlace(TopographicPlaceSearch topographicPlaceSearch) {
-
-		Pair<String, Map<String, Object>> queryWithParams = topographicPlaceQueryFromSearchBuilder.buildQueryString(topographicPlaceSearch);
-
-		final Query nativeQuery = entityManager.createNativeQuery(queryWithParams.getFirst(), TopographicPlace.class);
-
-		queryWithParams.getSecond().forEach(nativeQuery::setParameter);
-
-		List<TopographicPlace> topographicPlaces = nativeQuery.getResultList();
-		return topographicPlaces;
-	}
 
 	@Override
 	public String findFirstByKeyValues(String key, Set<String> originalIds) {
-		throw new NotImplementedException("findByKeyvalue not implemented for topographic place");
-	}
-
-	@Override
-	public List<TopographicPlace> findByNetexIdOrNameAndTypeMaxVersion(String name, TopographicPlaceTypeEnumeration topographicPlaceType) {
-
-		Map<String, Object> parameters = new HashMap<>();
-		StringBuilder sql = new StringBuilder("SELECT tp.* FROM topographic_place tp WHERE " +
-				"tp.version = (SELECT MAX(tpv.version) FROM topographic_place tpv WHERE tpv.netex_id = tp.netex_id " +
-				"and (tpv.to_date is null or tpv.to_date > :pointInTime) and (tpv.from_date is null or tpv.from_date < :pointInTime)) ");
-		Instant pointInTime = Instant.now();
-		parameters.put("pointInTime", pointInTime);
-
-        if(topographicPlaceType != null) {
-            sql.append("AND tp.topographic_place_type = :topographicPlaceType ");
-            parameters.put("topographicPlaceType", topographicPlaceType.name());
-        }
-		//or t.netex_id like concat('%', :query, '%'))
-        if(!Strings.isNullOrEmpty(name)) {
-            sql.append("AND (similarity(tp.name_value, :name) > 0.2 OR  similarity(tp.netex_id, :name) = 1)");
-            parameters.put("name", name);
-            sql.append("ORDER BY SIMILARITY(tp.name_value, :name) DESC");
-        }
-
-		Query query = entityManager.createNativeQuery(sql.toString(), TopographicPlace.class);
-        parameters.forEach(query::setParameter);
-
-		return query.getResultList();
+		throw new NotImplementedException("findByKeyValue not implemented for topographic place");
 	}
 
 	@Override
@@ -128,26 +78,6 @@ public class TopographicPlaceRepositoryImpl implements TopographicPlaceRepositor
 		ScrollableResults results = sqlQuery.scroll(ScrollMode.FORWARD_ONLY);
 		ScrollableResultIterator<TopographicPlace> topographicPlaceIterator = new ScrollableResultIterator<>(results, 100, session);
 		return  topographicPlaceIterator;
-	}
-
-	@Override
-	public List<TopographicPlace> getTopographicPlacesFromStopPlaceIds(Set<Long> stopPlaceDbIds) {
-		if(stopPlaceDbIds == null || stopPlaceDbIds.isEmpty()) {
-			return new ArrayList<>();
-		}
-		Query query = entityManager.createNativeQuery(generateTopographicPlacesQueryFromStopPlaceIds(stopPlaceDbIds), TopographicPlace.class);
-
-		try {
-			@SuppressWarnings("unchecked")
-			List<TopographicPlace> results = query.getResultList();
-			if (results.isEmpty()) {
-				return null;
-			} else {
-				return results;
-			}
-		} catch (NoResultException noResultException) {
-			return null;
-		}
 	}
 
 	private String generateTopographicPlacesQueryFromStopPlaceIds(Set<Long> stopPlaceDbIds) {

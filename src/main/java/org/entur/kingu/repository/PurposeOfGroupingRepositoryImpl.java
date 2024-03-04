@@ -1,5 +1,8 @@
 package org.entur.kingu.repository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
 import org.entur.kingu.model.PurposeOfGrouping;
 import org.entur.kingu.repository.iterator.ScrollableResultIterator;
 import org.hibernate.ScrollMode;
@@ -7,9 +10,6 @@ import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
 import org.hibernate.query.NativeQuery;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 import java.util.Iterator;
 import java.util.List;
 

@@ -15,6 +15,12 @@
 
 package org.entur.kingu.repository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
+import jakarta.transaction.Transactional;
 import org.apache.commons.lang3.StringUtils;
 import org.entur.kingu.model.Parking;
 import org.entur.kingu.repository.iterator.ScrollableResultIterator;
@@ -27,13 +33,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
-import javax.transaction.Transactional;
-import java.math.BigInteger;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -109,7 +108,7 @@ public class ParkingRepositoryImpl implements ParkingRepositoryCustom {
         Session session = entityManager.unwrap(Session.class);
         NativeQuery query = session.createNativeQuery("SELECT COUNT(*) from (" + sqlWithParams.getFirst() + ") as numberOfParkings");
         searchHelper.addParams(query, sqlWithParams.getSecond());
-        return ((BigInteger) query.uniqueResult()).intValue();
+        return ((Long) query.uniqueResult()).intValue();
     }
 
     private Iterator<Parking> scrollParkings(Pair<String, Map<String, Object>> sqlWithParams) {

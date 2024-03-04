@@ -1,8 +1,11 @@
 package org.entur.kingu.netex.mapping.mapper;
 
+import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
 import org.apache.commons.lang3.StringUtils;
+import org.entur.kingu.model.StopPlaceReference;
+import org.entur.kingu.model.TariffZoneRef;
 import org.rutebanken.netex.model.AuthorityRefStructure;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZoneRefStructure;
@@ -12,10 +15,7 @@ import org.rutebanken.netex.model.PointRefStructure;
 import org.rutebanken.netex.model.PointRefs_RelStructure;
 import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
 import org.rutebanken.netex.model.ScopingMethodEnumeration;
-import org.entur.kingu.model.StopPlaceReference;
-import org.entur.kingu.model.TariffZoneRef;
 
-import javax.xml.bind.JAXBElement;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;

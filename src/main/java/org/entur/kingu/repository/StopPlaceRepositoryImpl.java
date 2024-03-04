@@ -17,7 +17,18 @@ package org.entur.kingu.repository;
 
 
 import com.google.common.collect.Sets;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.persistence.TypedQuery;
 import org.entur.kingu.config.ExportParams;
+import org.entur.kingu.model.Quay;
+import org.entur.kingu.model.StopPlace;
+import org.entur.kingu.model.StopTypeEnumeration;
+import org.entur.kingu.repository.iterator.ScrollableResultIterator;
+import org.entur.kingu.repository.search.SearchHelper;
+import org.entur.kingu.repository.search.StopPlaceQueryFromSearchBuilder;
 import org.hibernate.CacheMode;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
@@ -27,14 +38,6 @@ import org.hibernate.query.NativeQuery;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
-
-import org.entur.kingu.model.Quay;
-import org.entur.kingu.model.StopPlace;
-import org.entur.kingu.model.StopTypeEnumeration;
-import org.entur.kingu.repository.iterator.ScrollableResultIterator;
-
-import org.entur.kingu.repository.search.SearchHelper;
-import org.entur.kingu.repository.search.StopPlaceQueryFromSearchBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,17 +47,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.util.Pair;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
-import javax.persistence.TypedQuery;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
@@ -65,7 +62,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static org.entur.kingu.netex.mapping.mapper.NetexIdMapper.MERGED_ID_KEY;
 import static org.entur.kingu.netex.mapping.mapper.NetexIdMapper.ORIGINAL_ID_KEY;
 
 

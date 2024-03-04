@@ -15,26 +15,19 @@
 
 package org.entur.kingu.repository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.apache.commons.lang3.StringUtils;
+import org.entur.kingu.model.GroupOfTariffZones;
+import org.entur.kingu.repository.iterator.ScrollableResultIterator;
 import org.hibernate.ScrollMode;
 import org.hibernate.ScrollableResults;
 import org.hibernate.Session;
-import org.hibernate.internal.SessionImpl;
 import org.hibernate.query.NativeQuery;
-
-import org.entur.kingu.model.GroupOfTariffZones;
-import org.entur.kingu.repository.iterator.ScrollableResultIterator;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.util.Pair;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 public class GroupOfTariffZonesRepositoryImpl implements GroupOfTariffZonesRepositoryCustom {

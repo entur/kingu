@@ -15,11 +15,12 @@
 
 package org.entur.kingu.geo;
 
+import org.entur.kingu.model.Zone_VersionStructure;
 import org.geotools.geometry.jts.JTS;
 import org.geotools.referencing.crs.DefaultGeographicCRS;
-import org.jboss.logging.Logger;
 import org.opengis.referencing.operation.TransformException;
-import org.entur.kingu.model.Zone_VersionStructure;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -27,7 +28,7 @@ public class ZoneDistanceChecker {
 
     public static final int DEFAULT_MAX_DISTANCE = 1000;
 
-    private static final Logger logger = Logger.getLogger(ZoneDistanceChecker.class);
+    private static final Logger logger = LoggerFactory.getLogger(ZoneDistanceChecker.class);
 
     public double getDistanceInMeters(Zone_VersionStructure zone1, Zone_VersionStructure zone2) throws TransformException {
 

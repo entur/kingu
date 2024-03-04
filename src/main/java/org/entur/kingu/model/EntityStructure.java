@@ -15,9 +15,9 @@
 
 package org.entur.kingu.model;
 
+import jakarta.persistence.MappedSuperclass;
 import org.entur.kingu.model.identification.IdentifiedEntity;
 
-import javax.persistence.MappedSuperclass;
 import java.io.Serializable;
 
 

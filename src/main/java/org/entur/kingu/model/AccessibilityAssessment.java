@@ -15,10 +15,9 @@
 
 package org.entur.kingu.model;
 
+import jakarta.persistence.Entity;
 import org.hibernate.annotations.Cache;
 import org.hibernate.annotations.CacheConcurrencyStrategy;
-
-import javax.persistence.Entity;
 
 
 @Entity

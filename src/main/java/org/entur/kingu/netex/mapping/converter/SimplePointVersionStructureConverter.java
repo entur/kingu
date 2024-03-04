@@ -62,7 +62,7 @@ public class SimplePointVersionStructureConverter extends BidirectionalConverter
         try {
             epsg4326 = factory.createCoordinateReferenceSystem(internalSrsName);
         } catch (FactoryException e) {
-            logger.warn("Cannot create coordinatereferenceSystem {}", internalSrsName, e);
+            logger.warn("Cannot create coordinateReferenceSystem {}", internalSrsName, e);
             throw new RuntimeException(e);
         }
     }

@@ -15,7 +15,7 @@
 
 package org.entur.kingu.model;
 
-import javax.persistence.Entity;
+import jakarta.persistence.Entity;
 
 @Entity
 public class TariffZone extends org.entur.kingu.model.Zone_VersionStructure {

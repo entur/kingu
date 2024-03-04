@@ -15,7 +15,8 @@
 
 package org.entur.kingu.model;
 
-import javax.persistence.MappedSuperclass;
+import jakarta.persistence.MappedSuperclass;
+
 import java.math.BigDecimal;
 import java.math.BigInteger;
 

@@ -16,23 +16,14 @@
 package org.entur.kingu.repository;
 
 import org.entur.kingu.model.TopographicPlace;
-import org.entur.kingu.model.TopographicPlaceTypeEnumeration;
-import org.entur.kingu.repository.search.TopographicPlaceSearch;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Set;
 
 
 public interface TopographicPlaceRepositoryCustom extends DataManagedObjectStructureRepository<TopographicPlace> {
-
-    List<TopographicPlace> findTopographicPlace(TopographicPlaceSearch topographicPlaceSearch);
-
-    List<TopographicPlace> findByNetexIdOrNameAndTypeMaxVersion(String name, TopographicPlaceTypeEnumeration topographicPlaceType);
-
     Iterator<TopographicPlace> scrollTopographicPlaces(Set<Long> stopPlaceDbIds);
 
     Iterator<TopographicPlace> scrollTopographicPlaces();
 
-    List<TopographicPlace> getTopographicPlacesFromStopPlaceIds(Set<Long> stopPlaceDbIds);
 }
