@@ -50,7 +50,7 @@ public class NetexExportRoute extends BaseRouteBuilder {
     @Value("${pubsub.kingu.outbound.topic.netex.export}")
     private String netexExportTopic;
 
-    @Value("${async.export.path:/deployments/data/}")
+    @Value("${async.export.path:/deployments/data}")
     String localExportPath;
 
     @Autowired
