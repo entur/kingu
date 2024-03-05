@@ -79,7 +79,12 @@ public class ScrollableResultIterator<T> implements Iterator<T> {
     @SuppressWarnings("unchecked")
     private Optional<T> getNext() {
         if (scrollableResults.next() && scrollableResults.get() != null) {
-            return Optional.of((T) scrollableResults.get());
+            if(scrollableResults.get() instanceof Object[]){
+                return Optional.of((T) ((Object[]) scrollableResults.get())[0]);
+            } else {
+                return Optional.of((T) scrollableResults.get());
+            }
+
         } else {
             return Optional.empty();
         }
