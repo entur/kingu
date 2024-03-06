@@ -23,7 +23,6 @@
 		<orika-core.version>1.5.4</orika-core.version>
 		<jts-core.version>1.16.0</jts-core.version>
 		<geotools.version>29.5</geotools.version>
-		<geotools-jts-wrapper.version>24.7</geotools-jts-wrapper.version>
 		<hibernate-spatial.version>6.4.4.Final</hibernate-spatial.version>
 		<hikariCP.version>5.0.0</hikariCP.version>
 		<micrometer-registry-prometheus.version>1.10.6</micrometer-registry-prometheus.version>
@@ -138,13 +137,6 @@
 			<artifactId>gt-referencing</artifactId>
 			<version>${geotools.version}</version>
 		</dependency>
-		<!--
-		<dependency>
-			<groupId>org.geotools</groupId>
-			<artifactId>gt-jts-wrapper</artifactId>
-			<version>${geotools-jts-wrapper.version}</version>
-		</dependency>
-		-->
 
 		<dependency>
 			<groupId>org.geotools</groupId>
