@@ -70,7 +70,7 @@ public class StopPlaceRepositoryImpl implements org.entur.kingu.repository.StopP
 
     private static final Logger logger = LoggerFactory.getLogger(StopPlaceRepositoryImpl.class);
 
-    private static final int SCROLL_FETCH_SIZE = 1000;
+    private static final int SCROLL_FETCH_SIZE = 2000;
 
     private static final BasicFormatterImpl basicFormatter = new BasicFormatterImpl();
 
