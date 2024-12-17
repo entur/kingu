@@ -21,7 +21,7 @@
 		<guava.version>33.0.0-jre</guava.version>
 		<netex-java-model.version>2.0.14</netex-java-model.version>
 		<orika-core.version>1.5.4</orika-core.version>
-		<jts-core.version>1.19.0</jts-core.version>
+		<jts-core.version>1.20.0</jts-core.version>
 		<geotools.version>29.5</geotools.version>
 		<hibernate-spatial.version>6.4.4.Final</hibernate-spatial.version>
 		<hikariCP.version>5.0.0</hikariCP.version>
