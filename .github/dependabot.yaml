@@ -4,19 +4,34 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
-    ignore:
-      # Ignore all major updates for all dependencies
-      - dependency-name: "*"
-        update-types: [ "version-update:semver-major" ]
+    groups:
+      auto-merge-minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+        patterns:
+          - "*"
+        exclude-patterns:
+          - "org.apache.camel:*"
+          - "org.apache.camel.springboot:*"
 
-      # Ignore both major and minor updates for Apache Camel
-      - dependency-name: "org.apache.camel:*"
-        update-types: [ "version-update:semver-major", "version-update:semver-minor" ]
-
-      # If using Camel Spring Boot dependencies, ignore those too
-      - dependency-name: "org.apache.camel.springboot:*"
-        update-types: [ "version-update:semver-major", "version-update:semver-minor" ]
-      -
+        # Group all major updates separately (excluding Camel)
+        major-updates:
+          update-types:
+            - "major"
+          patterns:
+            - "*"
+          exclude-patterns:
+            - "org.apache.camel:*"
+            - "org.apache.camel.springboot:*"
+        camel-updates:
+          update-types:
+            - "major"
+            - "minor"
+            - "patch"
+          patterns:
+            - "org.apache.camel:*"
+            - "org.apache.camel.springboot:*"
   - package-ecosystem: "docker"
     directory: "/"
     schedule:

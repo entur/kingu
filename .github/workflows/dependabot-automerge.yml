@@ -30,7 +30,7 @@ jobs:
     name: Dependabot automerge
     needs: maven-verify
     runs-on: ubuntu-latest
-    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && github.event_name == 'pull_request'}}
+    if: ${{ github.event.pull_request.user.login == 'dependabot[bot]' && github.event_name == 'pull_request' && contains(github.event.pull_request.head.ref,'auto-merge-')}}
     steps:
       - name: Dependabot metadata
         id: metadata
