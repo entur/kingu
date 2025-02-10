@@ -14,14 +14,6 @@ updates:
         exclude-patterns:
           - "org.apache.camel:*"
           - "org.apache.camel.springboot:*"
-      major-updates:
-        update-types:
-          - "major"
-        patterns:
-          - "*"
-        exclude-patterns:
-            - "org.apache.camel:*"
-            - "org.apache.camel.springboot:*"
       camel-updates:
         update-types:
           - "major"
