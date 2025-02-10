@@ -14,24 +14,22 @@ updates:
         exclude-patterns:
           - "org.apache.camel:*"
           - "org.apache.camel.springboot:*"
-
-        # Group all major updates separately (excluding Camel)
-        major-updates:
-          update-types:
-            - "major"
-          patterns:
-            - "*"
-          exclude-patterns:
+      major-updates:
+        update-types:
+          - "major"
+        patterns:
+          - "*"
+        exclude-patterns:
             - "org.apache.camel:*"
             - "org.apache.camel.springboot:*"
-        camel-updates:
-          update-types:
-            - "major"
-            - "minor"
-            - "patch"
-          patterns:
-            - "org.apache.camel:*"
-            - "org.apache.camel.springboot:*"
+      camel-updates:
+        update-types:
+          - "major"
+          - "minor"
+          - "patch"
+        patterns:
+          - "org.apache.camel:*"
+          - "org.apache.camel.springboot:*"
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
