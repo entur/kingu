@@ -16,7 +16,7 @@
 		<enforcer.skip>true</enforcer.skip>
 		<java.version>21</java.version>
 		<entur.google.pubsub.emulator.download.skip>true</entur.google.pubsub.emulator.download.skip>
-		<camel.version>4.3.0</camel.version>
+		<camel.version>4.10.0</camel.version>
 		<entur.helpers.version>2.7</entur.helpers.version>
 		<guava.version>33.0.0-jre</guava.version>
 		<netex-java-model.version>2.0.14</netex-java-model.version>
