@@ -7,9 +7,16 @@ import org.apache.camel.test.spring.junit5.UseAdviceWith;
 import org.entur.kingu.config.ExportParams;
 import org.entur.kingu.model.job.ExportJob;
 import org.entur.kingu.model.job.JobStatus;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
+import org.testcontainers.containers.PubSubEmulatorContainer;
+import org.testcontainers.junit.jupiter.Testcontainers;
+import org.testcontainers.utility.DockerImageName;
 
 import java.io.IOException;
 import java.time.Instant;
@@ -19,9 +26,13 @@ import java.time.temporal.ChronoUnit;
 
 @CamelSpringBootTest
 @UseAdviceWith
-@ActiveProfiles({"test","local-blobstore", "default", "google-pubsub-emulator", "google-pubsub-autocreate"})
+@ActiveProfiles({"test","local-blobstore", "default", "google-pubsub-autocreate"})
+@Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 public abstract class KingRouteBuilderIntegrationTestBase {
+
+    private static PubSubEmulatorContainer pubSubEmulatorContainer;
+
     @Autowired
     protected CamelContext context;
 
@@ -51,5 +62,22 @@ public abstract class KingRouteBuilderIntegrationTestBase {
         exportJob.setExportParams(exportPrams);
 
         return exportJob;
+    }
+    @BeforeAll
+    public static void init() {
+        pubSubEmulatorContainer = new PubSubEmulatorContainer(
+                DockerImageName.parse("gcr.io/google.com/cloudsdktool/cloud-sdk:emulators"
+                )
+        );
+        pubSubEmulatorContainer.start();
+    }
+    @AfterAll
+    public static void tearDown() {
+        pubSubEmulatorContainer.stop();
+    }
+    @DynamicPropertySource
+    static void pubSubProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.cloud.gcp.pubsub.emulator-host", pubSubEmulatorContainer::getEmulatorEndpoint);
+        registry.add("camel.component.google-pubsub.endpoint", pubSubEmulatorContainer::getEmulatorEndpoint);
     }
 }
