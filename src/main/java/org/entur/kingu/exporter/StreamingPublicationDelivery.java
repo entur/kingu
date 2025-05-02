@@ -238,17 +238,24 @@ public class StreamingPublicationDelivery {
         prepareTariffZones(exportParams, stopPlacePrimaryIds, mappedTariffZonesCount, netexSiteFrame);
         prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame);
         prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame,netexResourceFrame);
-
+        prepareFareZones(exportParams,stopPlacePrimaryIds,mappedFareZonesCount,mappedGroupOfTariffZonesCount,netexSiteFrame,netexFareFrame);
+        prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
 
         PublicationDeliveryStructure publicationDeliveryStructure;
-
-        if (exportParams.getServiceFrameExportMode() == ExportMode.ALL) {
-            prepareFareZones(exportParams,stopPlacePrimaryIds,mappedFareZonesCount,mappedGroupOfTariffZonesCount,netexSiteFrame,netexFareFrame);
-            prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
-            publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame, netexServiceFrame,netexFareFrame,netexResourceFrame);
+        if(!exportParams.getFareZoneExportMode().equals(ExportMode.NONE)) {
+            if(exportParams.getGroupOfStopPlacesExportMode().equals(ExportMode.NONE)) {
+                publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexFareFrame);
+            } else {
+                publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexFareFrame, netexResourceFrame);
+            }
         } else {
-            publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame,netexResourceFrame);
+            if(exportParams.getGroupOfStopPlacesExportMode().equals(ExportMode.NONE)) {
+                publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame, netexServiceFrame);
+            } else {
+                publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexResourceFrame);
+            }
         }
+
 
         Marshaller marshaller = createMarshaller();
 
@@ -282,13 +289,20 @@ public class StreamingPublicationDelivery {
             logger.info("Fare zone export mode is {}. Will not export fare zones", exportParams.getFareZoneExportMode());
             fareZoneIterator = Collections.emptyIterator();
         }
-            var fareZonesInFrameRelStructure = new FareZonesInFrame_RelStructure();
-            List<FareZone> netexFareZone = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, fareZoneIterator,
-                    FareZone.class, mappedFareZonesCount,prometheusMetricsService,exportParams.getName()));
+        var fareZonesInFrameRelStructure = new FareZonesInFrame_RelStructure();
 
-            setField(FareZonesInFrame_RelStructure.class,"fareZone", fareZonesInFrameRelStructure, netexFareZone);
+        List<FareZone> netexFareZones = new ArrayList<>();
+        while (fareZoneIterator.hasNext()) {
+            final org.entur.kingu.model.FareZone fareZone = fareZoneIterator.next();
+            final FareZone netexFareZone = netexMapper.mapToNetexModel(fareZone);
+            netexFareZones.add(netexFareZone);
+            mappedFareZonesCount.incrementAndGet();
+        }
+
+        if (!netexFareZones.isEmpty()) {
+            setField(FareZonesInFrame_RelStructure.class, "fareZone", fareZonesInFrameRelStructure, netexFareZones);
             netexFareFrame.setFareZones(fareZonesInFrameRelStructure);
-
+        }
         if (exportGroupOfTariffZones) {
             prepareGroupOfTariffZones(exportParams,stopPlacePrimaryIds,mappedGroupOfTariffZonesCount,netexSiteFrame);
         }
@@ -644,18 +658,57 @@ public class StreamingPublicationDelivery {
         logger.info("Returning publication delivery {} with site frame and  service frame", publicationDeliveryStructure);
         return publicationDeliveryStructure;
     }
-    @SuppressWarnings("unchecked")
-    private PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame, org.rutebanken.netex.model.ResourceFrame resourceFrame) {
-        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
-        publicationDeliveryStructure.withDataObjects(
-                new PublicationDeliveryStructure.DataObjects()
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
-                        .withCompositeFrameOrCommonFrame(new ObjectFactory().createResourceFrame(resourceFrame))
-        );
 
-        logger.info("Returning publication delivery {} with site frame", publicationDeliveryStructure);
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
+                                                                  org.rutebanken.netex.model.ServiceFrame serviceFrame,
+                                                                  org.rutebanken.netex.model.FareFrame fareFrame) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
+
+        publicationDeliveryStructure.withDataObjects
+                (
+                        new PublicationDeliveryStructure.DataObjects()
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createServiceFrame(serviceFrame))
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createFareFrame(fareFrame))
+                );
+
+        logger.info("Returning publication delivery {} with site frame and  service frame", publicationDeliveryStructure);
         return publicationDeliveryStructure;
     }
+
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
+                                                                  org.rutebanken.netex.model.ServiceFrame serviceFrame) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
+
+        publicationDeliveryStructure.withDataObjects
+                (
+                        new PublicationDeliveryStructure.DataObjects()
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createServiceFrame(serviceFrame))
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
+                );
+
+        logger.info("Returning publication delivery {} with site frame and  service frame", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
+    }
+
+    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
+                                                                  org.rutebanken.netex.model.ServiceFrame serviceFrame,
+                                                                  org.rutebanken.netex.model.ResourceFrame resourceFrame) {
+        PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
+
+        publicationDeliveryStructure.withDataObjects
+                (
+                        new PublicationDeliveryStructure.DataObjects()
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createServiceFrame(serviceFrame))
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createSiteFrame(siteFrame))
+                                .withCompositeFrameOrCommonFrame(new ObjectFactory().createResourceFrame(resourceFrame))
+
+                );
+
+        logger.info("Returning publication delivery {} with site frame and  service frame", publicationDeliveryStructure);
+        return publicationDeliveryStructure;
+    }
+
     private PublicationDeliveryStructure createPublicationDelivery() {
         return new PublicationDeliveryStructure()
                 .withVersion(publicationDeliveryId)
