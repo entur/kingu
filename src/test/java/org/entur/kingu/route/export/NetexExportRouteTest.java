@@ -201,7 +201,6 @@ class NetexExportRouteTest extends KingRouteBuilderIntegrationTestBase {
                 	"fareZoneExportMode": "RELEVANT",
                 	"groupOfStopPlacesExportMode": "RELEVANT",
                 	"groupOfTariffZonesExportMode": "RELEVANT",
-                	"serviceFrameExportMode": "NONE",
                 	"topographicPlaceExportMode": "RELEVANT",
                 	"municipalityReferences": null,
                 	"countyReferences": ["KVE:TopographicPlace:15"],
