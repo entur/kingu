@@ -22,6 +22,9 @@ jobs:
       - uses: actions/upload-artifact@v4.4.0
         with:
           path: target/*.jar
+  docker-lint:
+    needs: [maven-verify]
+    uses: entur/gha-docker/.github/workflows/lint.yml@v1
   docker-build:
     needs: [maven-verify]
     uses: entur/gha-docker/.github/workflows/build.yml@v1
@@ -32,3 +35,9 @@ jobs:
     if: github.repository_owner == 'entur' && github.event_name == 'push'
     needs: [docker-build]
     uses: entur/gha-docker/.github/workflows/push.yml@v1
+
+  docker-scan:
+    needs: [docker-build]
+    uses: entur/gha-docker/.github/workflows/scan.yml@v1
+    with:
+      image_aritfact: ${{ needs.docker-build.outputs.image_artifact }}
