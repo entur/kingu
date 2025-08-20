@@ -39,7 +39,7 @@ common:
     cpuLimit: 0.5
   configmap:
     data:
-      JAVA_OPTIONS: -server -Xss1024m -Xmx7g -Dspring.config.location=/etc/application-config/application.properties
+      JDK_JAVA_OPTIONS: -server -Xss1024m -Xmx7g -Dspring.config.location=/etc/application-config/application.properties
         -Dfile.encoding=UTF-8 --add-opens java.base/java.lang=ALL-UNNAMED
       TZ: Europe/Oslo
     enabled: true
