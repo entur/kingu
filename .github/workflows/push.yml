@@ -38,6 +38,6 @@ jobs:
 
   docker-scan:
     needs: [docker-build]
-    uses: entur/gha-docker/.github/workflows/scan.yml@v1
+    uses: entur/gha-security/.github/workflows/docker-scan.yml@v2
     with:
-      image_aritfact: ${{ needs.docker-build.outputs.image_artifact }}
+      image_artifact: ${{ needs.docker-build.outputs.image_artifact }}
