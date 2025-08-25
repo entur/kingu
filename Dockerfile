@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21.0.8_9-jdk-jammy
+FROM eclipse-temurin:21-jammy
 WORKDIR /deployments
 COPY target/kingu-*-SNAPSHOT.jar kingu.jar
 RUN addgroup appuser && adduser --disabled-password appuser --ingroup appuser
