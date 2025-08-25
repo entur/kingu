@@ -47,3 +47,12 @@ common:
     toEnv: true
   secrets:
     psql-credentials: [PGUSER, PGPASSWORD]
+  env: "dev" # Set to your environment: dev, tst, or prd
+  ingress:
+    enabled: false
+    host: "example.com" # Replace with your actual host
+    trafficType: "internal" # or "external", as appropriate
+sql:
+  instance: "your-postgres-instance" # Replace with your actual Postgres instance name
+configMap:
+  pubSubProjectId: "your-gcp-project-id" # Replace with your actual GCP Pub/Sub project ID
