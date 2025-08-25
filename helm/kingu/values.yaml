@@ -9,6 +9,7 @@ common:
     memoryLimit: 10000
     memory: 7500
     cpu: 1.2
+    uid: 2000
     probes:
       liveness:
         path: /actuator/health
