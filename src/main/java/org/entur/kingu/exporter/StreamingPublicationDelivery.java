@@ -484,9 +484,9 @@ public class StreamingPublicationDelivery {
         ValidBetween validBetween = new ValidBetween().withFromDate(validFrom).withToDate(validTo);
         passengerStopAssignment.withValidBetween(validBetween);
         if (isQuay) {
-            passengerStopAssignment.withQuayRef(new QuayRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
+            passengerStopAssignment.withQuayRef(new ObjectFactory().createQuayRef(new QuayRefStructure().withRef(netexId).withVersion(String.valueOf(version))));
         } else {
-            passengerStopAssignment.withStopPlaceRef(new StopPlaceRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
+            passengerStopAssignment.withStopPlaceRef(new ObjectFactory().createStopPlaceRef(new StopPlaceRefStructure().withRef(netexId).withVersion(String.valueOf(version))));
         }
         final JAXBElement<ScheduledStopPointRefStructure> scheduledStopPointRef = new ObjectFactory().createScheduledStopPointRef(new ScheduledStopPointRefStructure().withRef(scheduledStopPointNetexId).withVersionRef(String.valueOf(version)));
         passengerStopAssignment.withScheduledStopPointRef(scheduledStopPointRef);

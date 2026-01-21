@@ -19,7 +19,7 @@
 		<camel.version>4.3.0</camel.version>
 		<entur.helpers.version>2.7</entur.helpers.version>
 		<guava.version>33.0.0-jre</guava.version>
-		<netex-java-model.version>2.0.14</netex-java-model.version>
+		<netex-java-model.version>2.0.15</netex-java-model.version>
 		<orika-core.version>1.5.4</orika-core.version>
 		<jts-core.version>1.20.0</jts-core.version>
 		<geotools.version>29.5</geotools.version>

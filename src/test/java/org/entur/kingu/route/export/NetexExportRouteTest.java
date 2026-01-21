@@ -194,7 +194,7 @@ class NetexExportRouteTest extends KingRouteBuilderIntegrationTestBase {
     }
 
     private String generateMessage(){
-        var msg = """
+        return  """
                 {
                 	"name": "15_More og Romsdal",
                 	"tariffZoneExportMode": "RELEVANT",
@@ -224,7 +224,6 @@ class NetexExportRouteTest extends KingRouteBuilderIntegrationTestBase {
                 	}
                 }
                 """;
-        return msg;
     }
 
 }

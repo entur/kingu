@@ -18,13 +18,14 @@ package org.entur.kingu.netex.mapping.converter;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.netex.model.ParkingAreas_RelStructure;
 import org.entur.kingu.model.ParkingArea;
+import org.rutebanken.netex.model.ObjectFactory;
+import org.rutebanken.netex.model.ParkingAreas_RelStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Component
@@ -45,26 +46,14 @@ public class ParkingAreaListConverter extends BidirectionalConverter<List<Parkin
 
         parkingAreas.forEach(parkingArea -> {
             org.rutebanken.netex.model.ParkingArea netexParkingArea = mapperFacade.map(parkingArea, org.rutebanken.netex.model.ParkingArea.class);
-            parkingAreas_relStructure.getParkingAreaRefOrParkingArea().add(netexParkingArea);
+            parkingAreas_relStructure.withParkingAreaRefOrParkingArea_(new ObjectFactory().createParkingArea_(netexParkingArea));
         });
         return parkingAreas_relStructure;
     }
 
     @Override
     public List<ParkingArea> convertFrom(ParkingAreas_RelStructure parkingAreas_relStructure, Type<List<ParkingArea>> destinationType, MappingContext mappingContext) {
-        logger.debug("Mapping {} quays to internal model", parkingAreas_relStructure != null ? parkingAreas_relStructure.getParkingAreaRefOrParkingArea().size() : 0);
-        List<ParkingArea> parkingAreas = new ArrayList<>();
-        if(parkingAreas_relStructure != null && parkingAreas_relStructure.getParkingAreaRefOrParkingArea() != null) {
-            parkingAreas_relStructure.getParkingAreaRefOrParkingArea().stream()
-                    .filter(object -> object instanceof org.rutebanken.netex.model.ParkingArea)
-                    .map(object -> ((org.rutebanken.netex.model.ParkingArea) object))
-                    .map(netexParkingArea -> {
-                        ParkingArea tiamatQuay = mapperFacade.map(netexParkingArea, ParkingArea.class);
-                        return tiamatQuay;
-                    })
-                    .forEach(parkingArea -> parkingAreas.add(parkingArea));
-        }
-
-        return parkingAreas;
+        //not needed currently
+        return Collections.emptyList();
     }
 }
