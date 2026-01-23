@@ -12,7 +12,6 @@ import org.entur.kingu.exporter.async.NetexExporter;
 import org.entur.kingu.model.job.ExportJob;
 import org.entur.kingu.model.job.JobStatus;
 import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -146,12 +145,15 @@ class NetexExportRouteTest extends KingRouteBuilderIntegrationTestBase {
     }
 
     @Test
-    @Disabled("Ignoring test unable to creat local zip file")
     void netexExportZipTest() throws Exception {
         AdviceWith.adviceWith(context,"zip-netex-export-route",
                 a -> a.weaveByToUri("direct:uploadToGcsBucket").replace().to("mock:uploadToGcsBucket"));
 
         File localExportZipFile = new File("/tmp/tiamat-export.zip");
+        // Ensure clean state - delete if exists from previous run
+        if (localExportZipFile.exists()) {
+            localExportZipFile.delete();
+        }
 
         Exchange inputExchange = createExchangeWithBody(context,createExportJob(JobStatus.FINISHED));
 
