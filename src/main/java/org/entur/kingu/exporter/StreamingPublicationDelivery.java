@@ -64,6 +64,7 @@ import org.rutebanken.netex.model.ScheduledStopPoint;
 import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
 import org.rutebanken.netex.model.ScheduledStopPointsInFrame_RelStructure;
 import org.rutebanken.netex.model.SiteFrame;
+import org.rutebanken.netex.model.Site_VersionStructure;
 import org.rutebanken.netex.model.StopAssignment_VersionStructure;
 import org.rutebanken.netex.model.StopAssignmentsInFrame_RelStructure;
 import org.rutebanken.netex.model.StopPlace;
@@ -385,9 +386,27 @@ public class StreamingPublicationDelivery {
             ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(allStopPlaces.iterator(), stopPlaceRepository);
             NetexMappingIterator<org.entur.kingu.model.StopPlace, StopPlace> netexMappingIterator = new NetexMappingIterator<>(netexMapper, parentStopFetchingIterator, StopPlace.class, mappedStopPlaceCount, prometheusMetricsService,exportParams.getName());
 
-            List<StopPlace> stopPlaces = new NetexMappingIteratorList<>(() -> new NetexReferenceRemovingIterator(netexMappingIterator, exportParams, allCurrentNetexIdsAndVersion));
+            // Wrap StopPlace objects in JAXBElement for JAXB marshalling (required by @XmlElementRef)
+            // Use custom ArrayList that wraps elements in JAXBElement during iteration
+            List<JAXBElement<? extends Site_VersionStructure>> stopPlaces = new ArrayList<>() {
+                @Override
+                public Iterator<JAXBElement<? extends Site_VersionStructure>> iterator() {
+                    Iterator<StopPlace> innerIterator = new NetexReferenceRemovingIterator(netexMappingIterator, exportParams, allCurrentNetexIdsAndVersion);
+                    return new Iterator<>() {
+                        @Override
+                        public boolean hasNext() {
+                            return innerIterator.hasNext();
+                        }
 
-            setField(StopPlacesInFrame_RelStructure.class, "stopPlace", stopPlacesInFrame_relStructure, stopPlaces);
+                        @Override
+                        public JAXBElement<? extends Site_VersionStructure> next() {
+                            return netexObjectFactory.createStopPlace(innerIterator.next());
+                        }
+                    };
+                }
+            };
+
+            setField(StopPlacesInFrame_RelStructure.class, "stopPlace_", stopPlacesInFrame_relStructure, stopPlaces);
             netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
         } else {
             logger.info("No stop places to export");
@@ -484,9 +503,9 @@ public class StreamingPublicationDelivery {
         ValidBetween validBetween = new ValidBetween().withFromDate(validFrom).withToDate(validTo);
         passengerStopAssignment.withValidBetween(validBetween);
         if (isQuay) {
-            passengerStopAssignment.withQuayRef(new QuayRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
+            passengerStopAssignment.withQuayRef(new ObjectFactory().createQuayRef(new QuayRefStructure().withRef(netexId).withVersion(String.valueOf(version))));
         } else {
-            passengerStopAssignment.withStopPlaceRef(new StopPlaceRefStructure().withRef(netexId).withVersion(String.valueOf(version)));
+            passengerStopAssignment.withStopPlaceRef(new ObjectFactory().createStopPlaceRef(new StopPlaceRefStructure().withRef(netexId).withVersion(String.valueOf(version))));
         }
         final JAXBElement<ScheduledStopPointRefStructure> scheduledStopPointRef = new ObjectFactory().createScheduledStopPointRef(new ScheduledStopPointRefStructure().withRef(scheduledStopPointNetexId).withVersionRef(String.valueOf(version)));
         passengerStopAssignment.withScheduledStopPointRef(scheduledStopPointRef);

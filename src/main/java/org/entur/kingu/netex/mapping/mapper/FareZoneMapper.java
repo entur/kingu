@@ -6,7 +6,7 @@ import ma.glasnost.orika.MappingContext;
 import org.apache.commons.lang3.StringUtils;
 import org.entur.kingu.model.StopPlaceReference;
 import org.entur.kingu.model.TariffZoneRef;
-import org.rutebanken.netex.model.AuthorityRefStructure;
+import org.rutebanken.netex.model.AuthorityRef;
 import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZoneRefStructure;
 import org.rutebanken.netex.model.FareZoneRefs_RelStructure;
@@ -58,14 +58,14 @@ public class FareZoneMapper extends CustomMapper<FareZone, org.entur.kingu.model
     public void mapBtoA(org.entur.kingu.model.FareZone tiamatFareZone, FareZone netexFareZone, MappingContext context) {
         super.mapBtoA(tiamatFareZone, netexFareZone, context);
         if (tiamatFareZone.getTransportOrganisationRef() != null) {
-            final JAXBElement<AuthorityRefStructure> authorityRef = objectFactory.createAuthorityRef(new AuthorityRefStructure().withRef(tiamatFareZone.getTransportOrganisationRef()));
+            final JAXBElement<AuthorityRef> authorityRef = objectFactory.createAuthorityRef(new AuthorityRef().withRef(tiamatFareZone.getTransportOrganisationRef()));
             netexFareZone.withTransportOrganisationRef(authorityRef);
         }
 
         if (!tiamatFareZone.getNeighbours().isEmpty()) {
             final List<FareZoneRefStructure> fareZoneRefs = tiamatFareZone.getNeighbours().stream()
                     .map(tariffZoneRef -> new FareZoneRefStructure().withRef(tariffZoneRef.getRef()))
-                    .collect(Collectors.toList());
+                    .toList();
             final FareZoneRefs_RelStructure fareZoneRefsRelStructure = new FareZoneRefs_RelStructure().withFareZoneRef(fareZoneRefs);
             netexFareZone.withNeighbours(fareZoneRefsRelStructure);
         }
