@@ -42,7 +42,7 @@ data:
 
 
     #netex
-    netex.profile.version:1.14:NO-NeTEx-stops:1.5
+    netex.profile.version:1.15:NO-NeTEx-stops:1.5
 
     spring.profiles.active=gcs-blobstore
 
