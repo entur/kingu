@@ -50,18 +50,19 @@ Kingu is a Spring Boot application that:
 
 The export is triggered by a JSON message with the following structure:
 
-| Parameter | Type | Description |
-|-----------|------|-------------|
-| `name` | String | Export name (e.g., "03_Oslo") |
-| `tariffZoneExportMode` | ExportMode | How to export tariff zones |
-| `fareZoneExportMode` | ExportMode | How to export fare zones |
-| `groupOfStopPlacesExportMode` | ExportMode | How to export stop place groups |
-| `groupOfTariffZonesExportMode` | ExportMode | How to export tariff zone groups |
-| `topographicPlaceExportMode` | ExportMode | How to export topographic places |
-| `municipalityReferences` | List&lt;String&gt; | Filter by municipality IDs |
+| Parameter | Type               | Description                                      |
+|-----------|--------------------|--------------------------------------------------|
+| `name` | String             | Export name (e.g., "03_Oslo")                    |
+| `tariffZoneExportMode` | ExportMode         | How to export tariff zones                       |
+| `fareZoneExportMode` | ExportMode         | How to export fare zones                         |
+| `groupOfStopPlacesExportMode` | ExportMode         | How to export stop place groups                  |
+| `groupOfTariffZonesExportMode` | ExportMode         | How to export tariff zone groups                 |
+| `topographicPlaceExportMode` | ExportMode         | How to export topographic places                 |
+| `municipalityReferences` | List&lt;String&gt; | Filter by municipality IDs                       |
 | `countyReferences` | List&lt;String&gt; | Filter by county IDs (e.g., "KVE:TopographicPlace:03") |
-| `countryReferences` | List&lt;String&gt; | Filter by country IDs |
-| `stopPlaceSearch` | StopPlaceSearch | Advanced stop place search criteria |
+| `countryReferences` | List&lt;String&gt; | Filter by country IDs                            |
+| `stopPlaceSearch` | StopPlaceSearch    | Advanced stop place search criteria              |
+| `exportMultiSurface` | bolean             | default is false for backward compatibility      |
 
 ### Export Modes
 
@@ -154,6 +155,7 @@ netexXmlReferenceValidator.throwOnValidationError=false
   "municipalityReferences": null,
   "countyReferences": ["KVE:TopographicPlace:03"],
   "countryReferences": null,
+  "multiSurfaceExport": false,
   "stopPlaceSearch": {
     "query": null,
     "stopTypeEnumerations": null,
@@ -185,7 +187,7 @@ attributes.EnturNetexExportStatus="Completed"   # When export is done
 
 ```bash
 gcloud pubsub topics publish local.kingu.topic.netex.export \
-  --message='{"name":"03_Oslo","tariffZoneExportMode":"RELEVANT","fareZoneExportMode":"RELEVANT","groupOfStopPlacesExportMode":"RELEVANT","groupOfTariffZonesExportMode":"RELEVANT","topographicPlaceExportMode":"RELEVANT","municipalityReferences":null,"countyReferences":["KVE:TopographicPlace:03"],"countryReferences":null,"stopPlaceSearch":{"query":null,"stopTypeEnumerations":null,"submode":null,"netexIdList":null,"allVersions":false,"versionValidity":"CURRENT","withoutLocationOnly":false,"withoutQuaysOnly":false,"withDuplicatedQuayImportedIds":false,"withNearbySimilarDuplicates":false,"hasParking":false,"version":null,"tags":null,"withTags":false,"pointInTime":null}}' \
+  --message='{"name":"03_Oslo","tariffZoneExportMode":"RELEVANT","fareZoneExportMode":"RELEVANT","groupOfStopPlacesExportMode":"RELEVANT","groupOfTariffZonesExportMode":"RELEVANT","topographicPlaceExportMode":"RELEVANT","municipalityReferences":null,"countyReferences":["KVE:TopographicPlace:39"],"countryReferences":null,"exportMultiSurface":true,"stopPlaceSearch":{"query":null,"stopTypeEnumerations":null,"submode":null,"netexIdList":null,"allVersions":false,"versionValidity":"CURRENT","withoutLocationOnly":false,"withoutQuaysOnly":false,"withDuplicatedQuayImportedIds":false,"withNearbySimilarDuplicates":false,"hasParking":false,"version":null,"tags":null,"withTags":false,"pointInTime":null}}' \
   --attribute=EnturNetexExportStatus="Initiated" \
   --project=ent-kingu-dev
 ```

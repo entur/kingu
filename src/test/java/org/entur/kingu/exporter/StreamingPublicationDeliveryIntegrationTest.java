@@ -29,7 +29,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
+import org.locationtech.jts.geom.Polygon;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
@@ -385,6 +388,155 @@ class StreamingPublicationDeliveryIntegrationTest {
         assertTrue(siteFrameNodes.getLength() > 0, "Should have SiteFrame");
     }
 
+    @Test
+    void testExportWithMultiSurfaceFlagExportsMultiSurfaceForTopographicPlace() throws Exception {
+        // Set multi-surface geometry on the county topographic place
+        MultiPolygon multiPolygon = createMultiPolygon();
+        savedCounty.setMultiSurface(multiPolygon);
+        topographicPlaceRepository.save(savedCounty);
+
+        ExportParams exportParams = createExportParams(
+                "MultiSurface TopographicPlace Export",
+                ExportMode.NONE,  // tariffZone
+                ExportMode.NONE,  // fareZone
+                ExportMode.NONE,  // groupOfStopPlaces
+                ExportMode.NONE,  // groupOfTariffZones
+                ExportMode.ALL    // topographicPlace
+        );
+        exportParams.setExportMultiSurface(true);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        streamingPublicationDelivery.stream(exportParams, outputStream, true);
+
+        String xmlContent = outputStream.toString(StandardCharsets.UTF_8);
+        Document document = parseXml(xmlContent);
+
+        assertTrue(xmlContent.contains("NSR:TopographicPlace:1"), "Should contain topographic place");
+        assertTrue(getGmlElementCount(document, "MultiSurface") > 0, "Should contain MultiSurface element when exportMultiSurface is true");
+        // Note: Polygon elements may exist nested inside MultiSurface/surfaceMember - that's expected GML structure
+        // The key assertion is that MultiSurface is present (not top-level Polygon as the zone geometry)
+    }
+
+    @Test
+    void testExportWithoutMultiSurfaceFlagExportsPolygonForTopographicPlace() throws Exception {
+        // Set both polygon and multi-surface on the county
+        Polygon polygon = createSimplePolygon();
+        savedCounty.setPolygon(polygon);
+        MultiPolygon multiPolygon = createMultiPolygon();
+        savedCounty.setMultiSurface(multiPolygon);
+        topographicPlaceRepository.save(savedCounty);
+
+        ExportParams exportParams = createExportParams(
+                "Polygon TopographicPlace Export",
+                ExportMode.NONE,  // tariffZone
+                ExportMode.NONE,  // fareZone
+                ExportMode.NONE,  // groupOfStopPlaces
+                ExportMode.NONE,  // groupOfTariffZones
+                ExportMode.ALL    // topographicPlace
+        );
+        // exportMultiSurface defaults to false
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        streamingPublicationDelivery.stream(exportParams, outputStream, true);
+
+        String xmlContent = outputStream.toString(StandardCharsets.UTF_8);
+        Document document = parseXml(xmlContent);
+
+        assertTrue(xmlContent.contains("NSR:TopographicPlace:1"), "Should contain topographic place");
+        assertTrue(getGmlElementCount(document, "Polygon") > 0, "Should contain Polygon element when exportMultiSurface is false");
+        assertEquals(0, getGmlElementCount(document, "MultiSurface"), "Should not contain MultiSurface element when exportMultiSurface is false");
+    }
+
+    @Test
+    void testExportWithMultiSurfaceFlagForTariffZone() throws Exception {
+        // Set multi-surface on the tariff zone
+        MultiPolygon multiPolygon = createMultiPolygon();
+        savedTariffZone.setMultiSurface(multiPolygon);
+        tariffZoneRepository.save(savedTariffZone);
+
+        ExportParams exportParams = createExportParams(
+                "MultiSurface TariffZone Export",
+                ExportMode.ALL,   // tariffZone
+                ExportMode.NONE,  // fareZone
+                ExportMode.NONE,  // groupOfStopPlaces
+                ExportMode.NONE,  // groupOfTariffZones
+                ExportMode.NONE   // topographicPlace
+        );
+        exportParams.setExportMultiSurface(true);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        streamingPublicationDelivery.stream(exportParams, outputStream, true);
+
+        String xmlContent = outputStream.toString(StandardCharsets.UTF_8);
+        Document document = parseXml(xmlContent);
+
+        assertTrue(xmlContent.contains("RUT:TariffZone:100"), "Should contain tariff zone");
+        assertTrue(getGmlElementCount(document, "MultiSurface") > 0, "Should contain MultiSurface element for tariff zone");
+    }
+
+    @Test
+    void testExportWithoutMultiSurfaceFlagExcludesMultiSurfaceForTariffZone() throws Exception {
+        // Set both polygon and multi-surface on the tariff zone
+        Polygon polygon = createSimplePolygon();
+        savedTariffZone.setPolygon(polygon);
+        MultiPolygon multiPolygon = createMultiPolygon();
+        savedTariffZone.setMultiSurface(multiPolygon);
+        tariffZoneRepository.save(savedTariffZone);
+
+        ExportParams exportParams = createExportParams(
+                "Polygon TariffZone Export",
+                ExportMode.ALL,   // tariffZone
+                ExportMode.NONE,  // fareZone
+                ExportMode.NONE,  // groupOfStopPlaces
+                ExportMode.NONE,  // groupOfTariffZones
+                ExportMode.NONE   // topographicPlace
+        );
+        // exportMultiSurface defaults to false
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        streamingPublicationDelivery.stream(exportParams, outputStream, true);
+
+        String xmlContent = outputStream.toString(StandardCharsets.UTF_8);
+        Document document = parseXml(xmlContent);
+
+        assertTrue(xmlContent.contains("RUT:TariffZone:100"), "Should contain tariff zone");
+        assertTrue(getGmlElementCount(document, "Polygon") > 0, "Should contain Polygon when exportMultiSurface is false");
+        assertEquals(0, getGmlElementCount(document, "MultiSurface"), "Should not contain MultiSurface when exportMultiSurface is false");
+    }
+
+    private MultiPolygon createMultiPolygon() {
+        Polygon polygon1 = createJtsPolygon(
+                new Coordinate(10.0, 59.0),
+                new Coordinate(10.0, 59.1),
+                new Coordinate(10.1, 59.1),
+                new Coordinate(10.1, 59.0),
+                new Coordinate(10.0, 59.0)
+        );
+        Polygon polygon2 = createJtsPolygon(
+                new Coordinate(11.0, 60.0),
+                new Coordinate(11.0, 60.1),
+                new Coordinate(11.1, 60.1),
+                new Coordinate(11.1, 60.0),
+                new Coordinate(11.0, 60.0)
+        );
+        return geometryFactory.createMultiPolygon(new Polygon[]{polygon1, polygon2});
+    }
+
+    private Polygon createSimplePolygon() {
+        return createJtsPolygon(
+                new Coordinate(10.0, 59.0),
+                new Coordinate(10.0, 59.1),
+                new Coordinate(10.1, 59.1),
+                new Coordinate(10.1, 59.0),
+                new Coordinate(10.0, 59.0)
+        );
+    }
+
+    private Polygon createJtsPolygon(Coordinate... coordinates) {
+        LinearRing ring = geometryFactory.createLinearRing(coordinates);
+        return geometryFactory.createPolygon(ring);
+    }
+
     private void assertXmlContent(String xmlContent) throws Exception {
         // Parse the XML
         DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
@@ -408,6 +560,17 @@ class StreamingPublicationDeliveryIntegrationTest {
         String version = document.getDocumentElement().getAttribute("version");
         assertNotNull(version);
         assertFalse(version.isEmpty(), "Version attribute should not be empty");
+    }
+
+    private Document parseXml(String xmlContent) throws Exception {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        return builder.parse(new ByteArrayInputStream(xmlContent.getBytes(StandardCharsets.UTF_8)));
+    }
+
+    private int getGmlElementCount(Document document, String localName) {
+        return document.getElementsByTagNameNS("http://www.opengis.net/gml/3.2", localName).getLength();
     }
 
     private Point createPoint(double longitude, double latitude) {

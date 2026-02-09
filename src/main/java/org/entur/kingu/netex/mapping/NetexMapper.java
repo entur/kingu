@@ -217,7 +217,15 @@ public class NetexMapper {
     }
 
     public TopographicPlace mapToNetexModel(org.entur.kingu.model.TopographicPlace topographicPlace) {
-        return facade.map(topographicPlace, TopographicPlace.class);
+        return mapToNetexModel(topographicPlace, false);
+    }
+
+    public TopographicPlace mapToNetexModel(org.entur.kingu.model.TopographicPlace topographicPlace, boolean exportMultiSurface) {
+        TopographicPlace netexTopographicPlace = facade.map(topographicPlace, TopographicPlace.class);
+        if (!exportMultiSurface) {
+            netexTopographicPlace.setMultiSurface(null);
+        }
+        return netexTopographicPlace;
     }
 
     public PurposeOfGrouping mapToNetexModel(org.entur.kingu.model.PurposeOfGrouping purposeOfGrouping){
@@ -225,11 +233,27 @@ public class NetexMapper {
     }
 
     public TariffZone mapToNetexModel(org.entur.kingu.model.TariffZone tariffZone) {
-        return facade.map(tariffZone, TariffZone.class);
+        return mapToNetexModel(tariffZone, false);
+    }
+
+    public TariffZone mapToNetexModel(org.entur.kingu.model.TariffZone tariffZone, boolean exportMultiSurface) {
+        TariffZone netexTariffZone = facade.map(tariffZone, TariffZone.class);
+        if (!exportMultiSurface) {
+            netexTariffZone.setMultiSurface(null);
+        }
+        return netexTariffZone;
     }
 
     public FareZone mapToNetexModel(org.entur.kingu.model.FareZone fareZone) {
-        return facade.map(fareZone, FareZone.class);
+        return mapToNetexModel(fareZone, false);
+    }
+
+    public FareZone mapToNetexModel(org.entur.kingu.model.FareZone fareZone, boolean exportMultiSurface) {
+        FareZone netexFareZone = facade.map(fareZone, FareZone.class);
+        if (!exportMultiSurface) {
+            netexFareZone.setMultiSurface(null);
+        }
+        return netexFareZone;
     }
 
     public SiteFrame mapToNetexModel(org.entur.kingu.model.SiteFrame tiamatSiteFrame) {
