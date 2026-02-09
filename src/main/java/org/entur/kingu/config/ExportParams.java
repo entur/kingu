@@ -23,6 +23,7 @@ public class ExportParams implements Serializable {
     private List<String> countyReferences;
     private List<String> countryReferences;
     private StopPlaceSearch stopPlaceSearch;
+    private boolean exportMultiSurface = false;
 
 
     public ExportParams() {
@@ -92,6 +93,14 @@ public class ExportParams implements Serializable {
 
     public StopPlaceSearch getStopPlaceSearch() {
         return stopPlaceSearch;
+    }
+
+    public boolean isExportMultiSurface() {
+        return exportMultiSurface;
+    }
+
+    public void setExportMultiSurface(boolean exportMultiSurface) {
+        this.exportMultiSurface = exportMultiSurface;
     }
 
     public String toString() {

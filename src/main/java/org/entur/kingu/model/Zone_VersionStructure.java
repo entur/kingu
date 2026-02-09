@@ -21,6 +21,7 @@ import jakarta.persistence.FetchType;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Transient;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Point;
 import org.locationtech.jts.geom.Polygon;
 
@@ -37,6 +38,9 @@ public class Zone_VersionStructure
      */
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     protected org.entur.kingu.model.PersistablePolygon polygon;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    protected org.entur.kingu.model.PersistableMultiPolygon multiSurface;
 
     @Transient
     protected org.entur.kingu.model.Projections_RelStructure projections;
@@ -59,10 +63,32 @@ public class Zone_VersionStructure
     }
 
     public void setPolygon(Polygon polygon) {
+        if (polygon == null) {
+            this.polygon = null;
+            return;
+        }
         if (this.polygon == null) {
             this.polygon = new org.entur.kingu.model.PersistablePolygon();
         }
         this.polygon.setPolygon(polygon);
+    }
+
+    public MultiPolygon getMultiSurface() {
+        if (multiSurface != null) {
+            return multiSurface.getMultiPolygon();
+        }
+        return null;
+    }
+
+    public void setMultiSurface(MultiPolygon multiPolygon) {
+        if (multiPolygon == null) {
+            this.multiSurface = null;
+            return;
+        }
+        if (this.multiSurface == null) {
+            this.multiSurface = new org.entur.kingu.model.PersistableMultiPolygon();
+        }
+        this.multiSurface.setMultiPolygon(multiPolygon);
     }
 
     public Point  getCentroid() {
