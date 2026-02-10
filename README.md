@@ -155,7 +155,7 @@ netexXmlReferenceValidator.throwOnValidationError=false
   "municipalityReferences": null,
   "countyReferences": ["KVE:TopographicPlace:03"],
   "countryReferences": null,
-  "multiSurfaceExport": false,
+  "exportMultiSurface": false,
   "stopPlaceSearch": {
     "query": null,
     "stopTypeEnumerations": null,
