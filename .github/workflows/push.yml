@@ -19,6 +19,9 @@ jobs:
           distribution: liberica
           cache: 'maven'
       - run: mvn verify
+        env:
+          DOCKER_HOST: unix:///var/run/docker.sock
+          TESTCONTAINERS_DOCKER_SOCKET_OVERRIDE: /var/run/docker.sock
       - uses: actions/upload-artifact@v4.6.2
         with:
           path: target/*.jar
