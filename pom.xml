@@ -18,19 +18,19 @@
 		<entur.google.pubsub.emulator.download.skip>true</entur.google.pubsub.emulator.download.skip>
 		<camel.version>4.3.0</camel.version>
 		<entur.helpers.version>2.7</entur.helpers.version>
-		<guava.version>33.0.0-jre</guava.version>
+		<guava.version>33.5.0-jre</guava.version>
 		<netex-java-model.version>2.0.15.2</netex-java-model.version>
 		<orika-core.version>1.5.4</orika-core.version>
 		<jts-core.version>1.20.0</jts-core.version>
 		<geotools.version>29.5</geotools.version>
         <hibernate.version>6.5.3.Final</hibernate.version>
 		<hikariCP.version>5.0.0</hikariCP.version>
-		<micrometer-registry-prometheus.version>1.10.6</micrometer-registry-prometheus.version>
-		<testcontainers.version>1.20.4</testcontainers.version>
+		<micrometer-registry-prometheus.version>1.16.3</micrometer-registry-prometheus.version>
+		<testcontainers.version>1.21.4</testcontainers.version>
 		<argLine/>
 
-		<jackson.version>2.16.1</jackson.version>
-        <postgresql.version>42.7.7</postgresql.version>
+		<jackson.version>2.21.0</jackson.version>
+        <postgresql.version>42.7.10</postgresql.version>
         <flyway.version>10.20.1</flyway.version>
     </properties>
 	<repositories>
