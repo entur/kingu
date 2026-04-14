@@ -1,7 +1,7 @@
-FROM eclipse-temurin:21-jre-noble
+FROM eclipse-temurin:21-jre-alpine
 
-RUN apt-get update && apt-get upgrade -y && rm -rf /var/lib/apt/lists/* \
-    && addgroup --gid 2000 appuser && adduser --uid 2000 --disabled-password --ingroup appuser appuser
+RUN apk --no-cache upgrade \
+    && addgroup -g 2000 appuser && adduser -u 2000 -D -G appuser appuser
 
 WORKDIR /deployments
 RUN mkdir -p /deployments/data && chown -R appuser:appuser /deployments/data
