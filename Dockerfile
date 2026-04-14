@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-noble
+FROM eclipse-temurin:21-jre-noble
 
 WORKDIR /deployments
 COPY target/kingu-*-SNAPSHOT.jar kingu.jar
