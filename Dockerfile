@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre-jammy
 
 RUN apk --no-cache upgrade \
     && addgroup -g 2000 appuser && adduser -u 2000 -D -G appuser appuser
