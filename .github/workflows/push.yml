@@ -55,7 +55,7 @@ jobs:
 
   tf-plan-dev:
     if: ${{ !cancelled() && !contains(needs.*.result, 'failure') }}
-    needs: [ terraform-lint ]
+    needs: [ terraform-lint, docker-push ]
     name: Terraform Plan DEV
     uses: entur/gha-terraform/.github/workflows/plan.yml@v2
     with:
