@@ -94,8 +94,8 @@ jobs:
     secrets: inherit
 
   approval-tst:
-    if: ${{ github.ref == 'refs/heads/main' }}
-    needs: deploy-dev
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && github.ref == 'refs/heads/main' }}
+    needs: [ deploy-dev, helm-lint, tf-plan-dev, tf-apply-dev, docker-push ]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: Approve
@@ -147,8 +147,8 @@ jobs:
     secrets: inherit
 
   approval-prd:
-    if: ${{ github.ref == 'refs/heads/main' }}
-    needs: deploy-tst
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && github.ref == 'refs/heads/main' }}
+    needs: [ deploy-tst, approval-tst, tf-plan-tst, tf-apply-tst, docker-push ]
     runs-on: ubuntu-latest
     timeout-minutes: 10
     environment: Approve
