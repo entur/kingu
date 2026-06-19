@@ -18,11 +18,11 @@ package org.entur.kingu.service;
 import io.micrometer.core.instrument.ImmutableTag;
 import io.micrometer.core.instrument.Tag;
 import io.micrometer.core.instrument.Timer;
-import io.micrometer.prometheus.PrometheusMeterRegistry;
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import javax.annotation.PreDestroy;
+import jakarta.annotation.PreDestroy;
 import java.util.ArrayList;
 import java.util.List;
 
