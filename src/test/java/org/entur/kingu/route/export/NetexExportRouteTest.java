@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -65,7 +65,7 @@ class NetexExportRouteTest extends KingRouteBuilderIntegrationTestBase {
     protected ProducerTemplate uploadToGcsBucketTemplate;
 
 
-    @MockBean
+    @MockitoBean
     protected NetexExporter netexExporter;
 
     @Value("${pubsub.kingu.outbound.topic.netex.export}")

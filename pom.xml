@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.entur.ror</groupId>
 		<artifactId>superpom</artifactId>
-		<version>4.7.0</version>
+		<version>6.4.0</version>
 	</parent>
 	<groupId>org.entur</groupId>
 	<artifactId>kingu</artifactId>
@@ -16,22 +16,18 @@
 		<enforcer.skip>true</enforcer.skip>
 		<java.version>21</java.version>
 		<entur.google.pubsub.emulator.download.skip>true</entur.google.pubsub.emulator.download.skip>
-		<camel.version>4.3.0</camel.version>
-		<entur.helpers.version>2.7</entur.helpers.version>
+		<camel.version>4.18.0</camel.version>
+		<entur.helpers.version>7.1.0</entur.helpers.version>
 		<guava.version>33.0.0-jre</guava.version>
 		<netex-java-model.version>2.0.16</netex-java-model.version>
 		<orika-core.version>1.5.4</orika-core.version>
 		<jts-core.version>1.20.0</jts-core.version>
 		<geotools.version>29.5</geotools.version>
-        <hibernate.version>6.5.3.Final</hibernate.version>
 		<hikariCP.version>5.0.0</hikariCP.version>
-		<micrometer-registry-prometheus.version>1.10.6</micrometer-registry-prometheus.version>
 		<testcontainers.version>1.21.4</testcontainers.version>
 		<argLine/>
 
-		<jackson.version>2.16.1</jackson.version>
         <postgresql.version>42.7.7</postgresql.version>
-        <flyway.version>10.20.1</flyway.version>
     </properties>
 	<repositories>
 		<repository>
@@ -64,7 +60,7 @@
 		</dependency>
 		<dependency>
 			<groupId>org.entur.ror.helpers</groupId>
-			<artifactId>gcp-storage</artifactId>
+			<artifactId>storage-gcp-gcs</artifactId>
 			<version>${entur.helpers.version}</version>
 			<exclusions>
 				<exclusion>
@@ -156,12 +152,10 @@
 		<dependency>
 			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-spatial</artifactId>
-			<version>${hibernate.version}</version>
 		</dependency>
         <dependency>
             <groupId>org.hibernate.orm</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>${hibernate.version}</version>
         </dependency>
 		<dependency>
 			<groupId>com.zaxxer</groupId>
@@ -171,17 +165,14 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-core</artifactId>
-			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-annotations</artifactId>
-			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>${jackson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -195,7 +186,6 @@
 		<dependency>
 			<groupId>io.micrometer</groupId>
 			<artifactId>micrometer-registry-prometheus</artifactId>
-			<version>${micrometer-registry-prometheus.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>net.logstash.logback</groupId>
@@ -219,15 +209,13 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
-			<groupId>org.flywaydb</groupId>
-			<artifactId>flyway-core</artifactId>
-            <version>${flyway.version}</version>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-flyway</artifactId>
 			<scope>test</scope>
 		</dependency>
         <dependency>
             <groupId>org.flywaydb</groupId>
             <artifactId>flyway-database-postgresql</artifactId>
-            <version>${flyway.version}</version>
             <scope>test</scope>
         </dependency>
 		<dependency>

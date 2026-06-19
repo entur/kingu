@@ -16,11 +16,9 @@
 package org.entur.kingu.model;
 
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.MappedSuperclass;
 
 @Embeddable
-@MappedSuperclass
-public class SiteRefStructure extends SiteElementRefStructure {
+public class SiteRefStructure extends PlaceRefStructure {
 
     public SiteRefStructure() {
         super();
