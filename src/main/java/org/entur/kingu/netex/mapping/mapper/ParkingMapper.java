@@ -44,7 +44,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.entur.kingu.model.P
                     .toList();
             if (!parkingAreas.isEmpty()) {
                 ParkingAreas_RelStructure parkingAreas_relStructure = new ParkingAreas_RelStructure();
-                parkingAreas_relStructure.getParkingAreaRefOrParkingArea_().addAll(wrappedParkingAreas);
+                parkingAreas_relStructure.getParkingAreaRefOrParkingArea_Dummy().addAll(wrappedParkingAreas);
 
                 netexParking.setParkingAreas(parkingAreas_relStructure);
             }

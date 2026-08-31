@@ -23,6 +23,7 @@ import org.rutebanken.netex.model.DataManagedObjectStructure;
 import org.rutebanken.netex.model.KeyListStructure;
 import org.rutebanken.netex.model.KeyValueStructure;
 import org.rutebanken.netex.model.StopPlace;
+import org.entur.kingu.netex.mapping.NetexMultilingualStringHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,8 +55,8 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.entur.kingu.mod
             for (AlternativeName netexAltName : netexAlternativeName) {
                 if (netexAltName != null
                         && netexAltName.getName() != null
-                        && netexAltName.getName().getValue() != null
-                        && !netexAltName.getName().getValue().isEmpty()) {
+                        && NetexMultilingualStringHelper.getValue(netexAltName.getName()) != null
+                        && !NetexMultilingualStringHelper.getValue(netexAltName.getName()).isEmpty()) {
                     //Only include non-empty alternative names
                     org.entur.kingu.model.AlternativeName tiamatAltName = new org.entur.kingu.model.AlternativeName();
                     mapperFacade.map(netexAltName, tiamatAltName);

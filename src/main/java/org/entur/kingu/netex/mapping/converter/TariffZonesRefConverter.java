@@ -45,7 +45,7 @@ public class TariffZonesRefConverter extends BidirectionalConverter<Set<TariffZo
                 .collect(toList());
 
 
-        return new TariffZoneRefs_RelStructure().withTariffZoneRef_(wrappedTariffZoneRefList);
+        return new TariffZoneRefs_RelStructure().withTariffZoneRef_Dummy(wrappedTariffZoneRefList);
     }
 
     @Override

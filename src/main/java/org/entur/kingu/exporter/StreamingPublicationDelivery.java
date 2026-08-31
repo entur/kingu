@@ -39,6 +39,7 @@ import org.entur.kingu.model.TopographicPlace;
 import org.entur.kingu.netex.id.NetexIdHelper;
 import org.entur.kingu.netex.id.ValidPrefixList;
 import org.entur.kingu.netex.mapping.NetexMapper;
+import org.entur.kingu.netex.mapping.NetexMultilingualStringHelper;
 import org.entur.kingu.repository.FareZoneRepository;
 import org.entur.kingu.repository.GroupOfStopPlacesRepository;
 import org.entur.kingu.repository.GroupOfTariffZonesRepository;
@@ -53,7 +54,6 @@ import org.rutebanken.netex.model.FareZone;
 import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
 import org.rutebanken.netex.model.GroupsOfStopPlacesInFrame_RelStructure;
 import org.rutebanken.netex.model.GroupsOfTariffZonesInFrame_RelStructure;
-import org.rutebanken.netex.model.MultilingualString;
 import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.Parking;
 import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
@@ -361,7 +361,28 @@ public class StreamingPublicationDelivery {
             List<Parking> parkings = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, parkingRepository.scrollParkings(stopPlacePrimaryIds),
                     Parking.class, mappedParkingCount,prometheusMetricsService,exportParams.getName()));
 
-            setField(ParkingsInFrame_RelStructure.class, "parking", parkingsInFrame_relStructure, parkings);
+            // Wrap Parking objects in JAXBElement for JAXB marshalling (required by @XmlElementRef).
+            // Use a custom List that wraps elements in JAXBElement lazily during iteration, so the
+            // marshaller streams parkings without materializing the full list in memory.
+            List<JAXBElement<? extends Site_VersionStructure>> wrappedParkings = new ArrayList<>() {
+                @Override
+                public Iterator<JAXBElement<? extends Site_VersionStructure>> iterator() {
+                    Iterator<Parking> innerIterator = parkings.iterator();
+                    return new Iterator<>() {
+                        @Override
+                        public boolean hasNext() {
+                            return innerIterator.hasNext();
+                        }
+
+                        @Override
+                        public JAXBElement<? extends Site_VersionStructure> next() {
+                            return netexObjectFactory.createParking(innerIterator.next());
+                        }
+                    };
+                }
+            };
+
+            setField(ParkingsInFrame_RelStructure.class, "parking_Dummy", parkingsInFrame_relStructure, wrappedParkings);
             netexSiteFrame.setParkings(parkingsInFrame_relStructure);
         } else {
             logger.info("No parkings to export based on stop places");
@@ -386,27 +407,16 @@ public class StreamingPublicationDelivery {
             ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(allStopPlaces.iterator(), stopPlaceRepository);
             NetexMappingIterator<org.entur.kingu.model.StopPlace, StopPlace> netexMappingIterator = new NetexMappingIterator<>(netexMapper, parentStopFetchingIterator, StopPlace.class, mappedStopPlaceCount, prometheusMetricsService,exportParams.getName());
 
-            // Wrap StopPlace objects in JAXBElement for JAXB marshalling (required by @XmlElementRef)
-            // Use custom ArrayList that wraps elements in JAXBElement during iteration
-            List<JAXBElement<? extends Site_VersionStructure>> stopPlaces = new ArrayList<>() {
+            // Use a custom List backed by a lazily-scrolling iterator, so the marshaller streams
+            // stop places without materializing the full list in memory.
+            List<StopPlace> stopPlaces = new ArrayList<>() {
                 @Override
-                public Iterator<JAXBElement<? extends Site_VersionStructure>> iterator() {
-                    Iterator<StopPlace> innerIterator = new NetexReferenceRemovingIterator(netexMappingIterator, exportParams, allCurrentNetexIdsAndVersion);
-                    return new Iterator<>() {
-                        @Override
-                        public boolean hasNext() {
-                            return innerIterator.hasNext();
-                        }
-
-                        @Override
-                        public JAXBElement<? extends Site_VersionStructure> next() {
-                            return netexObjectFactory.createStopPlace(innerIterator.next());
-                        }
-                    };
+                public Iterator<StopPlace> iterator() {
+                    return new NetexReferenceRemovingIterator(netexMappingIterator, exportParams, allCurrentNetexIdsAndVersion);
                 }
             };
 
-            setField(StopPlacesInFrame_RelStructure.class, "stopPlace_", stopPlacesInFrame_relStructure, stopPlaces);
+            setField(StopPlacesInFrame_RelStructure.class, "stopPlace", stopPlacesInFrame_relStructure, stopPlaces);
             netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
         } else {
             logger.info("No stop places to export");
@@ -518,7 +528,7 @@ public class StreamingPublicationDelivery {
         final org.rutebanken.netex.model.ScheduledStopPoint netexScheduledStopPoint = new org.rutebanken.netex.model.ScheduledStopPoint();
         netexScheduledStopPoint.setId(scheduledStopPointNetexId);
         netexScheduledStopPoint.setVersion(String.valueOf(version));
-        netexScheduledStopPoint.withName(new MultilingualString().withValue(stopPlaceName));
+        netexScheduledStopPoint.withName(NetexMultilingualStringHelper.toNetexModel(stopPlaceName));
         ValidBetween validBetween = new ValidBetween().withFromDate(validFrom).withToDate(validTo);
 
         netexScheduledStopPoint.withValidBetween(validBetween);

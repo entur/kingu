@@ -24,6 +24,7 @@ import org.rutebanken.netex.model.Quay;
 import org.rutebanken.netex.model.SimplePoint_VersionStructure;
 import org.entur.kingu.model.AlternativeName;
 import org.entur.kingu.model.BoardingPosition;
+import org.entur.kingu.netex.mapping.NetexMultilingualStringHelper;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -49,8 +50,8 @@ public class QuayMapper extends CustomMapper<Quay, org.entur.kingu.model.Quay> {
             for (org.rutebanken.netex.model.AlternativeName netexAltName : netexAlternativeName) {
                 if (netexAltName != null
                         && netexAltName.getName() != null
-                        && netexAltName.getName().getValue() != null
-                        && !netexAltName.getName().getValue().isEmpty()) {
+                        && NetexMultilingualStringHelper.getValue(netexAltName.getName()) != null
+                        && !NetexMultilingualStringHelper.getValue(netexAltName.getName()).isEmpty()) {
                     //Only include non-empty alternative names
                     org.entur.kingu.model.AlternativeName tiamatAltName = new org.entur.kingu.model.AlternativeName();
                     mapperFacade.map(netexAltName, tiamatAltName);
@@ -72,7 +73,8 @@ public class QuayMapper extends CustomMapper<Quay, org.entur.kingu.model.Quay> {
                 if (netexBoardingPosition instanceof org.rutebanken.netex.model.BoardingPosition) {
                     final org.rutebanken.netex.model.BoardingPosition netexBoardingPosition1 = (org.rutebanken.netex.model.BoardingPosition) netexBoardingPosition;
                     if (netexBoardingPosition1.getPublicCode() != null
-                            && !netexBoardingPosition1.getPublicCode().isEmpty()) {
+                            && netexBoardingPosition1.getPublicCode().getValue() != null
+                            && !netexBoardingPosition1.getPublicCode().getValue().isEmpty()) {
                         final BoardingPosition tiamatBoardingPosition = new BoardingPosition();
                         mapperFacade.map(netexBoardingPosition1,tiamatBoardingPosition);
                         tiamatBoardingPositions.add(tiamatBoardingPosition);
@@ -134,7 +136,7 @@ public class QuayMapper extends CustomMapper<Quay, org.entur.kingu.model.Quay> {
                     final org.rutebanken.netex.model.BoardingPosition netexBoardingPosition = new org.rutebanken.netex.model.BoardingPosition();
                     mapperFacade.map(boardingPosition,netexBoardingPosition);
                     netexBoardingPosition.setId(boardingPosition.getNetexId());
-                    netexBoardingPosition.setPublicCode(boardingPosition.getPublicCode());
+                    netexBoardingPosition.setPublicCode(new org.rutebanken.netex.model.PublicCodeStructure().withValue(boardingPosition.getPublicCode()));
 
                     if (boardingPosition.getCentroid()!= null) {
                         SimplePoint_VersionStructure simplePoint = new SimplePoint_VersionStructure()
