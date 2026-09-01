@@ -17,21 +17,19 @@ package org.entur.kingu.netex.mapping;
 
 import jakarta.xml.bind.JAXBElement;
 import org.rutebanken.netex.model.MultilingualString;
-import org.rutebanken.netex.model.ObjectFactory;
 import org.rutebanken.netex.model.TextType;
 
 import java.io.Serializable;
 
 /**
  * Since netex-java-model 3.0.0, {@link MultilingualString} no longer holds a single value,
- * but a list of {@link TextType} elements to support multiple language variants of the same
- * text. Kingu's own model only ever stores a single value/lang pair, so on read we pick the
- * first {@code Text} element, and on write we produce a {@link MultilingualString} with exactly
- * one {@code Text} element.
+ * but a mixed-content list that can carry either plain text or {@link TextType} elements, the
+ * latter added to support multiple language variants of the same text. Kingu's own model only
+ * ever stores a single value/lang pair, so on read we accept either shape, and on write we
+ * produce the plain-text shape (schema-valid under the new type, since its {@code Text}
+ * sub-elements are optional) to keep output byte-compatible with pre-3.0.0 consumers.
  */
 public final class NetexMultilingualStringHelper {
-
-    private static final ObjectFactory OBJECT_FACTORY = new ObjectFactory();
 
     private NetexMultilingualStringHelper() {
     }
@@ -45,12 +43,7 @@ public final class NetexMultilingualStringHelper {
             return null;
         }
 
-        TextType text = new TextType().withValue(value);
-        if (lang != null) {
-            text.setLang(lang);
-        }
-
-        MultilingualString multilingualString = new MultilingualString().withContent(OBJECT_FACTORY.createMultilingualStringText(text));
+        MultilingualString multilingualString = new MultilingualString().withContent(value);
         if (lang != null) {
             multilingualString.setLang(lang);
         }
