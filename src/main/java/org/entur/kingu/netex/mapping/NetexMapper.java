@@ -166,27 +166,38 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
+        // Equipment_VersionStructure (unlike StopPlace/Quay/TariffZone/etc.) does not extend
+        // DataManagedObjectStructure, so it never goes through DataManagedObjectStructureMapper's
+        // NetexIdMapper call. Without fieldBToA here, Orika's default convention mapping instead
+        // wires up kingu's own JPA primary key (both sides happen to have a same-named "id"
+        // property), silently emitting the raw database id instead of the NSR:-prefixed netexId.
         mapperFactory.classMap(WaitingRoomEquipment.class, org.entur.kingu.model.WaitingRoomEquipment.class)
+                .fieldBToA("netexId", "id")
                 .byDefault()
                 .register();
 
         mapperFactory.classMap(SanitaryEquipment.class, org.entur.kingu.model.SanitaryEquipment.class)
+                .fieldBToA("netexId", "id")
                 .byDefault()
                 .register();
 
         mapperFactory.classMap(TicketingEquipment.class, org.entur.kingu.model.TicketingEquipment.class)
+                .fieldBToA("netexId", "id")
                 .byDefault()
                 .register();
 
         mapperFactory.classMap(ShelterEquipment.class, org.entur.kingu.model.ShelterEquipment.class)
+                .fieldBToA("netexId", "id")
                 .byDefault()
                 .register();
 
         mapperFactory.classMap(CycleStorageEquipment.class, org.entur.kingu.model.CycleStorageEquipment.class)
+                .fieldBToA("netexId", "id")
                 .byDefault()
                 .register();
 
         mapperFactory.classMap(GeneralSign.class, org.entur.kingu.model.GeneralSign.class)
+                .fieldBToA("netexId", "id")
                 .byDefault()
                 .register();
 
