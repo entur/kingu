@@ -20,12 +20,19 @@ import org.entur.kingu.model.tag.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.QueryHints;
 
+import java.util.Collection;
 import java.util.Set;
 
 public interface TagRepository extends JpaRepository<Tag, Long> {
 
     @QueryHints(value = {@QueryHint(name = "org.hibernate.cacheable", value = "true")}, forCounting = false)
     Set<Tag> findByIdReference(String ref);
+
+    /**
+     * Bulk variant of {@link #findByIdReference(String)}, used to preload tags for many entities in one
+     * query instead of one query per entity (see {@link org.entur.kingu.netex.mapping.mapper.TagKeyValuesMapper}).
+     */
+    Set<Tag> findByIdReferenceIn(Collection<String> refs);
 
     @QueryHints(value = {@QueryHint(name = "org.hibernate.cacheable", value = "true")}, forCounting = false)
     Set<Tag> findByNameContaining(String name);
