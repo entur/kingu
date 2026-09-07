@@ -259,6 +259,11 @@ class StreamingPublicationDeliveryIntegrationTest {
         assertTrue(xmlContent.contains("NSR:StopPlace:1001"), "Should contain the test stop place");
         assertTrue(xmlContent.contains("Test Stop Place"), "Should contain stop place name");
         assertTrue(xmlContent.contains("NSR:Quay:1001"), "Should contain the quay");
+
+        // otherTransportModes is @Transient on kingu's StopPlace/Quay; the getter null-initialises to
+        // an empty list, so without excluding it from the classMaps Orika/JAXB would marshal a spurious
+        // empty <OtherTransportModes></OtherTransportModes> element on every stop place and quay.
+        assertFalse(xmlContent.contains("OtherTransportModes"), "Should not contain an empty OtherTransportModes element");
     }
 
     @Test
