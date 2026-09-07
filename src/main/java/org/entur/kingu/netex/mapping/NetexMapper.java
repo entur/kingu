@@ -98,6 +98,7 @@ public class NetexMapper {
         mapperFactory.classMap(GroupOfStopPlaces.class, org.entur.kingu.model.GroupOfStopPlaces.class)
                 .byDefault()
                 .fieldBToA("purposeOfGrouping", "purposeOfGroupingRef")
+                .fieldAToB("purposeOfGroupingRef.ref", "purposeOfGrouping.name")
                 .customize(new GroupOfStopPlacesMapper())
                 .register();
 
@@ -118,6 +119,12 @@ public class NetexMapper {
                 .exclude("localServices")
                 .exclude("postalAddress")
                 .exclude("roadAddress")
+                // Kingu does not store other transport modes: the field is @Transient, so a
+                // mapped value goes nowhere. Mapping it anyway would still change the output,
+                // because the netex model's collection getter initialises null to an empty list
+                // and JAXB then marshals <OtherTransportModes></OtherTransportModes> on every
+                // stop place we publish.
+                .exclude("otherTransportModes")
                 .customize(new StopPlaceMapper())
                 .byDefault()
                 .register();
@@ -126,6 +133,9 @@ public class NetexMapper {
                 .exclude("localServices")
                 .exclude("postalAddress")
                 .exclude("roadAddress")
+                // Same as on StopPlace: otherTransportModes is @Transient, and mapping it emits an
+                // empty <OtherTransportModes></OtherTransportModes> element.
+                .exclude("otherTransportModes")
                 .customize(new QuayMapper())
                 .byDefault()
                 .register();
@@ -233,10 +243,12 @@ public class NetexMapper {
 
     public TopographicPlace mapToNetexModel(org.entur.kingu.model.TopographicPlace topographicPlace, boolean exportMultiSurface) {
         TopographicPlace netexTopographicPlace = facade.map(topographicPlace, TopographicPlace.class);
-        if (exportMultiSurface && netexTopographicPlace.getMultiSurface() != null) {
-            netexTopographicPlace.setPolygon(null);
-        } else {
-            netexTopographicPlace.setMultiSurface(null);
+        if (netexTopographicPlace != null) {
+            if (exportMultiSurface && netexTopographicPlace.getMultiSurface() != null) {
+                netexTopographicPlace.setPolygon(null);
+            } else {
+                netexTopographicPlace.setMultiSurface(null);
+            }
         }
         return netexTopographicPlace;
     }
@@ -251,10 +263,12 @@ public class NetexMapper {
 
     public TariffZone mapToNetexModel(org.entur.kingu.model.TariffZone tariffZone, boolean exportMultiSurface) {
         TariffZone netexTariffZone = facade.map(tariffZone, TariffZone.class);
-        if (exportMultiSurface && netexTariffZone.getMultiSurface() != null) {
-            netexTariffZone.setPolygon(null);
-        } else {
-            netexTariffZone.setMultiSurface(null);
+        if (netexTariffZone != null) {
+            if (exportMultiSurface && netexTariffZone.getMultiSurface() != null) {
+                netexTariffZone.setPolygon(null);
+            } else {
+                netexTariffZone.setMultiSurface(null);
+            }
         }
         return netexTariffZone;
     }
@@ -265,10 +279,12 @@ public class NetexMapper {
 
     public FareZone mapToNetexModel(org.entur.kingu.model.FareZone fareZone, boolean exportMultiSurface) {
         FareZone netexFareZone = facade.map(fareZone, FareZone.class);
-        if (exportMultiSurface && netexFareZone.getMultiSurface() != null) {
-            netexFareZone.setPolygon(null);
-        } else {
-            netexFareZone.setMultiSurface(null);
+        if (netexFareZone != null) {
+            if (exportMultiSurface && netexFareZone.getMultiSurface() != null) {
+                netexFareZone.setPolygon(null);
+            } else {
+                netexFareZone.setMultiSurface(null);
+            }
         }
         return netexFareZone;
     }
