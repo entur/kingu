@@ -39,6 +39,7 @@ import org.entur.kingu.model.TopographicPlace;
 import org.entur.kingu.netex.id.NetexIdHelper;
 import org.entur.kingu.netex.id.ValidPrefixList;
 import org.entur.kingu.netex.mapping.NetexMapper;
+import org.entur.kingu.netex.mapping.mapper.TagKeyValuesMapper;
 import org.entur.kingu.repository.FareZoneRepository;
 import org.entur.kingu.repository.GroupOfStopPlacesRepository;
 import org.entur.kingu.repository.GroupOfTariffZonesRepository;
@@ -93,6 +94,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -132,6 +134,7 @@ public class StreamingPublicationDelivery {
     private final PurposeOfGroupingRepository purposeOfGroupingRepository;
     private final NeTExValidator neTExValidator = NeTExValidator.getNeTExValidator();
     private final NetexIdHelper netexIdHelper;
+    private final TagKeyValuesMapper tagKeyValuesMapper;
     /**
      * Validate against netex schema using the {@link NeTExValidator}
      * Enabling this for large xml files can lead to high memory consumption and/or massive performance impact.
@@ -157,7 +160,8 @@ public class StreamingPublicationDelivery {
                                         NetexIdHelper netexIdHelper,
                                         @Value("${asyncNetexExport.validateAgainstSchema:false}") boolean validateAgainstSchema,
                                         PrometheusMetricsService prometheusMetricsService,
-                                        PurposeOfGroupingRepository purposeOfGroupingRepository) throws IOException, SAXException {
+                                        PurposeOfGroupingRepository purposeOfGroupingRepository,
+                                        TagKeyValuesMapper tagKeyValuesMapper) throws IOException, SAXException {
         this.stopPlaceRepository = stopPlaceRepository;
         this.parkingRepository = parkingRepository;
         this.validPrefixList = validPrefixList;
@@ -172,6 +176,7 @@ public class StreamingPublicationDelivery {
         this.validateAgainstSchema = validateAgainstSchema;
         this.prometheusMetricsService = prometheusMetricsService;
         this.purposeOfGroupingRepository = purposeOfGroupingRepository;
+        this.tagKeyValuesMapper = tagKeyValuesMapper;
     }
 
     private static JAXBContext createContext(Class clazz) {
@@ -225,60 +230,96 @@ public class StreamingPublicationDelivery {
         // Include them when gathering referenced entities so topographic places, tariff zones and parkings
         // referenced only by a parent are exported too - otherwise marshalling fails on a dangling reference.
         final Set<Long> exportedStopPlaceIds = new HashSet<>(stopPlacePrimaryIds);
-        exportedStopPlaceIds.addAll(stopPlaceRepository.getParentStopPlaceIds(stopPlacePrimaryIds));
+        final Set<Long> parentOnlyStopPlaceIds = stopPlaceRepository.getParentStopPlaceIds(stopPlacePrimaryIds);
+        exportedStopPlaceIds.addAll(parentOnlyStopPlaceIds);
         if (exportedStopPlaceIds.size() > stopPlacePrimaryIds.size()) {
             logger.info("Added {} parent stop place IDs for entity gathering", exportedStopPlaceIds.size() - stopPlacePrimaryIds.size());
         }
 
-        logger.info("Mapping site frame to netex model");
-        org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
+        // Bulk-load the parent stop places once, up front, so ParentStopFetchingIterator can look them up
+        // from a map instead of issuing one query per unique parent - and so both prepareStopPlaces and
+        // prepareScheduledStopPoints can reuse the same preloaded data without querying the database again.
+        final Map<String, org.entur.kingu.model.StopPlace> preloadedParentsByRef = loadParentsByRef(parentOnlyStopPlaceIds);
 
-        logger.info("Mapping service frame to netex model");
-        final org.rutebanken.netex.model.ServiceFrame netexServiceFrame = netexMapper.mapToNetexModel(serviceFrame);
+        // Bulk-load tags for every stop place that will be mapped (children + parents) once, up front, so
+        // TagKeyValuesMapper can look them up from memory during mapping instead of querying the database
+        // once per stop place (mapping runs for every StopPlace, including ones appended via ParentStopFetchingIterator).
+        Set<String> taggableStopPlaceNetexIds = new HashSet<>();
+        allStopPlaces.forEach(stopPlace -> taggableStopPlaceNetexIds.add(stopPlace.getNetexId()));
+        preloadedParentsByRef.values().forEach(parent -> taggableStopPlaceNetexIds.add(parent.getNetexId()));
+        tagKeyValuesMapper.preloadTags(taggableStopPlaceNetexIds);
+        try {
+            logger.info("Mapping site frame to netex model");
+            org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
-        logger.info("Mapping fare frame to netex model");
-        final org.rutebanken.netex.model.FareFrame netexFareFrame = netexMapper.mapToNetexModel(fareFrame);
+            logger.info("Mapping service frame to netex model");
+            final org.rutebanken.netex.model.ServiceFrame netexServiceFrame = netexMapper.mapToNetexModel(serviceFrame);
 
-        logger.info("Mapping resource frame to netex model");
-        final org.rutebanken.netex.model.ResourceFrame netexResourceFrame = netexMapper.mapToNetexModel(resourceFrame);
+            logger.info("Mapping fare frame to netex model");
+            final org.rutebanken.netex.model.FareFrame netexFareFrame = netexMapper.mapToNetexModel(fareFrame);
+
+            logger.info("Mapping resource frame to netex model");
+            final org.rutebanken.netex.model.ResourceFrame netexResourceFrame = netexMapper.mapToNetexModel(resourceFrame);
 
 
-        logger.info("Preparing scrollable iterators");
-        prepareStopPlaces(exportParams, allStopPlaces, mappedStopPlaceCount, netexSiteFrame);
-        prepareTopographicPlaces(exportParams, exportedStopPlaceIds, mappedTopographicPlacesCount, netexSiteFrame);
-        prepareTariffZones(exportParams, exportedStopPlaceIds, mappedTariffZonesCount, netexSiteFrame);
-        prepareParkings(exportParams, exportedStopPlaceIds, mappedParkingCount, netexSiteFrame);
-        prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame,netexResourceFrame);
-        prepareFareZones(exportParams,stopPlacePrimaryIds,mappedFareZonesCount,mappedGroupOfTariffZonesCount,netexSiteFrame,netexFareFrame);
-        prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);
+            logger.info("Preparing scrollable iterators");
+            prepareStopPlaces(exportParams, allStopPlaces, preloadedParentsByRef, mappedStopPlaceCount, netexSiteFrame);
+            prepareTopographicPlaces(exportParams, exportedStopPlaceIds, mappedTopographicPlacesCount, netexSiteFrame);
+            prepareTariffZones(exportParams, exportedStopPlaceIds, mappedTariffZonesCount, netexSiteFrame);
+            prepareParkings(exportParams, exportedStopPlaceIds, mappedParkingCount, netexSiteFrame);
+            prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame,netexResourceFrame);
+            prepareFareZones(exportParams,stopPlacePrimaryIds,mappedFareZonesCount,mappedGroupOfTariffZonesCount,netexSiteFrame,netexFareFrame);
+            prepareScheduledStopPoints(allStopPlaces, preloadedParentsByRef, netexServiceFrame);
 
-        PublicationDeliveryStructure publicationDeliveryStructure;
-        if(!exportParams.getFareZoneExportMode().equals(ExportMode.NONE)) {
-            if(exportParams.getGroupOfStopPlacesExportMode().equals(ExportMode.NONE)) {
-                publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexFareFrame);
+            PublicationDeliveryStructure publicationDeliveryStructure;
+            if(!exportParams.getFareZoneExportMode().equals(ExportMode.NONE)) {
+                if(exportParams.getGroupOfStopPlacesExportMode().equals(ExportMode.NONE)) {
+                    publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexFareFrame);
+                } else {
+                    publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexFareFrame, netexResourceFrame);
+                }
             } else {
-                publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexFareFrame, netexResourceFrame);
+                if(exportParams.getGroupOfStopPlacesExportMode().equals(ExportMode.NONE)) {
+                    publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame, netexServiceFrame);
+                } else {
+                    publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexResourceFrame);
+                }
             }
-        } else {
-            if(exportParams.getGroupOfStopPlacesExportMode().equals(ExportMode.NONE)) {
-                publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame, netexServiceFrame);
-            } else {
-                publicationDeliveryStructure = createPublicationDelivery(netexSiteFrame, netexServiceFrame, netexResourceFrame);
-            }
+
+
+            Marshaller marshaller = createMarshaller();
+
+            logger.info("Start marshalling publication delivery");
+            marshaller.marshal(netexObjectFactory.createPublicationDelivery(publicationDeliveryStructure), outputStream);
+            logger.info("Mapped {} stop places, {} parkings, {} topographic places, {} group of stop places and {} tariff zones to netex",
+                    mappedStopPlaceCount.get(),
+                    mappedParkingCount.get(),
+                    mappedTopographicPlacesCount,
+                    mappedGroupOfStopPlacesCount,
+                    mappedTariffZonesCount);
+        } finally {
+            tagKeyValuesMapper.clearPreloadedTags();
+        }
+    }
+
+    /**
+     * Bulk-load the given parent stop places in a single query and index them by the same
+     * "netexId-version" key {@link ParentStopFetchingIterator} uses to match a child's parent site ref,
+     * so parents can be looked up from memory instead of one query per unique parent.
+     */
+    private Map<String, org.entur.kingu.model.StopPlace> loadParentsByRef(Set<Long> parentStopPlaceIds) {
+        if (parentStopPlaceIds.isEmpty()) {
+            return Collections.emptyMap();
         }
 
-
-        Marshaller marshaller = createMarshaller();
-
-        logger.info("Start marshalling publication delivery");
-        marshaller.marshal(netexObjectFactory.createPublicationDelivery(publicationDeliveryStructure), outputStream);
-        logger.info("Mapped {} stop places, {} parkings, {} topographic places, {} group of stop places and {} tariff zones to netex",
-                mappedStopPlaceCount.get(),
-                mappedParkingCount.get(),
-                mappedTopographicPlacesCount,
-                mappedGroupOfStopPlacesCount,
-                mappedTariffZonesCount);
-
+        Map<String, org.entur.kingu.model.StopPlace> parentsByRef = new HashMap<>();
+        Iterator<org.entur.kingu.model.StopPlace> parentIterator = stopPlaceRepository.scrollStopPlaces(parentStopPlaceIds);
+        while (parentIterator.hasNext()) {
+            org.entur.kingu.model.StopPlace parent = parentIterator.next();
+            parentsByRef.put(parent.getNetexId() + "-" + parent.getVersion(), parent);
+        }
+        logger.info("Preloaded {} parent stop places for parent lookup during export", parentsByRef.size());
+        return parentsByRef;
     }
 
     private void prepareFareZones(ExportParams exportParams,Set<Long> stopPlacePrimaryIds, AtomicInteger mappedFareZonesCount, AtomicInteger mappedGroupOfTariffZonesCount, SiteFrame netexSiteFrame, org.rutebanken.netex.model.FareFrame netexFareFrame) {
@@ -378,7 +419,7 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    private void prepareStopPlaces(ExportParams exportParams, List<org.entur.kingu.model.StopPlace> allStopPlaces, AtomicInteger mappedStopPlaceCount, SiteFrame netexSiteFrame) {
+    private void prepareStopPlaces(ExportParams exportParams, List<org.entur.kingu.model.StopPlace> allStopPlaces, Map<String, org.entur.kingu.model.StopPlace> preloadedParentsByRef, AtomicInteger mappedStopPlaceCount, SiteFrame netexSiteFrame) {
 
         if (!allStopPlaces.isEmpty()) {
             logger.info("There are stop places to export");
@@ -393,7 +434,7 @@ public class StreamingPublicationDelivery {
 
 
             // Use Listening iterator to collect stop place IDs.
-            ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(allStopPlaces.iterator(), stopPlaceRepository);
+            ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(allStopPlaces.iterator(), preloadedParentsByRef);
             NetexMappingIterator<org.entur.kingu.model.StopPlace, StopPlace> netexMappingIterator = new NetexMappingIterator<>(netexMapper, parentStopFetchingIterator, StopPlace.class, mappedStopPlaceCount, prometheusMetricsService,exportParams.getName());
 
             // Wrap StopPlace objects in JAXBElement for JAXB marshalling (required by @XmlElementRef)
@@ -423,14 +464,12 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    private void prepareScheduledStopPoints(Set<Long> stopPlacePrimaryIds, org.rutebanken.netex.model.ServiceFrame netexServiceFrame) {
-        if (!stopPlacePrimaryIds.isEmpty()) {
+    private void prepareScheduledStopPoints(List<org.entur.kingu.model.StopPlace> allStopPlaces, Map<String, org.entur.kingu.model.StopPlace> preloadedParentsByRef, org.rutebanken.netex.model.ServiceFrame netexServiceFrame) {
+        if (!allStopPlaces.isEmpty()) {
             logger.info("There are stop places to export");
 
-            final Iterator<org.entur.kingu.model.StopPlace> stopPlaceIterator = stopPlaceRepository.scrollStopPlaces(stopPlacePrimaryIds);
-
-            // Use Listening iterator to collect stop place IDs.
-            ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(stopPlaceIterator, stopPlaceRepository);
+            // Reuse the already-loaded stop places instead of re-querying the database for the same rows.
+            ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(allStopPlaces.iterator(), preloadedParentsByRef);
 
             List<ScheduledStopPoint> netexScheduledStopPoints = new ArrayList<>();
 

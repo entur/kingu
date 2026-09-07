@@ -28,7 +28,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
@@ -36,6 +39,15 @@ import static org.entur.kingu.service.TagCreator.SUPPORTED_TAGGABLE_TYPES;
 
 @Component
 public class TagKeyValuesMapper {
+
+    /**
+     * Tags preloaded in bulk for the export currently running on this thread, keyed by idReference, so
+     * {@link #mapTagsToProperties} can look them up from memory instead of querying once per entity.
+     * Set and cleared by {@link #preloadTags(Collection)} / {@link #clearPreloadedTags()} - callers that
+     * never preload (e.g. mapping a single entity outside of a bulk export) keep the original
+     * one-query-per-entity behaviour untouched.
+     */
+    private static final ThreadLocal<Map<String, Set<Tag>>> PRELOADED_TAGS_BY_ID_REFERENCE = new ThreadLocal<>();
 
     public static final String TAG_PREFIX = "TAG";
 
@@ -57,6 +69,37 @@ public class TagKeyValuesMapper {
         this.tagRepository = tagRepository;
     }
 
+    /**
+     * Bulk-loads tags for the given idReferences in a single query and makes them available to
+     * {@link #mapTagsToProperties} for the remainder of this thread's work, instead of one query per entity.
+     * Must be paired with {@link #clearPreloadedTags()} (in a finally block) once the bulk operation
+     * (e.g. an export) that needs them is done, to avoid leaking preloaded data across unrelated work
+     * on a pooled thread.
+     */
+    public void preloadTags(Collection<String> idReferences) {
+        if (idReferences.isEmpty()) {
+            PRELOADED_TAGS_BY_ID_REFERENCE.set(Collections.emptyMap());
+            return;
+        }
+
+        Map<String, Set<Tag>> tagsByIdReference = new HashMap<>();
+        for (Tag tag : tagRepository.findByIdReferenceIn(idReferences)) {
+            tagsByIdReference.computeIfAbsent(tag.getIdReference(), ref -> new HashSet<>()).add(tag);
+        }
+        PRELOADED_TAGS_BY_ID_REFERENCE.set(tagsByIdReference);
+    }
+
+    public void clearPreloadedTags() {
+        PRELOADED_TAGS_BY_ID_REFERENCE.remove();
+    }
+
+    private Set<Tag> lookupTags(String idReference) {
+        Map<String, Set<Tag>> preloaded = PRELOADED_TAGS_BY_ID_REFERENCE.get();
+        if (preloaded != null) {
+            return preloaded.getOrDefault(idReference, Collections.emptySet());
+        }
+        return tagRepository.findByIdReference(idReference);
+    }
 
     public void mapTagsToProperties(org.entur.kingu.model.DataManagedObjectStructure tiamatEntity, DataManagedObjectStructure netexEntity) {
 
@@ -70,7 +113,7 @@ public class TagKeyValuesMapper {
             return;
         }
 
-        Set<Tag> tags = tagRepository.findByIdReference(tiamatEntity.getNetexId());
+        Set<Tag> tags = lookupTags(tiamatEntity.getNetexId());
 
         if (tags == null || tags.isEmpty()) {
             return;

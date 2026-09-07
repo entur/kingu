@@ -19,30 +19,36 @@ import com.google.common.base.Strings;
 import org.entur.kingu.model.EmbeddableMultilingualString;
 import org.entur.kingu.model.SiteRefStructure;
 import org.entur.kingu.model.StopPlace;
-import org.entur.kingu.repository.StopPlaceRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
+/**
+ * Appends parent stop places to the iteration the first time a child referencing them is encountered.
+ * Parents are looked up from a preloaded map (built once per export via a single bulk query) rather than
+ * fetched one-by-one, since the same set of parents is otherwise walked repeatedly (once per stop place
+ * frame being built) and a per-parent query would multiply DB round trips for every large export.
+ */
 public class ParentStopFetchingIterator implements Iterator<StopPlace> {
 
     private static final Logger logger = LoggerFactory.getLogger(ParentStopFetchingIterator.class);
 
     private final Iterator<StopPlace> iterator;
 
-    private final StopPlaceRepository stopPlaceRepository;
+    private final Map<String, StopPlace> preloadedParentsByRef;
 
 
     private final Map<String, EmbeddableMultilingualString> parents = new HashMap<>();
 
     private StopPlace parent = null;
 
-    public ParentStopFetchingIterator(Iterator<StopPlace> iterator, StopPlaceRepository stopPlaceRepository) {
+    public ParentStopFetchingIterator(Iterator<StopPlace> iterator, Map<String, StopPlace> preloadedParentsByRef) {
         this.iterator = iterator;
-        this.stopPlaceRepository = stopPlaceRepository;
+        this.preloadedParentsByRef = preloadedParentsByRef != null ? preloadedParentsByRef : Collections.emptyMap();
     }
 
     @Override
@@ -64,9 +70,14 @@ public class ParentStopFetchingIterator implements Iterator<StopPlace> {
         if (stopPlace.getParentSiteRef() != null) {
             String parentRefString = refString(stopPlace.getParentSiteRef());
             if (!parents.containsKey(parentRefString)) {
-                parent = stopPlaceRepository.findFirstByNetexIdAndVersion(stopPlace.getParentSiteRef().getRef(), Long.parseLong(stopPlace.getParentSiteRef().getVersion()));
-                logger.debug("Fetched parent during iteration: {} - {}", parent.getNetexId(), parent.getVersion());
-                parents.put(parentRefString, parent.getName());
+                StopPlace preloadedParent = preloadedParentsByRef.get(parentRefString);
+                if (preloadedParent == null) {
+                    logger.warn("No preloaded parent found for ref: {}. Parent will not be appended to export.", parentRefString);
+                } else {
+                    parent = preloadedParent;
+                    logger.debug("Emitting preloaded parent during iteration: {} - {}", parent.getNetexId(), parent.getVersion());
+                }
+                parents.put(parentRefString, parent == null ? null : parent.getName());
             }
             copyNameFromParentIfMissing(parentRefString, parents.get(parentRefString), stopPlace);
 
