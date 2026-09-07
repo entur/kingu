@@ -54,6 +54,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
@@ -224,7 +226,7 @@ class StreamingPublicationDeliveryIntegrationTest {
         assertTrue(xmlContent.contains("PublicationDelivery"), "Should contain PublicationDelivery root element");
 
         // Write to temp file for validation
-        File tempFile = File.createTempFile("netex-export-test", ".xml");
+        File tempFile = createSecureTempFile("netex-export-test", ".xml");
         try (FileOutputStream fos = new FileOutputStream(tempFile)) {
             fos.write(xmlContent.getBytes(StandardCharsets.UTF_8));
         }
@@ -424,7 +426,7 @@ class StreamingPublicationDeliveryIntegrationTest {
         String xmlContent = outputStream.toString(StandardCharsets.UTF_8);
 
         // Reference validation fails on a dangling TopographicPlaceRef before the fix.
-        File tempFile = File.createTempFile("netex-export-parent-topo-test", ".xml");
+        File tempFile = createSecureTempFile("netex-export-parent-topo-test", ".xml");
         try (FileOutputStream fos = new FileOutputStream(tempFile)) {
             fos.write(xmlContent.getBytes(StandardCharsets.UTF_8));
         }
@@ -654,6 +656,15 @@ class StreamingPublicationDeliveryIntegrationTest {
         String version = document.getDocumentElement().getAttribute("version");
         assertNotNull(version);
         assertFalse(version.isEmpty(), "Version attribute should not be empty");
+    }
+
+    /**
+     * Creates a temp file readable/writable only by the owner, to avoid leaking exported NeTEx
+     * content to other local users via the shared temp directory's default permissions.
+     */
+    private File createSecureTempFile(String prefix, String suffix) throws Exception {
+        return Files.createTempFile(prefix, suffix,
+                PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"))).toFile();
     }
 
     private Document parseXml(String xmlContent) throws Exception {
