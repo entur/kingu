@@ -93,6 +93,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -219,6 +220,15 @@ public class StreamingPublicationDelivery {
 
         logger.info("Got {} stop place IDs from stop place search", stopPlacePrimaryIds.size());
 
+        // Parent stops of multimodal stop places are appended to the export by ParentStopFetchingIterator,
+        // but they are not part of the stop place search result (and may be excluded from it by paging).
+        // Include them when gathering referenced entities so topographic places, tariff zones and parkings
+        // referenced only by a parent are exported too - otherwise marshalling fails on a dangling reference.
+        final Set<Long> exportedStopPlaceIds = new HashSet<>(stopPlacePrimaryIds);
+        exportedStopPlaceIds.addAll(stopPlaceRepository.getParentStopPlaceIds(stopPlacePrimaryIds));
+        if (exportedStopPlaceIds.size() > stopPlacePrimaryIds.size()) {
+            logger.info("Added {} parent stop place IDs for entity gathering", exportedStopPlaceIds.size() - stopPlacePrimaryIds.size());
+        }
 
         logger.info("Mapping site frame to netex model");
         org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
@@ -235,9 +245,9 @@ public class StreamingPublicationDelivery {
 
         logger.info("Preparing scrollable iterators");
         prepareStopPlaces(exportParams, allStopPlaces, mappedStopPlaceCount, netexSiteFrame);
-        prepareTopographicPlaces(exportParams, stopPlacePrimaryIds, mappedTopographicPlacesCount, netexSiteFrame);
-        prepareTariffZones(exportParams, stopPlacePrimaryIds, mappedTariffZonesCount, netexSiteFrame);
-        prepareParkings(exportParams, stopPlacePrimaryIds, mappedParkingCount, netexSiteFrame);
+        prepareTopographicPlaces(exportParams, exportedStopPlaceIds, mappedTopographicPlacesCount, netexSiteFrame);
+        prepareTariffZones(exportParams, exportedStopPlaceIds, mappedTariffZonesCount, netexSiteFrame);
+        prepareParkings(exportParams, exportedStopPlaceIds, mappedParkingCount, netexSiteFrame);
         prepareGroupOfStopPlaces(exportParams, stopPlacePrimaryIds, mappedGroupOfStopPlacesCount, netexSiteFrame,netexResourceFrame);
         prepareFareZones(exportParams,stopPlacePrimaryIds,mappedFareZonesCount,mappedGroupOfTariffZonesCount,netexSiteFrame,netexFareFrame);
         prepareScheduledStopPoints(stopPlacePrimaryIds, netexServiceFrame);

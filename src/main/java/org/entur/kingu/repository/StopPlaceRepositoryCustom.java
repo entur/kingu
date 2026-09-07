@@ -69,7 +69,13 @@ public interface StopPlaceRepositoryCustom extends DataManagedObjectStructureRep
 
     Set<Long> getDatabaseIds(ExportParams exportParams, boolean ignorePaging);
 
-
+    /**
+     * Returns the database ids of all versions of the parent stop places referenced by the given stop place ids.
+     * Used during export to gather entities (topographic places, tariff zones, parkings) referenced by parents
+     * that are appended to the export by {@link org.entur.kingu.exporter.async.ParentStopFetchingIterator}
+     * but are not part of the original stop place search result.
+     */
+    Set<Long> getParentStopPlaceIds(Set<Long> stopPlaceDatabaseIds);
 
     List<StopPlace> findAll(List<String> stopPlacesNetexIds);
 

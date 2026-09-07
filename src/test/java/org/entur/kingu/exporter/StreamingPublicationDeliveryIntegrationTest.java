@@ -8,6 +8,7 @@ import org.entur.kingu.config.ExportParams;
 import org.entur.kingu.model.EmbeddableMultilingualString;
 import org.entur.kingu.model.GroupOfStopPlaces;
 import org.entur.kingu.model.Quay;
+import org.entur.kingu.model.SiteRefStructure;
 import org.entur.kingu.model.StopPlace;
 import org.entur.kingu.model.StopPlaceReference;
 import org.entur.kingu.model.StopTypeEnumeration;
@@ -55,6 +56,7 @@ import java.io.FileOutputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -344,6 +346,93 @@ class StreamingPublicationDeliveryIntegrationTest {
         assertTrue(xmlContent.contains("ScheduledStopPoint"), "Should contain ScheduledStopPoint elements");
         assertTrue(xmlContent.contains("PassengerStopAssignment"), "Should contain PassengerStopAssignment elements");
         assertTrue(xmlContent.contains("ServiceFrame"), "Should contain ServiceFrame");
+    }
+
+    /**
+     * Reproduces the export failure where a multimodal parent stop references a topographic place
+     * that none of its children reference.
+     *
+     * The parent stop is appended to the export by {@link org.entur.kingu.exporter.async.ParentStopFetchingIterator}
+     * but is not part of the stop place search result (here the export is requested by the child id). Before the fix,
+     * topographic places were gathered only from the search result, so the parent's TopographicPlaceRef had no
+     * matching TopographicPlace in the document and reference validation failed on a dangling reference.
+     */
+    @Test
+    void testExportMultimodalParentReferencingTopographicPlaceNotReferencedByChildren() throws Exception {
+        TopographicPlace parentMunicipality = new TopographicPlace();
+        parentMunicipality.setNetexId("NSR:TopographicPlace:10");
+        parentMunicipality.setVersion(1L);
+        parentMunicipality.setName(new EmbeddableMultilingualString("Parent municipality", "nor"));
+        parentMunicipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
+        parentMunicipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(savedCounty));
+        parentMunicipality = topographicPlaceRepository.save(parentMunicipality);
+
+        TopographicPlace childMunicipality = new TopographicPlace();
+        childMunicipality.setNetexId("NSR:TopographicPlace:11");
+        childMunicipality.setVersion(1L);
+        childMunicipality.setName(new EmbeddableMultilingualString("Child municipality", "nor"));
+        childMunicipality.setTopographicPlaceType(TopographicPlaceTypeEnumeration.MUNICIPALITY);
+        childMunicipality.setParentTopographicPlaceRef(new TopographicPlaceRefStructure(savedCounty));
+        childMunicipality = topographicPlaceRepository.save(childMunicipality);
+
+        // Multimodal parent stop referencing the municipality that none of its children reference.
+        StopPlace parent = new StopPlace();
+        parent.setNetexId("NSR:StopPlace:2001");
+        parent.setVersion(1L);
+        parent.setName(new EmbeddableMultilingualString("Multimodal parent", "nor"));
+        parent.setParentStopPlace(true);
+        parent.setTopographicPlace(parentMunicipality);
+        parent.setValidBetween(new ValidBetween(Instant.now(), null));
+        stopPlaceRepository.save(parent);
+
+        // Child stop referencing the other municipality, linked to the parent via parentSiteRef.
+        StopPlace child = new StopPlace();
+        child.setNetexId("NSR:StopPlace:2002");
+        child.setVersion(1L);
+        child.setName(new EmbeddableMultilingualString("Child stop", "nor"));
+        child.setTopographicPlace(childMunicipality);
+        child.setParentSiteRef(new SiteRefStructure(parent.getNetexId(), String.valueOf(parent.getVersion())));
+        child.setValidBetween(new ValidBetween(Instant.now(), null));
+        stopPlaceRepository.save(child);
+
+        StopPlaceSearch stopPlaceSearch = StopPlaceSearch.newStopPlaceSearchBuilder()
+                .setNetexIdList(List.of(child.getNetexId()))
+                .setAllVersions(true)
+                .build();
+
+        ExportParams exportParams = new ExportParams(
+                "Multimodal parent topographic place export",
+                ExportMode.NONE,      // tariffZone
+                ExportMode.NONE,      // fareZone
+                ExportMode.NONE,      // groupOfStopPlaces
+                ExportMode.NONE,      // groupOfTariffZones
+                ExportMode.RELEVANT,  // topographicPlace
+                null,
+                null,
+                null,
+                stopPlaceSearch
+        );
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        streamingPublicationDelivery.stream(exportParams, outputStream, true);
+
+        String xmlContent = outputStream.toString(StandardCharsets.UTF_8);
+
+        // Reference validation fails on a dangling TopographicPlaceRef before the fix.
+        File tempFile = File.createTempFile("netex-export-parent-topo-test", ".xml");
+        try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+            fos.write(xmlContent.getBytes(StandardCharsets.UTF_8));
+        }
+        netexXmlReferenceValidator.validateNetexReferences(tempFile);
+        tempFile.delete();
+
+        // Both the searched child and its appended parent must be exported.
+        assertTrue(xmlContent.contains("NSR:StopPlace:2001"), "Should contain the appended parent stop place");
+        assertTrue(xmlContent.contains("NSR:StopPlace:2002"), "Should contain the searched child stop place");
+
+        // Both municipalities must be present: the one referenced by the child and the one referenced only by the parent.
+        assertTrue(xmlContent.contains("NSR:TopographicPlace:10"), "Should contain the topographic place referenced only by the parent");
+        assertTrue(xmlContent.contains("NSR:TopographicPlace:11"), "Should contain the topographic place referenced by the child");
     }
 
     @Test
