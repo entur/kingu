@@ -603,13 +603,17 @@ public class StopPlaceRepositoryImpl implements org.entur.kingu.repository.StopP
     }
 
     private String generateStopPlaceQueryFromStopPlaceIds(Set<Long> stopPlacePrimaryIds) {
+        return "SELECT s.* FROM stop_place s WHERE s.id IN(" + joinIds(stopPlacePrimaryIds) + ")";
+    }
 
-        Set<String> stopPlacePrimaryIdStrings = stopPlacePrimaryIds.stream().map(lvalue -> String.valueOf(lvalue)).collect(Collectors.toSet());
-        String joinedStopPlaceDbIds = String.join(",", stopPlacePrimaryIdStrings);
-        StringBuilder sql = new StringBuilder("SELECT s.* FROM stop_place s WHERE s.id IN(");
-        sql.append(joinedStopPlaceDbIds);
-        sql.append(")");
-        return sql.toString();
+    /**
+     * Joins database ids into a literal, comma-separated list for inlining directly into a SQL "IN (...)"
+     * clause, rather than binding each id as its own query parameter: PostgreSQL/JDBC caps prepared
+     * statements at 65,535 bind parameters, a limit a large export's id set can exceed. Safe to inline here
+     * since these are always internal, database-generated primary keys, never user-supplied input.
+     */
+    private static String joinIds(Set<Long> ids) {
+        return ids.stream().map(String::valueOf).collect(Collectors.joining(","));
     }
 
     @Override
@@ -652,13 +656,16 @@ public class StopPlaceRepositoryImpl implements org.entur.kingu.repository.StopP
         // both netex_id and version (parent_site_ref_version is stored as text) avoids gathering entities for
         // unrelated parent versions. These parents are not part of the search result, so their referenced
         // topographic places / tariff zones / parkings would otherwise be missing and break schema validation.
+        //
+        // IDs are inlined (see joinIds) rather than bound as parameters, since a full export can gather
+        // well over 100,000 stop place ids - binding each individually exceeds PostgreSQL/JDBC's 65,535
+        // bind parameter limit per statement and fails with "Given query has N parameters".
         Query query = entityManager.createNativeQuery(
                 "SELECT DISTINCT parent.id " +
                 "FROM stop_place child " +
                 "JOIN stop_place parent ON parent.netex_id = child.parent_site_ref " +
                 "    AND CAST(parent.version AS text) = child.parent_site_ref_version " +
-                "WHERE child.id IN (:ids) AND child.parent_site_ref IS NOT NULL");
-        query.setParameter("ids", stopPlaceDatabaseIds);
+                "WHERE child.id IN (" + joinIds(stopPlaceDatabaseIds) + ") AND child.parent_site_ref IS NOT NULL");
 
         Set<Long> result = new HashSet<>();
         for (Object object : query.getResultList()) {
