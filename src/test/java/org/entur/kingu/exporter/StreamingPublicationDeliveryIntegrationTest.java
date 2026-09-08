@@ -60,7 +60,10 @@ import java.time.Instant;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.LongStream;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -440,6 +443,22 @@ class StreamingPublicationDeliveryIntegrationTest {
         // Both municipalities must be present: the one referenced by the child and the one referenced only by the parent.
         assertTrue(xmlContent.contains("NSR:TopographicPlace:10"), "Should contain the topographic place referenced only by the parent");
         assertTrue(xmlContent.contains("NSR:TopographicPlace:11"), "Should contain the topographic place referenced by the child");
+    }
+
+    /**
+     * Reproduces a real export failure seen in dev: getParentStopPlaceIds bound every id in the given set
+     * as its own JDBC query parameter, and PostgreSQL/JDBC caps a single prepared statement at 65,535
+     * parameters. A full export (allVersions/ALL scope) can gather well over 100,000 stop place ids, which
+     * made the query fail with "PreparedStatement can have at most 65,535 parameters" on every attempt.
+     * The ids here don't need to correspond to real stop places - only the parameter count matters.
+     */
+    @Test
+    void getParentStopPlaceIdsHandlesMoreIdsThanThePostgresParameterLimit() {
+        Set<Long> moreThanPostgresParameterLimit = LongStream.rangeClosed(1, 70_000)
+                .boxed()
+                .collect(Collectors.toSet());
+
+        assertDoesNotThrow(() -> stopPlaceRepository.getParentStopPlaceIds(moreThanPostgresParameterLimit));
     }
 
     @Test
