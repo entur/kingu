@@ -59,18 +59,15 @@ public class NetexExporter {
 
             File localExportXmlFile = new File(exportJob.getLocalExportXmlFile());
             try {
-                boolean localExportXmlFileNewFileCreated = localExportXmlFile.createNewFile();
-                if (localExportXmlFileNewFileCreated) {
+                if (localExportXmlFile.createNewFile()) {
                     logger.info("Start streaming publication delivery to local file {}", localExportXmlFile);
                     FileOutputStream fileOutputStream = new FileOutputStream(localExportXmlFile,false);
                     streamingPublicationDelivery.stream(exportJob.getExportParams(), fileOutputStream, true);
                     exportJob.setStatus(JobStatus.FINISHED);
                     exportJob.setFinished(Instant.now());
                 } else {
-                    throw new IOException("Unable to create file: " + exportJob.getLocalExportZipFile());
+                    throw new IOException("Unable to create file: " + exportJob.getLocalExportXmlFile());
                 }
-            } catch (IOException e) {
-                throw new IOException("Unable to create file: " + exportJob.getLocalExportZipFile());
             } finally {
             MDC.remove(CAMEL_BREADCRUMB_ID);
             MDC.remove(NETEX_EXPORT_NAME);
