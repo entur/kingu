@@ -18,7 +18,7 @@ package org.entur.kingu.netex.mapping.converter;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.netex.model.ValidBetween;
+import org.entur.netex2.model.ValidBetween;
 import org.entur.kingu.netex.mapping.NetexMappingContextThreadLocal;
 import org.entur.kingu.time.ExportTimeZone;
 import org.slf4j.Logger;

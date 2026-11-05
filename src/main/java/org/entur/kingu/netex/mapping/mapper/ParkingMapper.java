@@ -18,10 +18,10 @@ package org.entur.kingu.netex.mapping.mapper;
 import jakarta.xml.bind.JAXBElement;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.Parking;
-import org.rutebanken.netex.model.ParkingArea;
-import org.rutebanken.netex.model.ParkingAreas_RelStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.Parking;
+import org.entur.netex2.model.ParkingArea;
+import org.entur.netex2.model.ParkingAreas_RelStructure;
 
 import java.util.List;
 
@@ -44,7 +44,7 @@ public class ParkingMapper extends CustomMapper<Parking, org.entur.kingu.model.P
                     .toList();
             if (!parkingAreas.isEmpty()) {
                 ParkingAreas_RelStructure parkingAreas_relStructure = new ParkingAreas_RelStructure();
-                parkingAreas_relStructure.getParkingAreaRefOrParkingArea_().addAll(wrappedParkingAreas);
+                parkingAreas_relStructure.getParkingAreaRefOrParkingArea().addAll(wrappedParkingAreas);
 
                 netexParking.setParkingAreas(parkingAreas_relStructure);
             }

@@ -29,31 +29,31 @@ import org.entur.kingu.netex.mapping.mapper.ParkingMapper;
 import org.entur.kingu.netex.mapping.mapper.PlaceEquipmentMapper;
 import org.entur.kingu.netex.mapping.mapper.QuayMapper;
 import org.entur.kingu.netex.mapping.mapper.StopPlaceMapper;
-import org.rutebanken.netex.model.AccessibilityAssessment;
-import org.rutebanken.netex.model.CycleStorageEquipment;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.FareFrame;
-import org.rutebanken.netex.model.FareZone;
-import org.rutebanken.netex.model.GeneralSign;
-import org.rutebanken.netex.model.GroupOfStopPlaces;
-import org.rutebanken.netex.model.GroupOfTariffZones;
-import org.rutebanken.netex.model.InstalledEquipment_VersionStructure;
-import org.rutebanken.netex.model.Parking;
-import org.rutebanken.netex.model.PathLink;
-import org.rutebanken.netex.model.PathLinkEndStructure;
-import org.rutebanken.netex.model.PlaceEquipments_RelStructure;
-import org.rutebanken.netex.model.PurposeOfGrouping;
-import org.rutebanken.netex.model.Quay;
-import org.rutebanken.netex.model.ResourceFrame;
-import org.rutebanken.netex.model.SanitaryEquipment;
-import org.rutebanken.netex.model.ServiceFrame;
-import org.rutebanken.netex.model.ShelterEquipment;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.TariffZone;
-import org.rutebanken.netex.model.TicketingEquipment;
-import org.rutebanken.netex.model.TopographicPlace;
-import org.rutebanken.netex.model.WaitingRoomEquipment;
+import org.entur.netex2.model.AccessibilityAssessment;
+import org.entur.netex2.model.CycleStorageEquipment;
+import org.entur.netex2.model.DataManagedObjectStructure;
+import org.entur.netex2.model.FareFrame;
+import org.entur.netex2.model.FareZone;
+import org.entur.netex2.model.GeneralSign;
+import org.entur.netex2.model.GroupOfStopPlaces;
+import org.entur.netex2.model.GroupOfTariffZones;
+import org.entur.netex2.model.InstalledEquipment_VersionStructure;
+import org.entur.netex2.model.Parking;
+import org.entur.netex2.model.PathLink;
+import org.entur.netex2.model.PlaceEquipments_RelStructure;
+import org.entur.netex2.model.SitePathLinkEndStructure;
+import org.entur.netex2.model.PurposeOfGrouping;
+import org.entur.netex2.model.Quay;
+import org.entur.netex2.model.ResourceFrame;
+import org.entur.netex2.model.SanitaryEquipment;
+import org.entur.netex2.model.ServiceFrame;
+import org.entur.netex2.model.ShelterEquipment;
+import org.entur.netex2.model.SiteFrame;
+import org.entur.netex2.model.StopPlace;
+import org.entur.netex2.model.TariffZone;
+import org.entur.netex2.model.TicketingEquipment;
+import org.entur.netex2.model.TopographicPlace;
+import org.entur.netex2.model.WaitingRoomEquipment;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -163,7 +163,7 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
-        mapperFactory.classMap(PathLinkEndStructure.class, org.entur.kingu.model.PathLinkEnd.class)
+        mapperFactory.classMap(SitePathLinkEndStructure.class, org.entur.kingu.model.PathLinkEnd.class)
                 .byDefault()
                 .register();
 
@@ -211,8 +211,13 @@ public class NetexMapper {
                 .byDefault()
                 .register();
 
+        // Not using fieldBToA("netexId", "id") here: PlaceEquipment's netexId has no valid slot
+        // on the netex side. PlaceEquipments_RelStructure.id is a RelationshipId, restricted to
+        // a fixed enumeration of NeTEx property names - not a free-form entity id. Explicitly
+        // excluded (rather than just skipping the netexId mapping) so Orika's convention-based
+        // default mapping doesn't instead wire up kingu's JPA primary key.
         mapperFactory.classMap(PlaceEquipments_RelStructure.class, org.entur.kingu.model.PlaceEquipment.class)
-                .fieldBToA("netexId", "id")
+                .exclude("id")
                 .customize(new PlaceEquipmentMapper())
                 .byDefault()
                 .register();

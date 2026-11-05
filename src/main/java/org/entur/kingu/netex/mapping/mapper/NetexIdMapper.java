@@ -21,7 +21,7 @@ import org.entur.kingu.model.EntityInVersionStructure;
 import org.entur.kingu.model.EntityStructure;
 import org.entur.kingu.netex.id.NetexIdHelper;
 import org.entur.kingu.netex.id.ValidPrefixList;
-import org.rutebanken.netex.model.KeyValueStructure;
+import org.entur.netex2.model.KeyValueStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,7 +60,7 @@ public class NetexIdMapper {
         this.netexIdHelper = netexIdHelper;
     }
 
-    public void toNetexModel(EntityStructure internalEntity, org.rutebanken.netex.model.EntityStructure netexEntity) {
+    public void toNetexModel(EntityStructure internalEntity, org.entur.netex2.model.EntityStructure netexEntity) {
         if(internalEntity.getNetexId() == null) {
             logger.warn("Netex ID for internal model object is null. Mapping to null value. Object: {}", internalEntity);
             netexEntity.setId(null);
@@ -69,7 +69,7 @@ public class NetexIdMapper {
         }
     }
 
-    public void toTiamatModel(org.rutebanken.netex.model.EntityInVersionStructure netexEntity, EntityInVersionStructure tiamatEntity) {
+    public void toTiamatModel(org.entur.netex2.model.EntityInVersionStructure netexEntity, EntityInVersionStructure tiamatEntity) {
 
         if(netexEntity.getId() == null) {
             tiamatEntity.setNetexId(null);
@@ -83,9 +83,9 @@ public class NetexIdMapper {
                 tiamatEntity.setNetexId(null);
             }
         }
-        if(netexEntity instanceof org.rutebanken.netex.model.DataManagedObjectStructure && tiamatEntity instanceof DataManagedObjectStructure) {
+        if(netexEntity instanceof org.entur.netex2.model.DataManagedObjectStructure && tiamatEntity instanceof DataManagedObjectStructure) {
             logger.debug("Copy key values to tiamat model {}", tiamatEntity.getNetexId());
-            copyKeyValuesToTiamatModel((org.rutebanken.netex.model.DataManagedObjectStructure) netexEntity, (DataManagedObjectStructure) tiamatEntity);
+            copyKeyValuesToTiamatModel((org.entur.netex2.model.DataManagedObjectStructure) netexEntity, (DataManagedObjectStructure) tiamatEntity);
         }
     }
 
@@ -96,7 +96,7 @@ public class NetexIdMapper {
      * @param netexEntity netexEntity containing key values. If it contains ORIGINAL_ID_KEY. Values will be separated.
      * @param tiamatEntity tiamat entity to add key values to.
      */
-    public void copyKeyValuesToTiamatModel(org.rutebanken.netex.model.DataManagedObjectStructure netexEntity, DataManagedObjectStructure tiamatEntity) {
+    public void copyKeyValuesToTiamatModel(org.entur.netex2.model.DataManagedObjectStructure netexEntity, DataManagedObjectStructure tiamatEntity) {
         if(netexEntity.getKeyList() != null) {
             if(netexEntity.getKeyList().getKeyValue() != null) {
 

@@ -18,7 +18,7 @@ package org.entur.kingu.netex.mapping.converter;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.netex.model.BoardingPositions_RelStructure;
+import org.entur.netex2.model.BoardingPositions_RelStructure;
 import org.entur.kingu.model.BoardingPosition;
 import org.springframework.stereotype.Component;
 

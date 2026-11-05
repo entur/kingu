@@ -17,9 +17,9 @@ package org.entur.kingu.netex.mapping.mapper;
 
 import com.google.common.collect.Sets;
 import com.google.common.primitives.Longs;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.KeyListStructure;
-import org.rutebanken.netex.model.KeyValueStructure;
+import org.entur.netex2.model.DataManagedObjectStructure;
+import org.entur.netex2.model.KeyListStructure;
+import org.entur.netex2.model.KeyValueStructure;
 import org.entur.kingu.model.tag.Tag;
 import org.entur.kingu.repository.TagRepository;
 import org.slf4j.Logger;

@@ -6,6 +6,32 @@ import org.entur.kingu.TestApp;
 import org.entur.kingu.config.ExportMode;
 import org.entur.kingu.config.ExportParams;
 import org.entur.kingu.model.EmbeddableMultilingualString;
+import org.entur.kingu.model.AccessibilityAssessment;
+import org.entur.kingu.model.AccessibilityLimitation;
+import org.entur.kingu.model.AlternativeName;
+import org.entur.kingu.model.BoardingPosition;
+import org.entur.kingu.model.BoardingPositionTypeEnumeration;
+import org.entur.kingu.model.CoveredEnumeration;
+import org.entur.kingu.model.CycleStorageEquipment;
+import org.entur.kingu.model.LimitationStatusEnumeration;
+import org.entur.kingu.model.MultilingualStringEntity;
+import org.entur.kingu.model.NameTypeEnumeration;
+import org.entur.kingu.model.Parking;
+import org.entur.kingu.model.ParkingArea;
+import org.entur.kingu.model.ParkingCapacity;
+import org.entur.kingu.model.ParkingProperties;
+import org.entur.kingu.model.ParkingTypeEnumeration;
+import org.entur.kingu.model.ParkingUserEnumeration;
+import org.entur.kingu.model.ParkingVehicleEnumeration;
+import org.entur.kingu.model.PlaceEquipment;
+import org.entur.kingu.model.ShelterEquipment;
+import org.entur.kingu.model.WaitingRoomEquipment;
+import org.entur.kingu.repository.ParkingRepository;
+import org.entur.netex2.validation.NeTExValidator;
+import javax.xml.transform.stream.StreamSource;
+import java.io.StringReader;
+import java.math.BigInteger;
+import java.util.ArrayList;
 import org.entur.kingu.model.GroupOfStopPlaces;
 import org.entur.kingu.model.Quay;
 import org.entur.kingu.model.SiteRefStructure;
@@ -96,6 +122,9 @@ class StreamingPublicationDeliveryIntegrationTest {
 
     @Autowired
     private GroupOfStopPlacesRepository groupOfStopPlacesRepository;
+
+    @Autowired
+    private ParkingRepository parkingRepository;
 
     private final GeometryFactory geometryFactory = new GeometryFactory();
 
@@ -681,6 +710,145 @@ class StreamingPublicationDeliveryIntegrationTest {
      * Creates a temp file readable/writable only by the owner, to avoid leaking exported NeTEx
      * content to other local users via the shared temp directory's default permissions.
      */
+    /**
+     * Exports a stop place, quay and parking carrying the elements whose NeTEx shape changed in
+     * NeTEx 2.0 (names and labels, public codes, covered, place equipment, parking areas), then
+     * validates the output against the 2.0 XSD and, for consumers still on NeTEx 1.x, the 1.15 XSD.
+     */
+    @Test
+    void testRichExportIsValidAgainstNetex2AndNetex115Schemas() throws Exception {
+        StopPlace stopPlace = new StopPlace();
+        stopPlace.setNetexId("NSR:StopPlace:2002");
+        stopPlace.setVersion(1L);
+        stopPlace.setName(new EmbeddableMultilingualString("Rich Stop Place", "nor"));
+        stopPlace.setStopPlaceType(StopTypeEnumeration.ONSTREET_BUS);
+        stopPlace.setCentroid(createPoint(10.75, 59.91));
+        stopPlace.setTopographicPlace(savedMunicipality);
+        stopPlace.setValidBetween(new ValidBetween(Instant.now(), null));
+        stopPlace.setTariffZones(new HashSet<>(Set.of(new TariffZoneRef(savedTariffZone))));
+        stopPlace.setPublicCode("2002");
+        stopPlace.setCovered(CoveredEnumeration.INDOORS);
+
+        AlternativeName alternativeName = new AlternativeName();
+        alternativeName.setName(new EmbeddableMultilingualString("Test Holdeplass", "eng"));
+        alternativeName.setNameType(NameTypeEnumeration.TRANSLATION);
+        stopPlace.getAlternativeNames().add(alternativeName);
+
+        AccessibilityLimitation limitation = new AccessibilityLimitation();
+        limitation.setNetexId("NSR:AccessibilityLimitation:1");
+        limitation.setVersion(1L);
+        limitation.setWheelchairAccess(LimitationStatusEnumeration.TRUE);
+        limitation.setStepFreeAccess(LimitationStatusEnumeration.PARTIAL);
+        AccessibilityAssessment accessibilityAssessment = new AccessibilityAssessment();
+        accessibilityAssessment.setNetexId("NSR:AccessibilityAssessment:1");
+        accessibilityAssessment.setVersion(1L);
+        accessibilityAssessment.setMobilityImpairedAccess(LimitationStatusEnumeration.PARTIAL);
+        accessibilityAssessment.setLimitations(new ArrayList<>(List.of(limitation)));
+        stopPlace.setAccessibilityAssessment(accessibilityAssessment);
+
+        ShelterEquipment shelter = new ShelterEquipment();
+        shelter.setNetexId("NSR:ShelterEquipment:1");
+        shelter.setEnclosed(true);
+        shelter.setSeats(BigInteger.valueOf(4));
+        WaitingRoomEquipment waitingRoom = new WaitingRoomEquipment();
+        waitingRoom.setNetexId("NSR:WaitingRoomEquipment:1");
+        waitingRoom.setSeats(BigInteger.valueOf(10));
+        PlaceEquipment stopPlaceEquipment = new PlaceEquipment();
+        stopPlaceEquipment.setNetexId("NSR:PlaceEquipment:1");
+        stopPlaceEquipment.getInstalledEquipment().add(shelter);
+        stopPlaceEquipment.getInstalledEquipment().add(waitingRoom);
+        stopPlace.setPlaceEquipments(stopPlaceEquipment);
+
+        Quay quay = new Quay();
+        quay.setNetexId("NSR:Quay:2002");
+        quay.setVersion(1L);
+        quay.setCentroid(createPoint(10.75, 59.91));
+        quay.setPublicCode("A");
+        quay.setCovered(CoveredEnumeration.COVERED);
+        BoardingPosition boardingPosition = new BoardingPosition();
+        boardingPosition.setNetexId("NSR:BoardingPosition:1");
+        boardingPosition.setPublicCode("1");
+        boardingPosition.setBoardingPositionType(BoardingPositionTypeEnumeration.POSITION_AT_BUS_STOP);
+        boardingPosition.setCentroid(createPoint(10.75, 59.91));
+        quay.getBoardingPositions().add(boardingPosition);
+        stopPlace.setQuays(new HashSet<>(Set.of(quay)));
+        stopPlace = stopPlaceRepository.save(stopPlace);
+
+        Parking parking = new Parking();
+        parking.setNetexId("NSR:Parking:1");
+        parking.setVersion(1L);
+        parking.setName(new EmbeddableMultilingualString("Test Parking", "nor"));
+        parking.setCentroid(createPoint(10.76, 59.92));
+        parking.setParentSiteRef(new SiteRefStructure(stopPlace.getNetexId(), String.valueOf(stopPlace.getVersion())));
+        parking.setParkingType(ParkingTypeEnumeration.PARK_AND_RIDE);
+        parking.getParkingVehicleTypes().add(ParkingVehicleEnumeration.CAR);
+        parking.setCovered(CoveredEnumeration.OUTDOORS);
+        parking.setTotalCapacity(BigInteger.valueOf(50));
+
+        ParkingCapacity capacity = new ParkingCapacity();
+        capacity.setNetexId("NSR:ParkingCapacity:1");
+        capacity.setVersion(1L);
+        capacity.setParkingUserType(ParkingUserEnumeration.ALL_USERS);
+        capacity.setNumberOfSpaces(BigInteger.valueOf(50));
+        ParkingProperties parkingProperties = new ParkingProperties();
+        parkingProperties.setNetexId("NSR:ParkingProperties:1");
+        parkingProperties.setVersion(1L);
+        parkingProperties.setSpaces(new ArrayList<>(List.of(capacity)));
+        parking.setParkingProperties(new ArrayList<>(List.of(parkingProperties)));
+
+        ParkingArea parkingArea = new ParkingArea();
+        parkingArea.setNetexId("NSR:ParkingArea:1");
+        parkingArea.setVersion(1L);
+        parkingArea.setName(new EmbeddableMultilingualString("Area 1", "nor"));
+        parkingArea.setTotalCapacity(BigInteger.valueOf(30));
+        parking.setParkingAreas(new ArrayList<>(List.of(parkingArea)));
+
+        CycleStorageEquipment cycleStorage = new CycleStorageEquipment();
+        cycleStorage.setNetexId("NSR:CycleStorageEquipment:1");
+        cycleStorage.setNumberOfSpaces(BigInteger.valueOf(20));
+        PlaceEquipment parkingEquipment = new PlaceEquipment();
+        parkingEquipment.setNetexId("NSR:PlaceEquipment:2");
+        parkingEquipment.getInstalledEquipment().add(cycleStorage);
+        parking.setPlaceEquipments(parkingEquipment);
+        parkingRepository.save(parking);
+
+        ExportParams exportParams = createExportParams("Rich NeTEx 2.0 export",
+                ExportMode.ALL, ExportMode.NONE, ExportMode.ALL, ExportMode.NONE, ExportMode.RELEVANT);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        streamingPublicationDelivery.stream(exportParams, outputStream, true);
+        String xmlContent = outputStream.toString(StandardCharsets.UTF_8);
+
+        for (NeTExValidator.NetexVersion version : List.of(NeTExValidator.NetexVersion.v2_0, NeTExValidator.NetexVersion.v1_15)) {
+            NeTExValidator validator = NeTExValidator.getNeTExValidator(version);
+            assertDoesNotThrow(() -> validator.validate(new StreamSource(new StringReader(xmlContent))),
+                    "Export should be valid against NeTEx " + version);
+        }
+
+        File tempFile = createSecureTempFile("netex-rich-export-test", ".xml");
+        try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+            fos.write(xmlContent.getBytes(StandardCharsets.UTF_8));
+        }
+        netexXmlReferenceValidator.validateNetexReferences(tempFile);
+        tempFile.delete();
+
+        Document doc = parseXml(xmlContent);
+        assertTrue(doc.getDocumentElement().getAttribute("version").startsWith("2.0:"),
+                "PublicationDelivery should declare NeTEx 2.0");
+        assertEquals(1, doc.getElementsByTagNameNS(NETEX_NS, "Parking").getLength(), "Parking should be exported");
+        assertEquals(1, doc.getElementsByTagNameNS(NETEX_NS, "ParkingArea").getLength(), "ParkingArea should be exported");
+        assertEquals(1, doc.getElementsByTagNameNS(NETEX_NS, "ShelterEquipment").getLength());
+        assertEquals(1, doc.getElementsByTagNameNS(NETEX_NS, "WaitingRoomEquipment").getLength());
+        assertEquals(1, doc.getElementsByTagNameNS(NETEX_NS, "CycleStorageEquipment").getLength());
+        assertEquals(1, doc.getElementsByTagNameNS(NETEX_NS, "BoardingPosition").getLength());
+        assertTrue(xmlContent.contains("<Description>Site frame {"),
+                "SiteFrame description (MultilingualStringEntity) should contain the export parameters");
+        assertEquals(0, doc.getElementsByTagNameNS(NETEX_NS, "Text").getLength(),
+                "Multilingual strings should be written inline, not as nested Text elements");
+    }
+
+    private static final String NETEX_NS = "http://www.netex.org.uk/netex";
+
     private File createSecureTempFile(String prefix, String suffix) throws Exception {
         return Files.createTempFile(prefix, suffix,
                 PosixFilePermissions.asFileAttribute(PosixFilePermissions.fromString("rw-------"))).toFile();

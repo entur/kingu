@@ -20,9 +20,9 @@ import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.entur.kingu.model.TariffZoneRef;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.TariffZoneRefs_RelStructure;
-import org.rutebanken.netex.model.ZoneRefStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.TariffZoneRefs_RelStructure;
+import org.entur.netex2.model.ZoneRefStructure;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -40,12 +40,12 @@ public class TariffZonesRefConverter extends BidirectionalConverter<Set<TariffZo
         }
 
         final List<JAXBElement<? extends ZoneRefStructure>> wrappedTariffZoneRefList = tariffZones.stream()
-                .map(tariffZoneRef -> mapperFacade.map(tariffZoneRef, org.rutebanken.netex.model.TariffZoneRef.class))
+                .map(tariffZoneRef -> mapperFacade.map(tariffZoneRef, org.entur.netex2.model.TariffZoneRef.class))
                 .map(tariffZoneRef -> new ObjectFactory().createTariffZoneRef(tariffZoneRef))
                 .collect(toList());
 
 
-        return new TariffZoneRefs_RelStructure().withTariffZoneRef_(wrappedTariffZoneRefList);
+        return new TariffZoneRefs_RelStructure().withTariffZoneRef(wrappedTariffZoneRefList);
     }
 
     @Override

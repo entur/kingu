@@ -21,7 +21,7 @@ import ma.glasnost.orika.metadata.Type;
 import org.entur.kingu.model.PurposeOfGrouping;
 import org.entur.kingu.netex.mapping.NetexMappingException;
 import org.entur.kingu.repository.PurposeOfGroupingRepository;
-import org.rutebanken.netex.model.PurposeOfGroupingRefStructure;
+import org.entur.netex2.model.PurposeOfGroupingRefStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;

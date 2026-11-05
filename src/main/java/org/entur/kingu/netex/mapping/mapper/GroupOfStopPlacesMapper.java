@@ -2,7 +2,7 @@ package org.entur.kingu.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import org.rutebanken.netex.model.GroupOfStopPlaces;
+import org.entur.netex2.model.GroupOfStopPlaces;
 
 public class GroupOfStopPlacesMapper extends CustomMapper<GroupOfStopPlaces, org.entur.kingu.model.GroupOfStopPlaces> {
 

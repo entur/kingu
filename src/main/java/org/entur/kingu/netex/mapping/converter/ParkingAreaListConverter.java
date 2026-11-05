@@ -19,8 +19,8 @@ import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
 import org.entur.kingu.model.ParkingArea;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.ParkingAreas_RelStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.ParkingAreas_RelStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -45,8 +45,8 @@ public class ParkingAreaListConverter extends BidirectionalConverter<List<Parkin
         logger.debug("Mapping {} parkingAreas to netex", parkingAreas.size());
 
         parkingAreas.forEach(parkingArea -> {
-            org.rutebanken.netex.model.ParkingArea netexParkingArea = mapperFacade.map(parkingArea, org.rutebanken.netex.model.ParkingArea.class);
-            parkingAreas_relStructure.withParkingAreaRefOrParkingArea_(new ObjectFactory().createParkingArea_(netexParkingArea));
+            org.entur.netex2.model.ParkingArea netexParkingArea = mapperFacade.map(parkingArea, org.entur.netex2.model.ParkingArea.class);
+            parkingAreas_relStructure.withParkingAreaRefOrParkingArea(new ObjectFactory().createParkingArea(netexParkingArea));
         });
         return parkingAreas_relStructure;
     }
