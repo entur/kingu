@@ -18,8 +18,8 @@ package org.entur.kingu.exporter.async;
 import jakarta.xml.bind.JAXBElement;
 import org.entur.kingu.config.ExportMode;
 import org.entur.kingu.config.ExportParams;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.ValidBetween;
+import org.entur.netex2.model.StopPlace;
+import org.entur.netex2.model.ValidBetween;
 
 import java.util.Iterator;
 import java.util.List;
@@ -99,8 +99,8 @@ public class NetexReferenceRemovingIterator implements Iterator<StopPlace> {
     }
 
     private void removeTariffZoneRefsVersion(StopPlace stopPlace, String type) {
-        if(stopPlace.getTariffZones() != null && stopPlace.getTariffZones().getTariffZoneRef_() != null) {
-            stopPlace.getTariffZones().getTariffZoneRef_().stream()
+        if(stopPlace.getTariffZones() != null && stopPlace.getTariffZones().getTariffZoneRef() != null) {
+            stopPlace.getTariffZones().getTariffZoneRef().stream()
                     .map(JAXBElement::getValue)
                     .forEach(tariffZoneRef -> {
                 if(tariffZoneRef.getRef().contains(type)) {

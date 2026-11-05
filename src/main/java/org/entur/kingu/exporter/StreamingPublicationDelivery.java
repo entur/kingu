@@ -40,6 +40,7 @@ import org.entur.kingu.netex.id.NetexIdHelper;
 import org.entur.kingu.netex.id.ValidPrefixList;
 import org.entur.kingu.netex.mapping.NetexMapper;
 import org.entur.kingu.netex.mapping.mapper.TagKeyValuesMapper;
+import org.entur.kingu.netex.mapping.NetexMultilingualStringHelper;
 import org.entur.kingu.repository.FareZoneRepository;
 import org.entur.kingu.repository.GroupOfStopPlacesRepository;
 import org.entur.kingu.repository.GroupOfTariffZonesRepository;
@@ -49,34 +50,33 @@ import org.entur.kingu.repository.StopPlaceRepository;
 import org.entur.kingu.repository.TariffZoneRepository;
 import org.entur.kingu.repository.TopographicPlaceRepository;
 import org.entur.kingu.service.PrometheusMetricsService;
-import org.rutebanken.netex.model.DataManagedObjectStructure;
-import org.rutebanken.netex.model.FareZone;
-import org.rutebanken.netex.model.FareZonesInFrame_RelStructure;
-import org.rutebanken.netex.model.GroupsOfStopPlacesInFrame_RelStructure;
-import org.rutebanken.netex.model.GroupsOfTariffZonesInFrame_RelStructure;
-import org.rutebanken.netex.model.MultilingualString;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.Parking;
-import org.rutebanken.netex.model.ParkingsInFrame_RelStructure;
-import org.rutebanken.netex.model.PassengerStopAssignment;
-import org.rutebanken.netex.model.PublicationDeliveryStructure;
-import org.rutebanken.netex.model.QuayRefStructure;
-import org.rutebanken.netex.model.ScheduledStopPoint;
-import org.rutebanken.netex.model.ScheduledStopPointRefStructure;
-import org.rutebanken.netex.model.ScheduledStopPointsInFrame_RelStructure;
-import org.rutebanken.netex.model.SiteFrame;
-import org.rutebanken.netex.model.Site_VersionStructure;
-import org.rutebanken.netex.model.StopAssignment_VersionStructure;
-import org.rutebanken.netex.model.StopAssignmentsInFrame_RelStructure;
-import org.rutebanken.netex.model.StopPlace;
-import org.rutebanken.netex.model.StopPlaceRefStructure;
-import org.rutebanken.netex.model.StopPlacesInFrame_RelStructure;
-import org.rutebanken.netex.model.TariffZone;
-import org.rutebanken.netex.model.TariffZonesInFrame_RelStructure;
-import org.rutebanken.netex.model.TopographicPlacesInFrame_RelStructure;
-import org.rutebanken.netex.model.ValidBetween;
-import org.rutebanken.netex.model.Zone_VersionStructure;
-import org.rutebanken.netex.validation.NeTExValidator;
+import org.entur.netex2.model.DataManagedObjectStructure;
+import org.entur.netex2.model.FareZone;
+import org.entur.netex2.model.FareZonesInFrame_RelStructure;
+import org.entur.netex2.model.GroupsOfStopPlacesInFrame_RelStructure;
+import org.entur.netex2.model.GroupsOfTariffZonesInFrame_RelStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.Parking;
+import org.entur.netex2.model.ParkingsInFrame_RelStructure;
+import org.entur.netex2.model.PassengerStopAssignment;
+import org.entur.netex2.model.PublicationDeliveryStructure;
+import org.entur.netex2.model.QuayRefStructure;
+import org.entur.netex2.model.ScheduledStopPoint;
+import org.entur.netex2.model.ScheduledStopPointRefStructure;
+import org.entur.netex2.model.ScheduledStopPointsInFrame_RelStructure;
+import org.entur.netex2.model.SiteFrame;
+import org.entur.netex2.model.Site_VersionStructure;
+import org.entur.netex2.model.StopAssignment_VersionStructure;
+import org.entur.netex2.model.StopAssignmentsInFrame_RelStructure;
+import org.entur.netex2.model.StopPlace;
+import org.entur.netex2.model.StopPlaceRefStructure;
+import org.entur.netex2.model.StopPlacesInFrame_RelStructure;
+import org.entur.netex2.model.TariffZone;
+import org.entur.netex2.model.TariffZonesInFrame_RelStructure;
+import org.entur.netex2.model.TopographicPlacesInFrame_RelStructure;
+import org.entur.netex2.model.ValidBetween;
+import org.entur.netex2.model.Zone_VersionStructure;
+import org.entur.netex2.validation.NeTExValidator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -115,7 +115,7 @@ public class StreamingPublicationDelivery {
 
     private static final Logger logger = LoggerFactory.getLogger(StreamingPublicationDelivery.class);
 
-    @Value("${netex.profile.version:1.12:NO-NeTEx-stops:1.4}")
+    @Value("${netex.profile.version:2.0:NO-NeTEx-stops:1.5}")
     private String publicationDeliveryId;
 
     private static final JAXBContext publicationDeliveryContext = createContext(PublicationDeliveryStructure.class);
@@ -250,16 +250,16 @@ public class StreamingPublicationDelivery {
         tagKeyValuesMapper.preloadTags(taggableStopPlaceNetexIds);
         try {
             logger.info("Mapping site frame to netex model");
-            org.rutebanken.netex.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
+            org.entur.netex2.model.SiteFrame netexSiteFrame = netexMapper.mapToNetexModel(siteFrame);
 
             logger.info("Mapping service frame to netex model");
-            final org.rutebanken.netex.model.ServiceFrame netexServiceFrame = netexMapper.mapToNetexModel(serviceFrame);
+            final org.entur.netex2.model.ServiceFrame netexServiceFrame = netexMapper.mapToNetexModel(serviceFrame);
 
             logger.info("Mapping fare frame to netex model");
-            final org.rutebanken.netex.model.FareFrame netexFareFrame = netexMapper.mapToNetexModel(fareFrame);
+            final org.entur.netex2.model.FareFrame netexFareFrame = netexMapper.mapToNetexModel(fareFrame);
 
             logger.info("Mapping resource frame to netex model");
-            final org.rutebanken.netex.model.ResourceFrame netexResourceFrame = netexMapper.mapToNetexModel(resourceFrame);
+            final org.entur.netex2.model.ResourceFrame netexResourceFrame = netexMapper.mapToNetexModel(resourceFrame);
 
 
             logger.info("Preparing scrollable iterators");
@@ -322,7 +322,7 @@ public class StreamingPublicationDelivery {
         return parentsByRef;
     }
 
-    private void prepareFareZones(ExportParams exportParams,Set<Long> stopPlacePrimaryIds, AtomicInteger mappedFareZonesCount, AtomicInteger mappedGroupOfTariffZonesCount, SiteFrame netexSiteFrame, org.rutebanken.netex.model.FareFrame netexFareFrame) {
+    private void prepareFareZones(ExportParams exportParams,Set<Long> stopPlacePrimaryIds, AtomicInteger mappedFareZonesCount, AtomicInteger mappedGroupOfTariffZonesCount, SiteFrame netexSiteFrame, org.entur.netex2.model.FareFrame netexFareFrame) {
 
         boolean exportGroupOfTariffZones =false;
 
@@ -412,7 +412,28 @@ public class StreamingPublicationDelivery {
             List<Parking> parkings = new NetexMappingIteratorList<>(() -> new NetexMappingIterator<>(netexMapper, parkingRepository.scrollParkings(stopPlacePrimaryIds),
                     Parking.class, mappedParkingCount,prometheusMetricsService,exportParams.getName()));
 
-            setField(ParkingsInFrame_RelStructure.class, "parking", parkingsInFrame_relStructure, parkings);
+            // Wrap Parking objects in JAXBElement for JAXB marshalling (required by @XmlElementRef).
+            // Use a custom List that wraps elements in JAXBElement lazily during iteration, so the
+            // marshaller streams parkings without materializing the full list in memory.
+            List<JAXBElement<? extends Site_VersionStructure>> wrappedParkings = new ArrayList<>() {
+                @Override
+                public Iterator<JAXBElement<? extends Site_VersionStructure>> iterator() {
+                    Iterator<Parking> innerIterator = parkings.iterator();
+                    return new Iterator<>() {
+                        @Override
+                        public boolean hasNext() {
+                            return innerIterator.hasNext();
+                        }
+
+                        @Override
+                        public JAXBElement<? extends Site_VersionStructure> next() {
+                            return netexObjectFactory.createParking(innerIterator.next());
+                        }
+                    };
+                }
+            };
+
+            setField(ParkingsInFrame_RelStructure.class, "parking", parkingsInFrame_relStructure, wrappedParkings);
             netexSiteFrame.setParkings(parkingsInFrame_relStructure);
         } else {
             logger.info("No parkings to export based on stop places");
@@ -437,34 +458,23 @@ public class StreamingPublicationDelivery {
             ParentStopFetchingIterator parentStopFetchingIterator = new ParentStopFetchingIterator(allStopPlaces.iterator(), preloadedParentsByRef);
             NetexMappingIterator<org.entur.kingu.model.StopPlace, StopPlace> netexMappingIterator = new NetexMappingIterator<>(netexMapper, parentStopFetchingIterator, StopPlace.class, mappedStopPlaceCount, prometheusMetricsService,exportParams.getName());
 
-            // Wrap StopPlace objects in JAXBElement for JAXB marshalling (required by @XmlElementRef)
-            // Use custom ArrayList that wraps elements in JAXBElement during iteration
-            List<JAXBElement<? extends Site_VersionStructure>> stopPlaces = new ArrayList<>() {
+            // Use a custom List backed by a lazily-scrolling iterator, so the marshaller streams
+            // stop places without materializing the full list in memory.
+            List<StopPlace> stopPlaces = new ArrayList<>() {
                 @Override
-                public Iterator<JAXBElement<? extends Site_VersionStructure>> iterator() {
-                    Iterator<StopPlace> innerIterator = new NetexReferenceRemovingIterator(netexMappingIterator, exportParams, allCurrentNetexIdsAndVersion);
-                    return new Iterator<>() {
-                        @Override
-                        public boolean hasNext() {
-                            return innerIterator.hasNext();
-                        }
-
-                        @Override
-                        public JAXBElement<? extends Site_VersionStructure> next() {
-                            return netexObjectFactory.createStopPlace(innerIterator.next());
-                        }
-                    };
+                public Iterator<StopPlace> iterator() {
+                    return new NetexReferenceRemovingIterator(netexMappingIterator, exportParams, allCurrentNetexIdsAndVersion);
                 }
             };
 
-            setField(StopPlacesInFrame_RelStructure.class, "stopPlace_", stopPlacesInFrame_relStructure, stopPlaces);
+            setField(StopPlacesInFrame_RelStructure.class, "stopPlace", stopPlacesInFrame_relStructure, stopPlaces);
             netexSiteFrame.setStopPlaces(stopPlacesInFrame_relStructure);
         } else {
             logger.info("No stop places to export");
         }
     }
 
-    private void prepareScheduledStopPoints(List<org.entur.kingu.model.StopPlace> allStopPlaces, Map<String, org.entur.kingu.model.StopPlace> preloadedParentsByRef, org.rutebanken.netex.model.ServiceFrame netexServiceFrame) {
+    private void prepareScheduledStopPoints(List<org.entur.kingu.model.StopPlace> allStopPlaces, Map<String, org.entur.kingu.model.StopPlace> preloadedParentsByRef, org.entur.netex2.model.ServiceFrame netexServiceFrame) {
         if (!allStopPlaces.isEmpty()) {
             logger.info("There are stop places to export");
 
@@ -564,10 +574,10 @@ public class StreamingPublicationDelivery {
     }
 
     private ScheduledStopPoint createNetexScheduledStopPoint(String scheduledStopPointNetexId, String stopPlaceName, long version, LocalDateTime validFrom, LocalDateTime validTo) {
-        final org.rutebanken.netex.model.ScheduledStopPoint netexScheduledStopPoint = new org.rutebanken.netex.model.ScheduledStopPoint();
+        final org.entur.netex2.model.ScheduledStopPoint netexScheduledStopPoint = new org.entur.netex2.model.ScheduledStopPoint();
         netexScheduledStopPoint.setId(scheduledStopPointNetexId);
         netexScheduledStopPoint.setVersion(String.valueOf(version));
-        netexScheduledStopPoint.withName(new MultilingualString().withValue(stopPlaceName));
+        netexScheduledStopPoint.withName(NetexMultilingualStringHelper.toNetexModel(stopPlaceName));
         ValidBetween validBetween = new ValidBetween().withFromDate(validFrom).withToDate(validTo);
 
         netexScheduledStopPoint.withValidBetween(validBetween);
@@ -593,10 +603,10 @@ public class StreamingPublicationDelivery {
 
         if (relevantTopographicPlacesIterator.hasNext()) {
 
-            List<org.rutebanken.netex.model.TopographicPlace> topographicPlaces = new ArrayList<>();
+            List<org.entur.netex2.model.TopographicPlace> topographicPlaces = new ArrayList<>();
             while (relevantTopographicPlacesIterator.hasNext()) {
                 TopographicPlace tp = relevantTopographicPlacesIterator.next();
-                org.rutebanken.netex.model.TopographicPlace netexTp = netexMapper.mapToNetexModel(tp, exportParams.isExportMultiSurface());
+                org.entur.netex2.model.TopographicPlace netexTp = netexMapper.mapToNetexModel(tp, exportParams.isExportMultiSurface());
                 topographicPlaces.add(netexTp);
                 mappedTopographicPlacesCount.incrementAndGet();
             }
@@ -609,7 +619,7 @@ public class StreamingPublicationDelivery {
         }
     }
 
-    private void prepareGroupOfStopPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedGroupOfStopPlacesCount, SiteFrame netexSiteFrame, org.rutebanken.netex.model.ResourceFrame netexResourceFrame) {
+    private void prepareGroupOfStopPlaces(ExportParams exportParams, Set<Long> stopPlacePrimaryIds, AtomicInteger mappedGroupOfStopPlacesCount, SiteFrame netexSiteFrame, org.entur.netex2.model.ResourceFrame netexResourceFrame) {
 
         Iterator<GroupOfStopPlaces> groupOfStopPlacesIterator;
 
@@ -630,10 +640,10 @@ public class StreamingPublicationDelivery {
 
         if (groupOfStopPlacesIterator.hasNext()) {
 
-            NetexMappingIterator<GroupOfStopPlaces, org.rutebanken.netex.model.GroupOfStopPlaces> netexMappingIterator = new NetexMappingIterator<>(
-                    netexMapper, groupOfStopPlacesIterator, org.rutebanken.netex.model.GroupOfStopPlaces.class, mappedGroupOfStopPlacesCount, prometheusMetricsService, exportParams.getName());
+            NetexMappingIterator<GroupOfStopPlaces, org.entur.netex2.model.GroupOfStopPlaces> netexMappingIterator = new NetexMappingIterator<>(
+                    netexMapper, groupOfStopPlacesIterator, org.entur.netex2.model.GroupOfStopPlaces.class, mappedGroupOfStopPlacesCount, prometheusMetricsService, exportParams.getName());
 
-            List<org.rutebanken.netex.model.GroupOfStopPlaces> groupOfStopPlacesList = new NetexMappingIteratorList<>(() -> netexMappingIterator);
+            List<org.entur.netex2.model.GroupOfStopPlaces> groupOfStopPlacesList = new NetexMappingIteratorList<>(() -> netexMappingIterator);
 
             GroupsOfStopPlacesInFrame_RelStructure groupsOfStopPlacesInFrame_relStructure = new GroupsOfStopPlacesInFrame_RelStructure();
             setField(GroupsOfStopPlacesInFrame_RelStructure.class, "groupOfStopPlaces", groupsOfStopPlacesInFrame_relStructure, groupOfStopPlacesList);
@@ -642,8 +652,8 @@ public class StreamingPublicationDelivery {
             if(!allPurposeOfGrouping.isEmpty()) {
                 List<JAXBElement<? extends DataManagedObjectStructure>> netexPurposeOfGroupingList2 = new ArrayList<>();
                 for (PurposeOfGrouping purposeOfGrouping : allPurposeOfGrouping) {
-                    final org.rutebanken.netex.model.PurposeOfGrouping netexPurposeOfGrouping = netexMapper.mapToNetexModel(purposeOfGrouping);
-                    final JAXBElement<org.rutebanken.netex.model.PurposeOfGrouping> purposeOfGrouping2= new ObjectFactory().createPurposeOfGrouping(netexPurposeOfGrouping);
+                    final org.entur.netex2.model.PurposeOfGrouping netexPurposeOfGrouping = netexMapper.mapToNetexModel(purposeOfGrouping);
+                    final JAXBElement<org.entur.netex2.model.PurposeOfGrouping> purposeOfGrouping2= new ObjectFactory().createPurposeOfGrouping(netexPurposeOfGrouping);
                     netexPurposeOfGroupingList2.add(purposeOfGrouping2);
                 }
                 netexResourceFrame.withTypesOfValue(new ObjectFactory()
@@ -670,10 +680,10 @@ public class StreamingPublicationDelivery {
         }
 
         if (groupOfTariffZonesIterator.hasNext()) {
-            NetexMappingIterator<GroupOfTariffZones, org.rutebanken.netex.model.GroupOfTariffZones> netexMappingIterator = new NetexMappingIterator<>(
-                    netexMapper, groupOfTariffZonesIterator, org.rutebanken.netex.model.GroupOfTariffZones.class,mappedGroupOfTariffZonesCount, prometheusMetricsService, exportParams.getName());
+            NetexMappingIterator<GroupOfTariffZones, org.entur.netex2.model.GroupOfTariffZones> netexMappingIterator = new NetexMappingIterator<>(
+                    netexMapper, groupOfTariffZonesIterator, org.entur.netex2.model.GroupOfTariffZones.class,mappedGroupOfTariffZonesCount, prometheusMetricsService, exportParams.getName());
 
-            List<org.rutebanken.netex.model.GroupOfTariffZones> groupOfTariffZonesList = new NetexMappingIteratorList<>(() -> netexMappingIterator);
+            List<org.entur.netex2.model.GroupOfTariffZones> groupOfTariffZonesList = new NetexMappingIteratorList<>(() -> netexMappingIterator);
 
             final GroupsOfTariffZonesInFrame_RelStructure groupsOfTariffZonesInFrame_relStructure = new GroupsOfTariffZonesInFrame_RelStructure();
             setField(GroupsOfTariffZonesInFrame_RelStructure.class,"groupOfTariffZones", groupsOfTariffZonesInFrame_relStructure,groupOfTariffZonesList);
@@ -710,10 +720,10 @@ public class StreamingPublicationDelivery {
     }
 
     @SuppressWarnings("unchecked")
-    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
-                                                                  org.rutebanken.netex.model.ServiceFrame serviceFrame,
-                                                                  org.rutebanken.netex.model.FareFrame fareFrame,
-                                                                  org.rutebanken.netex.model.ResourceFrame resourceFrame) {
+    public PublicationDeliveryStructure createPublicationDelivery(org.entur.netex2.model.SiteFrame siteFrame,
+                                                                  org.entur.netex2.model.ServiceFrame serviceFrame,
+                                                                  org.entur.netex2.model.FareFrame fareFrame,
+                                                                  org.entur.netex2.model.ResourceFrame resourceFrame) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
 
         publicationDeliveryStructure.withDataObjects
@@ -730,9 +740,9 @@ public class StreamingPublicationDelivery {
         return publicationDeliveryStructure;
     }
 
-    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
-                                                                  org.rutebanken.netex.model.ServiceFrame serviceFrame,
-                                                                  org.rutebanken.netex.model.FareFrame fareFrame) {
+    public PublicationDeliveryStructure createPublicationDelivery(org.entur.netex2.model.SiteFrame siteFrame,
+                                                                  org.entur.netex2.model.ServiceFrame serviceFrame,
+                                                                  org.entur.netex2.model.FareFrame fareFrame) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
 
         publicationDeliveryStructure.withDataObjects
@@ -747,8 +757,8 @@ public class StreamingPublicationDelivery {
         return publicationDeliveryStructure;
     }
 
-    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
-                                                                  org.rutebanken.netex.model.ServiceFrame serviceFrame) {
+    public PublicationDeliveryStructure createPublicationDelivery(org.entur.netex2.model.SiteFrame siteFrame,
+                                                                  org.entur.netex2.model.ServiceFrame serviceFrame) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
 
         publicationDeliveryStructure.withDataObjects
@@ -762,9 +772,9 @@ public class StreamingPublicationDelivery {
         return publicationDeliveryStructure;
     }
 
-    public PublicationDeliveryStructure createPublicationDelivery(org.rutebanken.netex.model.SiteFrame siteFrame,
-                                                                  org.rutebanken.netex.model.ServiceFrame serviceFrame,
-                                                                  org.rutebanken.netex.model.ResourceFrame resourceFrame) {
+    public PublicationDeliveryStructure createPublicationDelivery(org.entur.netex2.model.SiteFrame siteFrame,
+                                                                  org.entur.netex2.model.ServiceFrame serviceFrame,
+                                                                  org.entur.netex2.model.ResourceFrame resourceFrame) {
         PublicationDeliveryStructure publicationDeliveryStructure = createPublicationDelivery();
 
         publicationDeliveryStructure.withDataObjects

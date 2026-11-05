@@ -18,8 +18,8 @@ package org.entur.kingu.netex.mapping.converter;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.netex.model.ObjectFactory;
-import org.rutebanken.netex.model.SiteRefs_RelStructure;
+import org.entur.netex2.model.ObjectFactory;
+import org.entur.netex2.model.SiteRefs_RelStructure;
 import org.entur.kingu.model.SiteRefStructure;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +47,7 @@ public class SiteRefsRelStructureConverter extends BidirectionalConverter<Set<Si
 
             siteRefStructures.stream()
                     .peek(siteref -> logger.info(siteref.toString()))
-                    .map(siteRef -> mapperFacade.map(siteRef, org.rutebanken.netex.model.SiteRefStructure.class))
+                    .map(siteRef -> mapperFacade.map(siteRef, org.entur.netex2.model.SiteRefStructure.class))
                     .map(netexSiteRef -> netexObjectFactory.createSiteRef(netexSiteRef))
                     .forEach(jaxbElement -> siteRefs_relStructure.getSiteRef().add(jaxbElement));
 

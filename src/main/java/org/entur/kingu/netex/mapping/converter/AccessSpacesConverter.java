@@ -18,7 +18,7 @@ package org.entur.kingu.netex.mapping.converter;
 import ma.glasnost.orika.MappingContext;
 import ma.glasnost.orika.converter.BidirectionalConverter;
 import ma.glasnost.orika.metadata.Type;
-import org.rutebanken.netex.model.AccessSpaces_RelStructure;
+import org.entur.netex2.model.AccessSpaces_RelStructure;
 import org.entur.kingu.model.AccessSpace;
 import org.springframework.stereotype.Component;
 
