@@ -25,6 +25,7 @@ import org.entur.kingu.netex.mapping.mapper.FareZoneMapper;
 import org.entur.kingu.netex.mapping.mapper.GroupOfStopPlacesMapper;
 import org.entur.kingu.netex.mapping.mapper.GroupOfTariffZonesMapper;
 import org.entur.kingu.netex.mapping.mapper.KeyListToKeyValuesMapMapper;
+import org.entur.kingu.netex.mapping.mapper.ParkingAreaMapper;
 import org.entur.kingu.netex.mapping.mapper.ParkingMapper;
 import org.entur.kingu.netex.mapping.mapper.PlaceEquipmentMapper;
 import org.entur.kingu.netex.mapping.mapper.QuayMapper;
@@ -160,6 +161,13 @@ public class NetexMapper {
                 .exclude("accessModes")
                 .fieldBToA("netexId", "id")
                 .customize(new ParkingMapper())
+                .byDefault()
+                .register();
+
+        // Registered explicitly: without a class map, Orika's generated mapping exported every
+        // parking area as an empty element (no name, no capacity, no parking properties).
+        mapperFactory.classMap(org.entur.netex2.model.ParkingArea.class, org.entur.kingu.model.ParkingArea.class)
+                .customize(new ParkingAreaMapper())
                 .byDefault()
                 .register();
 

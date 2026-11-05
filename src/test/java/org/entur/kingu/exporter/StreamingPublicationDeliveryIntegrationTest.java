@@ -71,6 +71,7 @@ import org.testcontainers.containers.PubSubEmulatorContainer;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -801,6 +802,16 @@ class StreamingPublicationDeliveryIntegrationTest {
         parkingArea.setVersion(1L);
         parkingArea.setName(new EmbeddableMultilingualString("Area 1", "nor"));
         parkingArea.setTotalCapacity(BigInteger.valueOf(30));
+        ParkingCapacity areaCapacity = new ParkingCapacity();
+        areaCapacity.setNetexId("NSR:ParkingCapacity:2");
+        areaCapacity.setVersion(1L);
+        areaCapacity.setParkingUserType(ParkingUserEnumeration.REGISTERED_DISABLED);
+        areaCapacity.setNumberOfSpaces(BigInteger.valueOf(4));
+        ParkingProperties areaProperties = new ParkingProperties();
+        areaProperties.setNetexId("NSR:ParkingProperties:2");
+        areaProperties.setVersion(1L);
+        areaProperties.setSpaces(new ArrayList<>(List.of(areaCapacity)));
+        parkingArea.setParkingProperties(areaProperties);
         parking.setParkingAreas(new ArrayList<>(List.of(parkingArea)));
 
         CycleStorageEquipment cycleStorage = new CycleStorageEquipment();
@@ -837,6 +848,13 @@ class StreamingPublicationDeliveryIntegrationTest {
                 "PublicationDelivery should declare NeTEx 2.0");
         assertEquals(1, doc.getElementsByTagNameNS(NETEX_NS, "Parking").getLength(), "Parking should be exported");
         assertEquals(1, doc.getElementsByTagNameNS(NETEX_NS, "ParkingArea").getLength(), "ParkingArea should be exported");
+        Element exportedParkingArea = (Element) doc.getElementsByTagNameNS(NETEX_NS, "ParkingArea").item(0);
+        assertEquals("Area 1", exportedParkingArea.getElementsByTagNameNS(NETEX_NS, "Name").item(0).getTextContent(),
+                "ParkingArea name should be exported");
+        assertEquals("30", exportedParkingArea.getElementsByTagNameNS(NETEX_NS, "TotalCapacity").item(0).getTextContent(),
+                "ParkingArea total capacity should be exported");
+        assertEquals("4", exportedParkingArea.getElementsByTagNameNS(NETEX_NS, "NumberOfSpaces").item(0).getTextContent(),
+                "ParkingArea parking properties should be exported");
         assertEquals(1, doc.getElementsByTagNameNS(NETEX_NS, "ShelterEquipment").getLength());
         assertEquals(1, doc.getElementsByTagNameNS(NETEX_NS, "WaitingRoomEquipment").getLength());
         assertEquals(1, doc.getElementsByTagNameNS(NETEX_NS, "CycleStorageEquipment").getLength());
