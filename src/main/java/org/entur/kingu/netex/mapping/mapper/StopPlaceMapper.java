@@ -17,13 +17,12 @@ package org.entur.kingu.netex.mapping.mapper;
 
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MappingContext;
-import org.entur.netex2.model.AlternativeName;
-import org.entur.netex2.model.AlternativeNames_RelStructure;
-import org.entur.netex2.model.DataManagedObjectStructure;
-import org.entur.netex2.model.KeyListStructure;
-import org.entur.netex2.model.KeyValueStructure;
-import org.entur.netex2.model.StopPlace;
-import org.entur.kingu.netex.mapping.NetexMultilingualStringHelper;
+import org.rutebanken.netex.model.AlternativeName;
+import org.rutebanken.netex.model.AlternativeNames_RelStructure;
+import org.rutebanken.netex.model.DataManagedObjectStructure;
+import org.rutebanken.netex.model.KeyListStructure;
+import org.rutebanken.netex.model.KeyValueStructure;
+import org.rutebanken.netex.model.StopPlace;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -55,8 +54,8 @@ public class StopPlaceMapper extends CustomMapper<StopPlace, org.entur.kingu.mod
             for (AlternativeName netexAltName : netexAlternativeName) {
                 if (netexAltName != null
                         && netexAltName.getName() != null
-                        && NetexMultilingualStringHelper.getValue(netexAltName.getName()) != null
-                        && !NetexMultilingualStringHelper.getValue(netexAltName.getName()).isEmpty()) {
+                        && netexAltName.getName().getValue() != null
+                        && !netexAltName.getName().getValue().isEmpty()) {
                     //Only include non-empty alternative names
                     org.entur.kingu.model.AlternativeName tiamatAltName = new org.entur.kingu.model.AlternativeName();
                     mapperFacade.map(netexAltName, tiamatAltName);
