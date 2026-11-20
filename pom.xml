@@ -27,7 +27,7 @@
 		<testcontainers.version>1.21.4</testcontainers.version>
 		<argLine/>
 
-        <postgresql.version>42.7.11</postgresql.version>
+        <postgresql.version>42.7.12</postgresql.version>
     </properties>
 	<repositories>
 		<repository>
